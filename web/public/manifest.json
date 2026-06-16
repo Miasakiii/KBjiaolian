@@ -1,0 +1,43 @@
+{
+  "name": "KB教练 - AI 健身康复师",
+  "short_name": "KB教练",
+  "description": "AI 驱动的体态分析、训练方案、饮食指导",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#16a34a",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "首页仪表盘"
+    },
+    {
+      "src": "/screenshots/analyze.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "体态分析"
+    }
+  ],
+  "categories": ["health", "fitness", "lifestyle"],
+  "lang": "zh-CN",
+  "dir": "ltr"
+}

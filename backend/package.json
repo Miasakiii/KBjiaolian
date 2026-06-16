@@ -1,0 +1,28 @@
+{
+  "name": "kb-coach-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --forceExit --detectOpenHandles",
+    "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch --forceExit --detectOpenHandles",
+    "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --forceExit --detectOpenHandles"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.10.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^8.5.2",
+    "jsonwebtoken": "^9.0.3"
+  },
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "cross-env": "^10.1.0",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.4"
+  }
+}

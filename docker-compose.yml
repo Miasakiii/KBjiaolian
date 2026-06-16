@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kb-coach-backend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend/data:/app/data
+      - ./backend/logs:/app/logs
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - JWT_SECRET=${JWT_SECRET}
+      - MIMO_API_KEY=${MIMO_API_KEY}
+      - MIMO_API_URL=${MIMO_API_URL}
+      - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+    networks:
+      - kb-coach-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Web 前端服务
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+    container_name: kb-coach-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
+      - NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME:-KB教练}
+    networks:
+      - kb-coach-network
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # Nginx 反向代理（可选）
+  nginx:
+    image: nginx:alpine
+    container_name: kb-coach-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/logs:/var/log/nginx
+    networks:
+      - kb-coach-network
+    depends_on:
+      - backend
+      - web
+
+networks:
+  kb-coach-network:
+    driver: bridge

@@ -1,0 +1,17 @@
+{
+  "name": "",
+  "gender": "",
+  "age": null,
+  "height_cm": null,
+  "weight_kg": null,
+  "goal": "",
+  "experience": "",
+  "equipment": "",
+  "training_days_per_week": null,
+  "session_duration_min": null,
+  "injuries": [],
+  "body_photo_urls": [],
+  "notes": "",
+  "created_at": "2026-06-13",
+  "updated_at": "2026-06-13"
+}
