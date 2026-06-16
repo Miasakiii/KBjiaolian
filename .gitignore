@@ -78,6 +78,9 @@ coverage/
 # === Claude Code ===
 .claude/
 
+# === 部署文档（个人使用，不推送）===
+docs/CLOUD_DEPLOY.md
+
 # === Flutter SDK（不要上传）===
 flutter-sdk/
 ralph/
