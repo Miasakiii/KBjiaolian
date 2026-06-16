@@ -9,7 +9,7 @@ services:
     container_name: kb-coach-backend
     restart: unless-stopped
     ports:
-      - "3001:3001"
+      - "127.0.0.1:3001:3001"
     volumes:
       - ./backend/data:/app/data
       - ./backend/logs:/app/logs
@@ -37,7 +37,7 @@ services:
     container_name: kb-coach-web
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:3001/api}
       - NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME:-KB教练}
