@@ -14,13 +14,17 @@ export default function ExportPage() {
   const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
-    setStats(getDataStats());
+    const loadStats = async () => {
+      const data = await getDataStats();
+      setStats(data);
+    };
+    loadStats();
   }, []);
 
   const handleExportJSON = async () => {
     setExporting(true);
     try {
-      exportAsJSON();
+      await exportAsJSON();
     } finally {
       setExporting(false);
     }
@@ -29,7 +33,7 @@ export default function ExportPage() {
   const handleExportCSV = async () => {
     setExporting(true);
     try {
-      exportAsCSV();
+      await exportAsCSV();
     } finally {
       setExporting(false);
     }
