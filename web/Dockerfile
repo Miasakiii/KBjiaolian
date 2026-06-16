@@ -1,6 +1,10 @@
 # Web 前端 Dockerfile
 FROM node:20-alpine AS base
 
+# 构建参数（NEXT_PUBLIC_* 必须在 build 阶段注入）
+ARG NEXT_PUBLIC_API_URL=http://localhost:3001/api
+ARG NEXT_PUBLIC_APP_NAME=KB教练
+
 # 安装依赖
 WORKDIR /app
 COPY package*.json ./
@@ -8,6 +12,10 @@ RUN npm install
 
 # 复制源代码
 COPY . .
+
+# 将构建参数设为环境变量，Next.js 构建时会内联到客户端 JS
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME}
 
 # 构建应用
 RUN npm run build

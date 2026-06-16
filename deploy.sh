@@ -36,7 +36,7 @@ if [ ! -f .env ]; then
     cat > .env << EOF
 # 后端配置
 JWT_SECRET=$(openssl rand -hex 32)
-MIMO_API_KEY=sk-cmp4jr6jcooigneoe9tn8azhzfyih099h3yx7syksa9psoti
+MIMO_API_KEY=your-mimo-api-key
 MIMO_API_URL=https://api.xiaomimimo.com/v1/chat/completions
 MIMO_MODEL=mimo-v2.5
 PORT=3001
@@ -51,6 +51,7 @@ NEXT_PUBLIC_APP_NAME=KB教练
 TZ=Asia/Shanghai
 EOF
     echo -e "${GREEN}✅ .env 文件已创建${NC}"
+    echo -e "${YELLOW}⚠️  请编辑 .env 文件，将 MIMO_API_KEY 替换为你的真实 API Key${NC}"
 fi
 
 # 创建数据目录

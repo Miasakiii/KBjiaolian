@@ -41,7 +41,14 @@ import {
 export function createApp() {
   const app = express();
 
-  app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'] }));
+  // 信任反向代理（Nginx / Docker 网络），以便正确获取客户端 IP
+  app.set('trust proxy', 1);
+
+  // CORS：从环境变量读取，支持逗号分隔多域名，回退 localhost 开发环境
+  const corsOrigin = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(s => s.trim())
+    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'];
+  app.use(cors({ origin: corsOrigin }));
   app.use(express.json({ limit: '10mb' }));
 
   // === 速率限制 ===

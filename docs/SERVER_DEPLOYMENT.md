@@ -105,7 +105,7 @@ docker-compose --version
 # 创建 .env 文件
 cat > .env << 'EOF'
 JWT_SECRET=你的随机密钥
-MIMO_API_KEY=sk-cmp4jr6jcooigneoe9tn8azhzfyih099h3yx7syksa9psoti
+MIMO_API_KEY=your-mimo-api-key
 MIMO_API_URL=https://api.xiaomimimo.com/v1/chat/completions
 MIMO_MODEL=mimo-v2.5
 PORT=3001

@@ -39,7 +39,7 @@ git push -u origin main
    在 Railway 项目设置中添加以下环境变量：
    ```
    JWT_SECRET=生成一个随机密钥（至少32位）
-   MIMO_API_KEY=sk-cmp4jr6jcooigneoe9tn8azhzfyih099h3yx7syksa9psoti
+   MIMO_API_KEY=your-mimo-api-key
    MIMO_API_URL=https://api.xiaomimimo.com/v1/chat/completions
    MIMO_MODEL=mimo-v2.5
    PORT=3001
