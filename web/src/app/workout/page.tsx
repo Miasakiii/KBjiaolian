@@ -20,8 +20,11 @@ export default function WorkoutPage() {
   const [startTime, setStartTime] = useState(0);
 
   useEffect(() => {
-    const allPlans = getAllPlans();
-    setPlans(allPlans);
+    const loadPlans = async () => {
+      const allPlans = await getAllPlans();
+      setPlans(allPlans);
+    };
+    loadPlans();
   }, []);
 
   const initializeWorkout = useCallback((plan: TrainingPlan, day: DayPlan) => {

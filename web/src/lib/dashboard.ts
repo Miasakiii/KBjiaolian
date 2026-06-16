@@ -86,7 +86,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const recentActivities = generateRecentActivities(analysisRecords, workoutRecords);
 
   // 生成今日任务
-  const todayTasks = generateTodayTasks(latestScore, workoutStats.thisWeek, todayNutrition.records.length > 0);
+  const todayTasks = generateTodayTasks(latestScore !== null, workoutStats.thisWeek, todayNutrition.records.length > 0);
 
   return {
     latestScore,

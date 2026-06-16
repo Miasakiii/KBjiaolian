@@ -10,8 +10,13 @@ export default function TodayNutrition() {
   const [goals, setGoals] = useState<NutritionGoals | null>(null);
 
   useEffect(() => {
-    setToday(getTodayNutrition());
-    setGoals(getNutritionGoals());
+    const loadData = async () => {
+      const todayData = await getTodayNutrition();
+      setToday(todayData);
+      const goalsData = await getNutritionGoals();
+      setGoals(goalsData);
+    };
+    loadData();
   }, []);
 
   if (!today || !goals) {
