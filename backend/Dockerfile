@@ -1,10 +1,10 @@
 # 后端 Dockerfile
 FROM node:20-alpine AS base
 
-# 安装依赖
+# 安装依赖（使用淘宝镜像加速）
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --production
+RUN npm config set registry https://registry.npmmirror.com && npm install --production
 
 # 复制源代码
 COPY . .

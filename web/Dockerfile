@@ -5,10 +5,10 @@ FROM node:20-alpine AS base
 ARG NEXT_PUBLIC_API_URL=http://localhost:3001/api
 ARG NEXT_PUBLIC_APP_NAME=KB教练
 
-# 安装依赖
+# 安装依赖（使用淘宝镜像加速）
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm config set registry https://registry.npmmirror.com && npm install
 
 # 复制源代码
 COPY . .
@@ -31,8 +31,8 @@ COPY --from=base /app/public ./public
 COPY --from=base /app/package*.json ./
 COPY --from=base /app/next.config.js ./
 
-# 安装生产依赖
-RUN npm install --production
+# 安装生产依赖（使用淘宝镜像加速）
+RUN npm config set registry https://registry.npmmirror.com && npm install --production
 
 # 暴露端口
 EXPOSE 3000
