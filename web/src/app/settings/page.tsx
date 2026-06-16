@@ -194,7 +194,7 @@ export default function SettingsPage() {
                     {(Object.keys(goalLabels) as Array<keyof typeof goalLabels>).map((goal) => (
                       <button
                         key={goal}
-                        onClick={() => setProfile({ ...profile, goal })}
+                        onClick={() => setProfile({ ...profile, goal: goal as 'muscle_gain' | 'fat_loss' | 'posture_fix' | 'health' })}
                         className={`py-2.5 rounded-xl font-medium transition-colors ${
                           profile.goal === goal
                             ? 'bg-primary-500 text-white'
@@ -214,7 +214,7 @@ export default function SettingsPage() {
                     {(Object.keys(experienceLabels) as Array<keyof typeof experienceLabels>).map((exp) => (
                       <button
                         key={exp}
-                        onClick={() => setProfile({ ...profile, experience: exp })}
+                        onClick={() => setProfile({ ...profile, experience: exp as 'beginner' | 'intermediate' | 'advanced' })}
                         className={`py-2.5 rounded-xl font-medium transition-colors ${
                           profile.experience === exp
                             ? 'bg-primary-500 text-white'
