@@ -109,7 +109,7 @@ export default function SettingsPage() {
                     {(Object.keys(genderLabels) as Array<keyof typeof genderLabels>).map((gender) => (
                       <button
                         key={gender}
-                        onClick={() => setProfile({ ...profile, gender })}
+                        onClick={() => setProfile({ ...profile, gender: gender as 'male' | 'female' | 'other' })}
                         className={`py-2.5 rounded-xl font-medium transition-colors ${
                           profile.gender === gender
                             ? 'bg-primary-500 text-white'
