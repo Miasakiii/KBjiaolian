@@ -217,6 +217,29 @@ export function deleteAllAnalysisRecords(req, res) {
   }
 }
 
+// 按 ID 获取单条分析记录（供对比分析使用）
+export function getAnalysisRecordById(userId, recordId) {
+  return stmts.getAnalysisById.get(recordId, userId);
+}
+
+// 获取原始训练记录（供渐进式算法使用）
+export function getWorkoutRecordsRaw(userId, limit = 20) {
+  return stmts.getWorkoutsByUserPaginated.all(userId, limit, 0).map(r => ({
+    id: r.id,
+    planId: r.plan_id,
+    planName: r.plan_name,
+    dayNumber: r.day_number,
+    dayName: r.day_name,
+    startTime: r.start_time,
+    endTime: r.end_time,
+    duration: r.duration,
+    exercises: JSON.parse(r.exercises || '[]'),
+    rating: r.rating,
+    notes: r.notes,
+    created_at: r.created_at,
+  }));
+}
+
 // === 训练方案 API ===
 
 export function savePlan(req, res) {

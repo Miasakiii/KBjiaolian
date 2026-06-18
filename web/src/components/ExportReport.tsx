@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { toast } from 'sonner';
 import { AnalysisResult } from '@/types/analysis';
 
 interface ExportReportProps {
@@ -54,7 +55,7 @@ export default function ExportReport({ result, imagePreview }: ExportReportProps
       pdf.save(`KB教练-体态分析报告-${new Date().toLocaleDateString('zh-CN')}.pdf`);
     } catch (error) {
       console.error('导出失败:', error);
-      alert('导出失败，请稍后重试');
+      toast.error('导出失败，请稍后重试');
     } finally {
       setIsExporting(false);
     }
@@ -77,7 +78,7 @@ export default function ExportReport({ result, imagePreview }: ExportReportProps
       link.click();
     } catch (error) {
       console.error('导出失败:', error);
-      alert('导出失败，请稍后重试');
+      toast.error('导出失败，请稍后重试');
     } finally {
       setIsExporting(false);
     }

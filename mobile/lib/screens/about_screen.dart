@@ -24,7 +24,7 @@ class AboutScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF16a34a).withOpacity(0.3),
+                    color: const Color(0xFF16a34a).withValues(alpha: 0.3),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -108,22 +108,22 @@ class AboutScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _FeatureItem(
+                    const _FeatureItem(
                       icon: '📸',
                       title: 'AI 体态分析',
                       description: '拍照即可获得专业体态评估',
                     ),
-                    _FeatureItem(
+                    const _FeatureItem(
                       icon: '🏋️',
                       title: '个性化训练方案',
                       description: '根据体态分析生成针对性计划',
                     ),
-                    _FeatureItem(
+                    const _FeatureItem(
                       icon: '🍎',
                       title: '饮食识别',
                       description: '拍照识别食物，自动计算营养',
                     ),
-                    _FeatureItem(
+                    const _FeatureItem(
                       icon: '🤖',
                       title: 'AI 教练',
                       description: '随时咨询健身、营养问题',
@@ -148,17 +148,17 @@ class AboutScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _SecurityItem(
+                    const _SecurityItem(
                       icon: Icons.lock,
                       title: '本地存储',
                       subtitle: '所有数据存储在你的设备',
                     ),
-                    _SecurityItem(
+                    const _SecurityItem(
                       icon: Icons.upload,
                       title: '自由导出',
                       subtitle: '支持导出所有数据',
                     ),
-                    _SecurityItem(
+                    const _SecurityItem(
                       icon: Icons.delete,
                       title: '随时删除',
                       subtitle: '可以随时清空所有数据',

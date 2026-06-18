@@ -4,6 +4,8 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { AuthProvider } from '@/lib/AuthContext';
 import AuthGuard from '@/components/AuthProvider';
+import { Toaster } from 'sonner';
+import UpdatePrompt from '@/components/UpdatePrompt';
 
 export const metadata: Metadata = {
   title: 'KB教练 — AI 健身康复师',
@@ -53,24 +55,8 @@ export default function RootLayout({
             <Footer />
           </AuthGuard>
         </AuthProvider>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').then(
-                    function(registration) {
-                      console.log('ServiceWorker registration successful');
-                    },
-                    function(err) {
-                      console.log('ServiceWorker registration failed: ', err);
-                    }
-                  );
-                });
-              }
-            `,
-          }}
-        />
+        <Toaster position="top-center" richColors closeButton />
+        <UpdatePrompt />
       </body>
     </html>
   );

@@ -2,9 +2,11 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import PhotoUpload from '@/components/PhotoUpload';
 import ResultPanel from '@/components/ResultPanel';
 import TipsCard from '@/components/TipsCard';
+import QuotaBar from '@/components/QuotaBar';
 import { AnalysisResult } from '@/types/analysis';
 import { saveRecord } from '@/lib/storage';
 import { authFetch } from '@/lib/auth';
@@ -34,7 +36,8 @@ export default function AnalyzePage() {
           });
 
           if (!response.ok) {
-            throw new Error('分析失败');
+            const errorData = await response.json().catch(() => ({}))
+            throw new Error(errorData.error || '分析失败')
           }
 
           const data = await response.json();
@@ -47,7 +50,8 @@ export default function AnalyzePage() {
           }
         } catch (error) {
           console.error('分析错误:', error);
-          alert('分析失败，请确保后端服务已启动');
+          const message = error instanceof Error ? error.message : '分析失败，请确保后端服务已启动'
+          toast.error(message)
         } finally {
           setIsAnalyzing(false);
         }
@@ -75,6 +79,7 @@ export default function AnalyzePage() {
         {/* 桌面：左右分栏 */}
         <div className="hidden md:grid md:grid-cols-5 gap-8" style={{ minHeight: '65vh' }}>
           <div className="col-span-2 space-y-6">
+            <QuotaBar action="analyze" />
             <div className="h-96">
               <PhotoUpload onUpload={handleUpload} isAnalyzing={isAnalyzing} />
             </div>
@@ -87,6 +92,7 @@ export default function AnalyzePage() {
 
         {/* 移动：上下布局 */}
         <div className="md:hidden space-y-6">
+          <QuotaBar action="analyze" />
           <div className="h-72">
             <PhotoUpload onUpload={handleUpload} isAnalyzing={isAnalyzing} />
           </div>

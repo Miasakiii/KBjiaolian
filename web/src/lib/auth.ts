@@ -3,6 +3,8 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 const TOKEN_KEY = 'kb-coach-token';
 const USER_KEY = 'kb-coach-user';
+const GUEST_KEY = 'kb-coach-guest';
+const REDIRECT_KEY = 'kb-coach-redirect';
 
 export interface User {
   id: string;
@@ -50,6 +52,41 @@ export function isAuthenticated(): boolean {
   return !!getToken();
 }
 
+// 游客模式
+export function isGuest(): boolean {
+  if (typeof window === 'undefined') return false;
+  return localStorage.getItem(GUEST_KEY) === 'true';
+}
+
+export function setGuest(): void {
+  localStorage.setItem(GUEST_KEY, 'true');
+}
+
+export function clearGuest(): void {
+  localStorage.removeItem(GUEST_KEY);
+}
+
+// 是否有访问权限（已登录 或 游客）
+export function hasAccess(): boolean {
+  return isAuthenticated() || isGuest();
+}
+
+// 登录回跳：保存/读取/清除目标路径
+export function saveRedirectPath(path: string): void {
+  if (typeof window === 'undefined') return;
+  sessionStorage.setItem(REDIRECT_KEY, path);
+}
+
+export function getRedirectPath(): string | null {
+  if (typeof window === 'undefined') return null;
+  return sessionStorage.getItem(REDIRECT_KEY);
+}
+
+export function clearRedirectPath(): void {
+  if (typeof window === 'undefined') return;
+  sessionStorage.removeItem(REDIRECT_KEY);
+}
+
 // 带认证的 fetch 请求
 export async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getToken();
@@ -66,6 +103,9 @@ export async function authFetch(url: string, options: RequestInit = {}): Promise
 
   // 如果 token 过期，清除认证信息
   if (response.status === 401) {
+    if (isGuest()) {
+      throw new Error('游客模式下无法使用此功能，请先登录');
+    }
     clearAuth();
     window.location.href = '/login';
     throw new Error('登录已过期，请重新登录');
@@ -113,5 +153,40 @@ export async function login(email: string, password: string): Promise<AuthRespon
 // 登出
 export function logout(): void {
   clearAuth();
+  clearGuest();
   window.location.href = '/login';
+}
+
+// 忘记密码
+export async function forgotPassword(email: string): Promise<{ message: string; token?: string; resetUrl?: string }> {
+  const response = await fetch(`${API_BASE}/auth/forgot-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || '操作失败');
+  }
+
+  return data;
+}
+
+// 重置密码
+export async function resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+  const response = await fetch(`${API_BASE}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, newPassword }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || '重置失败');
+  }
+
+  return data;
 }

@@ -66,7 +66,7 @@ class HomeScreen extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF16a34a).withOpacity(0.3),
+                color: const Color(0xFF16a34a).withValues(alpha: 0.3),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -117,7 +117,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(
+            const Expanded(
               child: _StatCard(
                 icon: '💪',
                 title: '本周训练',
@@ -126,7 +126,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(
+            const Expanded(
               child: _StatCard(
                 icon: '🍎',
                 title: '今日热量',
@@ -359,7 +359,7 @@ class _ActionButton extends StatelessWidget {
                 height: 48,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [color, color.withOpacity(0.8)],
+                    colors: [color, color.withValues(alpha: 0.8)],
                   ),
                   borderRadius: BorderRadius.circular(12),
                 ),

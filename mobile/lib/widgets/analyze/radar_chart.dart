@@ -153,7 +153,7 @@ class _RadarChartPainter extends CustomPainter {
 
     // 填充
     final fillPaint = Paint()
-      ..color = Colors.green.withOpacity(0.2)
+      ..color = Colors.green.withValues(alpha: 0.2)
       ..style = PaintingStyle.fill;
     canvas.drawPath(path, fillPaint);
 

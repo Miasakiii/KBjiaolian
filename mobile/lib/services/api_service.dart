@@ -278,4 +278,82 @@ class ApiService {
       return false;
     }
   }
+
+  // 渐进式训练方案（基于历史数据自适应）
+  static Future<Map<String, dynamic>> generateProgressivePlan({
+    required String goal,
+    required String experience,
+    required String equipment,
+    required int daysPerWeek,
+    required int sessionDuration,
+    required Map<String, dynamic> analysisResult,
+  }) async {
+    final headers = await _getHeaders();
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/plan/progressive'),
+      headers: headers,
+      body: jsonEncode({
+        'goal': goal,
+        'experience': experience,
+        'equipment': equipment,
+        'daysPerWeek': daysPerWeek,
+        'sessionDuration': sessionDuration,
+        'analysisResult': analysisResult,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else if (response.statusCode == 401) {
+      throw Exception('请先登录');
+    } else {
+      throw Exception('生成方案失败: ${response.body}');
+    }
+  }
+
+  // 获取渐进式训练建议
+  static Future<Map<String, dynamic>> getProgressionAdvice({
+    String experience = 'beginner',
+  }) async {
+    final headers = await _getHeaders();
+
+    final response = await http.get(
+      Uri.parse('$baseUrl/plan/progression?experience=$experience'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else if (response.statusCode == 401) {
+      throw Exception('请先登录');
+    } else {
+      throw Exception('获取建议失败: ${response.body}');
+    }
+  }
+
+  // 前后对比分析
+  static Future<Map<String, dynamic>> compareAnalysis({
+    required String beforeId,
+    required String afterId,
+  }) async {
+    final headers = await _getHeaders();
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/analyze/compare'),
+      headers: headers,
+      body: jsonEncode({
+        'beforeId': beforeId,
+        'afterId': afterId,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else if (response.statusCode == 401) {
+      throw Exception('请先登录');
+    } else {
+      throw Exception('对比分析失败: ${response.body}');
+    }
+  }
 }

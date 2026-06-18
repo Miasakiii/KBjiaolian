@@ -1,34 +1,35 @@
 'use client';
 
 import Link from 'next/link';
+import { BarChart3, Dumbbell, Apple, Beef, TrendingUp, TrendingDown } from 'lucide-react';
 
 interface StatCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
-  icon: string;
+  icon: React.ReactNode;
   trend?: number;
   link: string;
-  color: string;
 }
 
-function StatCard({ title, value, subtitle, icon, trend, link, color }: StatCardProps) {
+function StatCard({ title, value, subtitle, icon, trend, link }: StatCardProps) {
   return (
     <Link href={link} className="block">
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-200/50 p-5 hover:shadow-lg hover:border-primary-300 transition-all">
+      <div className="bg-white rounded-2xl border border-gray-200 p-5 hover:shadow-sm transition-all">
         <div className="flex items-start justify-between mb-3">
-          <span className="text-2xl">{icon}</span>
+          <span className="text-gray-500">{icon}</span>
           {trend !== undefined && trend !== 0 && (
-            <span className={`text-xs font-medium px-2 py-1 rounded-full ${
-              trend > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+            <span className={`text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 ${
+              trend > 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
             }`}>
-              {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}
+              {trend > 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+              {Math.abs(trend)}
             </span>
           )}
         </div>
-        <div className="text-3xl font-bold text-primary-800 mb-1">{value}</div>
-        <div className="text-sm text-primary-500">{title}</div>
-        {subtitle && <div className="text-xs text-primary-400 mt-1">{subtitle}</div>}
+        <div className="text-2xl font-bold text-gray-900 mb-1">{value}</div>
+        <div className="text-sm text-gray-500">{title}</div>
+        {subtitle && <div className="text-xs text-gray-400 mt-1">{subtitle}</div>}
       </div>
     </Link>
   );
@@ -59,39 +60,35 @@ export default function DashboardStats({
   const caloriesPercent = Math.round((nutrition.calories / nutrition.caloriesGoal) * 100);
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       <StatCard
         title="体态评分"
         value={latestScore ?? '--'}
         subtitle={latestScore ? '最新评分' : '未测评'}
-        icon="📊"
+        icon={<BarChart3 size={20} />}
         trend={scoreTrend}
         link="/history"
-        color="primary"
       />
       <StatCard
         title="本周训练"
         value={`${workoutStats.thisWeek}次`}
         subtitle={`连续 ${workoutStats.streak} 天`}
-        icon="💪"
+        icon={<Dumbbell size={20} />}
         link="/workouts"
-        color="blue"
       />
       <StatCard
         title="今日热量"
         value={`${nutrition.calories}`}
         subtitle={`${caloriesPercent}% 目标`}
-        icon="🍎"
+        icon={<Apple size={20} />}
         link="/nutrition"
-        color="green"
       />
       <StatCard
         title="蛋白质"
         value={`${nutrition.protein}g`}
         subtitle={`${Math.round((nutrition.protein / nutrition.proteinGoal) * 100)}% 目标`}
-        icon="🥩"
+        icon={<Beef size={20} />}
         link="/nutrition"
-        color="orange"
       />
     </div>
   );

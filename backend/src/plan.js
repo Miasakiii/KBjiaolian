@@ -87,8 +87,8 @@ function buildPlanPrompt(params, analysisResult) {
 `;
 }
 
-export async function generatePlan(params, analysisResult) {
-  const prompt = buildPlanPrompt(params, analysisResult);
+export async function generatePlan(params, analysisResult, extraPrompt = '') {
+  const prompt = buildPlanPrompt(params, analysisResult) + (extraPrompt ? '\n\n' + extraPrompt : '');
 
   // 设置超时时间为 60 秒
   const controller = new AbortController();

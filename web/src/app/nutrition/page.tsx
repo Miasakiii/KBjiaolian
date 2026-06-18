@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import PhotoUpload from '@/components/PhotoUpload';
 import FoodResult from '@/components/FoodResult';
 import { NutritionAnalysis, NutritionRecord, mealTypeLabels } from '@/types/nutrition';
@@ -41,7 +42,7 @@ export default function NutritionPage() {
           setAnalysis(data);
         } catch (error) {
           console.error('食物识别错误:', error);
-          alert('食物识别失败，请确保后端服务已启动');
+          toast.error('食物识别失败，请确保后端服务已启动');
         } finally {
           setIsAnalyzing(false);
         }

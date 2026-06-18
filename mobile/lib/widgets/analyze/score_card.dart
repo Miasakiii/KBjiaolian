@@ -46,7 +46,7 @@ class ScoreCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: scoreColor.withOpacity(0.1),
+                    color: scoreColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
@@ -63,7 +63,7 @@ class ScoreCard extends StatelessWidget {
                         '/100',
                         style: TextStyle(
                           fontSize: 16,
-                          color: scoreColor.withOpacity(0.7),
+                          color: scoreColor.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -109,8 +109,8 @@ class ScoreCard extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    backgroundColor: chipColor.withOpacity(0.1),
-                    side: BorderSide(color: chipColor.withOpacity(0.3)),
+                    backgroundColor: chipColor.withValues(alpha: 0.1),
+                    side: BorderSide(color: chipColor.withValues(alpha: 0.3)),
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   );
                 }).toList(),

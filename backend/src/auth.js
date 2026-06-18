@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import db from './database.js';
 
 // JWT_SECRET 必须从环境变量读取，不允许硬编码后备值（安全要求）
@@ -8,6 +9,11 @@ if (!JWT_SECRET) {
   throw new Error('JWT_SECRET 环境变量未设置。请在 .env 文件中配置安全的密钥。');
 }
 const JWT_EXPIRES_IN = '7d';
+
+// 验证码配置
+const CODE_LENGTH = 6;
+const CODE_EXPIRE_MS = 5 * 60 * 1000; // 5 分钟
+const CODE_COOLDOWN_MS = 60 * 1000; // 60 秒冷却
 
 // 验证邮箱格式
 function isValidEmail(email) {
@@ -29,21 +35,121 @@ function generateUserId() {
   return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
 }
 
+// 生成 6 位数字验证码
+function generateCode() {
+  return crypto.randomInt(100000, 999999).toString();
+}
+
 // 预编译 SQL 语句
 const stmts = {
   findUserByEmail: db.prepare('SELECT * FROM users WHERE email = ?'),
   findUserById: db.prepare('SELECT * FROM users WHERE id = ?'),
   createUser: db.prepare('INSERT INTO users (id, email, password, nickname) VALUES (?, ?, ?, ?)'),
+  updatePassword: db.prepare('UPDATE users SET password = ?, updated_at = ? WHERE id = ?'),
+  createResetToken: db.prepare('INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)'),
+  findResetToken: db.prepare('SELECT * FROM password_resets WHERE token = ? AND used = 0 AND expires_at > ?'),
+  markTokenUsed: db.prepare('UPDATE password_resets SET used = 1 WHERE id = ?'),
+  cleanExpiredTokens: db.prepare('DELETE FROM password_resets WHERE expires_at < ?'),
+
+  // 验证码相关
+  insertCode: db.prepare('INSERT INTO verification_codes (email, code, type, expires_at) VALUES (?, ?, ?, ?)'),
+  findValidCode: db.prepare(`
+    SELECT * FROM verification_codes
+    WHERE email = ? AND code = ? AND type = ? AND used = 0 AND expires_at > ?
+    ORDER BY created_at DESC LIMIT 1
+  `),
+  markCodeUsed: db.prepare('UPDATE verification_codes SET used = 1 WHERE id = ?'),
+  findRecentCode: db.prepare(`
+    SELECT * FROM verification_codes
+    WHERE email = ? AND type = ? AND created_at > ?
+    ORDER BY created_at DESC LIMIT 1
+  `),
+  cleanExpiredCodes: db.prepare('DELETE FROM verification_codes WHERE expires_at < ?'),
 };
 
-// 注册
+// === 发送验证码 ===
+export async function sendVerificationCode(req, res) {
+  try {
+    const { email, type = 'register' } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: '请提供邮箱' });
+    }
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: '邮箱格式不正确' });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+
+    // 注册类型：检查邮箱是否已注册
+    if (type === 'register') {
+      const existing = stmts.findUserByEmail.get(normalizedEmail);
+      if (existing) {
+        return res.status(409).json({ error: '该邮箱已注册' });
+      }
+    }
+
+    // 冷却检查：60 秒内只能发一次
+    const cooldown = Date.now() - CODE_COOLDOWN_MS;
+    const recent = stmts.findRecentCode.get(normalizedEmail, type, cooldown);
+    if (recent) {
+      return res.status(429).json({ error: '验证码发送过于频繁，请稍后再试' });
+    }
+
+    // 清理过期验证码
+    stmts.cleanExpiredCodes.run(Date.now());
+
+    // 生成并存储验证码
+    const code = generateCode();
+    const expiresAt = Date.now() + CODE_EXPIRE_MS;
+    stmts.insertCode.run(normalizedEmail, code, type, expiresAt);
+
+    // TODO: 接入真实邮件服务（Resend / QQ邮箱 SMTP / SendGrid）
+    // 当前为开发模式，控制台打印验证码
+    console.log('');
+    console.log('='.repeat(50));
+    console.log(`📧 验证码 [${type === 'register' ? '注册' : '重置密码'}]`);
+    console.log(`   邮箱: ${normalizedEmail}`);
+    console.log(`   验证码: ${code}`);
+    console.log(`   有效期: 5 分钟`);
+    console.log('='.repeat(50));
+    console.log('');
+
+    res.json({
+      message: '验证码已发送',
+      // 开发模式返回提示
+      ...(process.env.NODE_ENV !== 'production' && {
+        devHint: `验证码已打印到后端控制台 (邮箱: ${normalizedEmail})`,
+      }),
+    });
+  } catch (err) {
+    console.error('发送验证码失败:', err.message);
+    res.status(500).json({ error: '发送验证码失败，请稍后重试' });
+  }
+}
+
+// === 验证验证码 ===
+export function verifyCode(email, code, type = 'register') {
+  const normalizedEmail = email.toLowerCase().trim();
+  const record = stmts.findValidCode.get(normalizedEmail, code, type, Date.now());
+
+  if (!record) {
+    return { valid: false, error: '验证码无效或已过期' };
+  }
+
+  // 标记已使用
+  stmts.markCodeUsed.run(record.id);
+  return { valid: true };
+}
+
+// === 注册（需要验证码）===
 export async function register(req, res) {
   try {
-    const { email, password, nickname } = req.body;
+    const { email, password, nickname, code } = req.body;
 
     // 输入校验
-    if (!email || !password) {
-      return res.status(400).json({ error: '请提供邮箱和密码' });
+    if (!email || !password || !code) {
+      return res.status(400).json({ error: '请提供邮箱、密码和验证码' });
     }
     if (!isValidEmail(email)) {
       return res.status(400).json({ error: '邮箱格式不正确' });
@@ -52,8 +158,14 @@ export async function register(req, res) {
       return res.status(400).json({ error: '密码长度需要 6-100 个字符' });
     }
 
-    // 检查邮箱是否已注册
+    // 验证码校验
     const normalizedEmail = email.toLowerCase().trim();
+    const codeResult = verifyCode(normalizedEmail, code, 'register');
+    if (!codeResult.valid) {
+      return res.status(400).json({ error: codeResult.error });
+    }
+
+    // 检查邮箱是否已注册（双重检查）
     const existingUser = stmts.findUserByEmail.get(normalizedEmail);
     if (existingUser) {
       return res.status(409).json({ error: '该邮箱已注册' });
@@ -83,17 +195,15 @@ export async function register(req, res) {
   }
 }
 
-// 登录
+// === 登录（不需要验证码）===
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
 
-    // 输入校验
     if (!email || !password) {
       return res.status(400).json({ error: '请提供邮箱和密码' });
     }
 
-    // 查找用户
     const normalizedEmail = email.toLowerCase().trim();
     const user = stmts.findUserByEmail.get(normalizedEmail);
 
@@ -101,13 +211,11 @@ export async function login(req, res) {
       return res.status(401).json({ error: '邮箱或密码错误' });
     }
 
-    // 验证密码
     const isValid = await bcrypt.compare(password, user.password);
     if (!isValid) {
       return res.status(401).json({ error: '邮箱或密码错误' });
     }
 
-    // 生成 token
     const token = generateToken(user.id);
 
     res.json({
@@ -124,7 +232,7 @@ export async function login(req, res) {
   }
 }
 
-// 获取当前用户信息
+// === 获取当前用户信息 ===
 export function getProfile(req, res) {
   const user = stmts.findUserById.get(req.userId);
   if (!user) {
@@ -135,11 +243,103 @@ export function getProfile(req, res) {
     id: user.id,
     email: user.email,
     nickname: user.nickname,
+    plan: user.plan || 'free',
+    planExpiresAt: user.plan_expires_at,
     createdAt: user.created_at,
   });
 }
 
-// JWT 认证中间件
+// === 忘记密码 — 发送重置验证码 ===
+export async function forgotPassword(req, res) {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: '请提供邮箱' });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = stmts.findUserByEmail.get(normalizedEmail);
+
+    // 安全考虑：无论邮箱是否存在都返回成功
+    if (!user) {
+      return res.json({ message: '如果该邮箱已注册，验证码已发送' });
+    }
+
+    // 冷却检查
+    const cooldown = Date.now() - CODE_COOLDOWN_MS;
+    const recent = stmts.findRecentCode.get(normalizedEmail, 'reset', cooldown);
+    if (recent) {
+      return res.json({ message: '如果该邮箱已注册，验证码已发送' });
+    }
+
+    // 清理过期验证码
+    stmts.cleanExpiredCodes.run(Date.now());
+
+    // 生成重置验证码
+    const code = generateCode();
+    const expiresAt = Date.now() + CODE_EXPIRE_MS;
+    stmts.insertCode.run(normalizedEmail, code, 'reset', expiresAt);
+
+    // TODO: 接入真实邮件服务
+    console.log('');
+    console.log('='.repeat(50));
+    console.log(`📧 重置密码验证码`);
+    console.log(`   邮箱: ${normalizedEmail}`);
+    console.log(`   验证码: ${code}`);
+    console.log(`   有效期: 5 分钟`);
+    console.log('='.repeat(50));
+    console.log('');
+
+    res.json({
+      message: '如果该邮箱已注册，验证码已发送',
+      ...(process.env.NODE_ENV !== 'production' && {
+        devHint: `验证码已打印到后端控制台 (邮箱: ${normalizedEmail})`,
+      }),
+    });
+  } catch (err) {
+    console.error('忘记密码失败:', err.message);
+    res.status(500).json({ error: '操作失败，请稍后重试' });
+  }
+}
+
+// === 重置密码（需要验证码）===
+export async function resetPassword(req, res) {
+  try {
+    const { email, code, newPassword } = req.body;
+
+    if (!email || !code || !newPassword) {
+      return res.status(400).json({ error: '请提供邮箱、验证码和新密码' });
+    }
+
+    if (!isValidPassword(newPassword)) {
+      return res.status(400).json({ error: '密码长度需要 6-100 个字符' });
+    }
+
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = stmts.findUserByEmail.get(normalizedEmail);
+    if (!user) {
+      return res.status(400).json({ error: '验证码无效或已过期' });
+    }
+
+    // 验证码校验
+    const codeResult = verifyCode(normalizedEmail, code, 'reset');
+    if (!codeResult.valid) {
+      return res.status(400).json({ error: codeResult.error });
+    }
+
+    // 更新密码
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    stmts.updatePassword.run(hashedPassword, Date.now(), user.id);
+
+    res.json({ message: '密码重置成功，请使用新密码登录' });
+  } catch (err) {
+    console.error('重置密码失败:', err.message);
+    res.status(500).json({ error: '重置失败，请稍后重试' });
+  }
+}
+
+// === JWT 认证中间件 ===
 export function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
 

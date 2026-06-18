@@ -4,9 +4,10 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { syncLocalToCloud } from '@/lib/cloudStorage';
+import { saveRedirectPath } from '@/lib/auth';
 
 // 不需要认证的页面
-const PUBLIC_PATHS = ['/login', '/about'];
+const PUBLIC_PATHS = ['/login', '/about', '/forgot-password', '/reset-password'];
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -15,7 +16,7 @@ interface AuthGuardProps {
 export default function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isGuest, isLoading } = useAuth();
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
@@ -23,8 +24,9 @@ export default function AuthGuard({ children }: AuthGuardProps) {
 
     const isPublicPath = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
 
-    if (!isPublicPath && !isAuthenticated) {
-      // 未登录且访问受保护页面，跳转到登录页
+    if (!isPublicPath && !isAuthenticated && !isGuest) {
+      // 未登录且非游客，保存目标路径后跳转登录页
+      saveRedirectPath(pathname);
       router.push('/login');
     } else {
       setChecking(false);
@@ -34,7 +36,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
         syncLocalToCloud().catch(console.warn);
       }
     }
-  }, [pathname, router, isAuthenticated, isLoading]);
+  }, [pathname, router, isAuthenticated, isGuest, isLoading]);
 
   // 正在检查登录状态时显示加载
   if ((checking || isLoading) && !PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {

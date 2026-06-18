@@ -79,7 +79,7 @@ class HistoryScreen extends StatelessWidget {
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: _getScoreColor(result['score']).withOpacity(0.1),
+                    backgroundColor: _getScoreColor(result['score']).withValues(alpha: 0.1),
                     child: Text(
                       '${result['score']}',
                       style: TextStyle(

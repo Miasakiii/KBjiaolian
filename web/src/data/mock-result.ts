@@ -12,6 +12,15 @@ export const mockResult: AnalysisResult = {
     roundShoulder: 45,
     pelvicTilt: 78,
     kneeExtension: 82,
+    spineCurve: 15,
+    shoulderHeight: 22,
+    legAlignment: 10,
+    coreStability: 55,
+  },
+  bodyMetrics: {
+    postureType: '上交叉综合征 + 下交叉综合征',
+    riskLevel: '中',
+    affectedAreas: ['颈椎', '肩胛骨', '腰椎', '骨盆'],
   },
   suggestions: [
     {

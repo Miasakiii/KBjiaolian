@@ -49,11 +49,13 @@ export async function exportAsCSV(): Promise<void> {
 function generateAnalysisCSV(records: any[]): string {
   if (records.length === 0) return '暂无数据';
 
-  const headers = ['日期', '评分', '头前伸', '圆肩', '骨盆前倾', '膝超伸', '问题'];
+  const headers = ['日期', '评分', '头前伸', '圆肩', '骨盆前倾', '膝超伸', '脊柱侧弯', '高低肩', 'X/O型腿', '核心稳定', '体态类型', '风险等级', '问题'];
   const rows = records.map((r) => {
     const date = new Date(r.timestamp).toLocaleDateString('zh-CN');
     const issues = r.result.issues.map((i: any) => i.name).join('; ');
-    return `${date},${r.result.score},${r.result.radar.headForward},${r.result.radar.roundShoulder},${r.result.radar.pelvicTilt},${r.result.radar.kneeExtension},"${issues}"`;
+    const radar = r.result.radar;
+    const metrics = r.result.bodyMetrics || {};
+    return `${date},${r.result.score},${radar.headForward ?? 0},${radar.roundShoulder ?? 0},${radar.pelvicTilt ?? 0},${radar.kneeExtension ?? 0},${radar.spineCurve ?? 0},${radar.shoulderHeight ?? 0},${radar.legAlignment ?? 0},${radar.coreStability ?? 0},"${metrics.postureType || ''}","${metrics.riskLevel || ''}","${issues}"`;
   });
 
   return [headers.join(','), ...rows].join('\n');

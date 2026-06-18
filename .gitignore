@@ -36,10 +36,13 @@ mobile/ios/Runner.xcworkspace
 mobile/macos/Flutter/Generated.xcconfig
 mobile/macos/Flutter/ephemeral/
 mobile/windows/flutter/ephemeral/
+mobile/windows/flutter/generated_plugin_registrant.cc
+mobile/windows/flutter/generated_plugins.cmake
 
-# === IDE ===
+# === IDE / AI 工具 ===
 .idea/
 .vscode/
+.atomcode/
 *.swp
 *.swo
 *~

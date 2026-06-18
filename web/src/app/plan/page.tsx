@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { toast } from 'sonner';
 import PlanForm from '@/components/PlanForm';
 import PlanResult from '@/components/PlanResult';
 import TodayNutrition from '@/components/TodayNutrition';
@@ -31,7 +32,7 @@ export default function PlanPage() {
 
   const handleGenerate = useCallback(async (params: PlanParams) => {
     if (!analysisResult) {
-      alert('请先完成体态分析');
+      toast.warning('请先完成体态分析');
       return;
     }
 
@@ -55,7 +56,7 @@ export default function PlanPage() {
       setSaved(false);
     } catch (error) {
       console.error('生成训练方案失败:', error);
-      alert('生成训练方案失败，请确保后端服务已启动');
+      toast.error('生成训练方案失败，请确保后端服务已启动');
     } finally {
       setIsGenerating(false);
     }
