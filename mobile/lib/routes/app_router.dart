@@ -8,9 +8,12 @@ import '../screens/workout_screen.dart';
 import '../screens/nutrition_screen.dart';
 import '../screens/chat_screen.dart';
 import '../screens/history_screen.dart';
+import '../screens/compare_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/about_screen.dart';
+import '../screens/progress_screen.dart';
 import '../screens/login_screen.dart';
+import '../screens/profile_screen.dart';
 import '../widgets/common/main_scaffold.dart';
 
 // 公开路由（不需要登录）
@@ -87,8 +90,20 @@ GoRouter createAppRouter(ChangeNotifier authProvider) {
             builder: (context, state) => const SettingsScreen(),
           ),
           GoRoute(
+            path: '/profile',
+            builder: (context, state) => const ProfileScreen(),
+          ),
+          GoRoute(
             path: '/about',
             builder: (context, state) => const AboutScreen(),
+          ),
+          GoRoute(
+            path: '/compare',
+            builder: (context, state) => const CompareScreen(),
+          ),
+          GoRoute(
+            path: '/progress',
+            builder: (context, state) => const ProgressScreen(),
           ),
         ],
       ),
