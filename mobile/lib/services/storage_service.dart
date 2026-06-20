@@ -146,4 +146,20 @@ class StorageService {
   static Map<String, dynamic> getUserGoals() {
     return getJson('user_goals') ?? {};
   }
+
+  static Future<void> saveProfile(Map<String, dynamic> profile) async {
+    await saveJson('user_profile', profile);
+  }
+
+  static Map<String, dynamic>? getProfile() {
+    return getJson('user_profile');
+  }
+
+  static Future<void> saveGoals(Map<String, dynamic> goals) async {
+    await saveJson('user_goals', goals);
+  }
+
+  static Map<String, dynamic>? getGoals() {
+    return getJson('user_goals');
+  }
 }
