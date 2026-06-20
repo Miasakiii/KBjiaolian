@@ -17,8 +17,8 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    // 首次进入页面时滚动到底部
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ChatProvider>().loadHistory();
       if (mounted) _scrollToBottom();
     });
   }
