@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { DayPlan } from '@/types/plan';
 import ExerciseItem from './ExerciseItem';
@@ -20,7 +20,7 @@ export default function DaySchedule({ dayPlan }: DayScheduleProps) {
           </p>
         </div>
         <div className="w-12 h-12 bg-primary-100 rounded-xl flex items-center justify-center">
-          <span className="text-2xl">💪</span>
+          <span className="text-2xl"></span>
         </div>
       </div>
 

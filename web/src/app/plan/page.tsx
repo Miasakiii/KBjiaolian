@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -80,7 +80,7 @@ export default function PlanPage() {
         <div className="max-w-2xl mx-auto px-4 pt-16">
           <div className="text-center py-16">
             <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-4xl">📸</span>
+              <span className="text-4xl"></span>
             </div>
             <h2 className="text-xl font-semibold text-primary-800 mb-2">请先完成体态分析</h2>
             <p className="text-primary-500 mb-6">训练方案需要基于体态分析结果生成</p>
@@ -101,7 +101,7 @@ export default function PlanPage() {
       <header className="text-center pt-12 pb-8">
         <div className="inline-flex items-center gap-3 mb-2">
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30">
-            <span className="text-2xl">🏋️</span>
+            <span className="text-2xl"></span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-700 to-primary-500 bg-clip-text text-transparent">
             {plan ? '训练方案' : '生成训练方案'}

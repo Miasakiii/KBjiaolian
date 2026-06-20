@@ -6,6 +6,8 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #fafafa;
+  color: #171717;
 }
 
 html {
@@ -24,4 +26,16 @@ html {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #22c55e;
+}
+
+/* 选中文本颜色 */
+::selection {
+  background-color: #dcfce7;
+  color: #14532d;
+}
+
+/* 焦点样式 */
+:focus-visible {
+  outline: 2px solid #22c55e;
+  outline-offset: 2px;
 }

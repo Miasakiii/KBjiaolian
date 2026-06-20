@@ -49,8 +49,8 @@ export const mealTypeLabels: Record<string, string> = {
 };
 
 export const mealTypeIcons: Record<string, string> = {
-  breakfast: '🌅',
-  lunch: '☀️',
-  dinner: '🌙',
-  snack: '🍪',
+  breakfast: 'Sunrise',
+  lunch: 'Sun',
+  dinner: 'Moon',
+  snack: 'Cookie',
 };

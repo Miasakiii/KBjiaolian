@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 训练动作库数据
  *
  * 按肌群分类，每个动作包含：
@@ -29,9 +29,9 @@ export interface ExerciseDef {
   secondaryMuscles: MuscleGroup[];
   difficulty: Difficulty;
   equipment: Equipment;
-  /** 动画类型：emoji 占位，后续替换为 lottie/gif */
+  /** 动画类型：icon 占位，后续替换为 lottie/gif */
   animation: {
-    type: 'emoji' | 'lottie' | 'gif';
+    type: 'icon' | 'lottie' | 'gif';
     value: string;
   };
   description: string;
@@ -55,14 +55,14 @@ export const muscleGroupLabels: Record<MuscleGroup, string> = {
 };
 
 export const muscleGroupEmojis: Record<MuscleGroup, string> = {
-  chest: '💪',
-  back: '🔙',
-  shoulders: '🏋️',
-  arms: '💪',
-  legs: '🦵',
-  core: '🎯',
-  glutes: '🍑',
-  full_body: '🔥',
+  chest: 'Dumbbell',
+  back: 'ArrowLeftCircle',
+  shoulders: 'Dumbbell',
+  arms: 'Dumbbell',
+  legs: 'Footprints',
+  core: 'Target',
+  glutes: 'Dumbbell',
+  full_body: 'Flame',
 };
 
 export const difficultyLabels: Record<Difficulty, string> = {
@@ -92,7 +92,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['shoulders', 'arms'],
     difficulty: 'beginner',
     equipment: 'bodyweight',
-    animation: { type: 'emoji', value: '🤸' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '最经典的上肢推类动作，锻炼胸肌、三角肌前束和肱三头肌。',
     steps: [
       '双手撑地，略宽于肩，身体呈一条直线',
@@ -111,7 +111,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['shoulders', 'arms'],
     difficulty: 'intermediate',
     equipment: 'barbell',
-    animation: { type: 'emoji', value: '🏋️' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '力量训练之王，复合推类动作，对胸肌刺激最为全面。',
     steps: [
       '平躺于卧推凳，双脚踩实地面',
@@ -130,7 +130,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['shoulders'],
     difficulty: 'intermediate',
     equipment: 'dumbbell',
-    animation: { type: 'emoji', value: '🦅' },
+    animation: { type: 'icon', value: 'Target' },
     description: '孤立胸肌动作，增加胸肌厚度和中缝线条。',
     steps: [
       '平躺，双手持哑铃伸直于胸部上方',
@@ -149,7 +149,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['shoulders', 'arms'],
     difficulty: 'intermediate',
     equipment: 'dumbbell',
-    animation: { type: 'emoji', value: '📐' },
+    animation: { type: 'icon', value: 'Ruler' },
     description: '针对上胸的推类动作，让胸型更饱满。',
     steps: [
       '调节卧推凳至30-45度角',
@@ -170,7 +170,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['arms'],
     difficulty: 'intermediate',
     equipment: 'bodyweight',
-    animation: { type: 'emoji', value: '🧗' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '最佳背部自重训练，全面锻炼背阔肌、菱形肌和肱二头肌。',
     steps: [
       '双手正握杠，握距略宽于肩',
@@ -189,7 +189,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['arms'],
     difficulty: 'beginner',
     equipment: 'machine',
-    animation: { type: 'emoji', value: '⬇️' },
+    animation: { type: 'icon', value: 'ArrowDown' },
     description: '引体向上的器械替代版本，适合初学者建立背部发力感。',
     steps: [
       '坐于器械上，大腿固定于垫下',
@@ -208,7 +208,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['arms'],
     difficulty: 'beginner',
     equipment: 'dumbbell',
-    animation: { type: 'emoji', value: '🚣' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '经典单侧背部训练，能纠正左右不平衡。',
     steps: [
       '一手一膝撑于凳上，另一手持哑铃',
@@ -227,7 +227,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['arms'],
     difficulty: 'intermediate',
     equipment: 'barbell',
-    animation: { type: 'emoji', value: '🚣' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '高效复合背部动作，同时锻炼背阔肌、菱形肌和竖脊肌。',
     steps: [
       '双脚与肩同宽，屈髋俯身约45°',
@@ -248,7 +248,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['arms', 'core'],
     difficulty: 'intermediate',
     equipment: 'barbell',
-    animation: { type: 'emoji', value: '🏗️' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '肩部王牌动作，锻炼三角肌前束和中束，同时强化核心。',
     steps: [
       '双脚与肩同宽，杠铃置于锁骨位置',
@@ -267,7 +267,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: [],
     difficulty: 'beginner',
     equipment: 'dumbbell',
-    animation: { type: 'emoji', value: '🦅' },
+    animation: { type: 'icon', value: 'Target' },
     description: '三角肌中束孤立动作，打造肩部宽度。',
     steps: [
       '双脚与肩同宽，双手持哑铃于体侧',
@@ -286,7 +286,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['back'],
     difficulty: 'beginner',
     equipment: 'cable',
-    animation: { type: 'emoji', value: '🎯' },
+    animation: { type: 'icon', value: 'Target' },
     description: '锻炼三角肌后束和外旋肌群，改善圆肩体态。',
     steps: [
       '龙门架绳索调至面部高度',
@@ -307,7 +307,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: [],
     difficulty: 'beginner',
     equipment: 'dumbbell',
-    animation: { type: 'emoji', value: '💪' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '最基础的手臂训练动作，锻炼肱二头肌。',
     steps: [
       '站立，双手持哑铃于体前',
@@ -326,7 +326,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['chest', 'shoulders'],
     difficulty: 'intermediate',
     equipment: 'bodyweight',
-    animation: { type: 'emoji', value: '🤸' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '高效肱三头肌训练，也能刺激下胸和前肩。',
     steps: [
       '双手撑于双杠或凳子边缘',
@@ -345,7 +345,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: [],
     difficulty: 'beginner',
     equipment: 'dumbbell',
-    animation: { type: 'emoji', value: '🔨' },
+    animation: { type: 'icon', value: 'Hammer' },
     description: '锻炼肱肌和肱桡肌，让手臂更厚实。',
     steps: [
       '双手持哑铃，掌心相对（中立握）',
@@ -366,7 +366,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['glutes', 'core'],
     difficulty: 'intermediate',
     equipment: 'barbell',
-    animation: { type: 'emoji', value: '🦵' },
+    animation: { type: 'icon', value: 'Footprints' },
     description: '力量训练之王，全面锻炼股四头肌、臀大肌和核心。',
     steps: [
       '杠铃置于斜方肌上，双脚略宽于肩',
@@ -385,7 +385,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['glutes'],
     difficulty: 'beginner',
     equipment: 'bodyweight',
-    animation: { type: 'emoji', value: '🚶' },
+    animation: { type: 'icon', value: 'Footprints' },
     description: '单腿训练动作，锻炼股四头肌和臀大肌，改善左右平衡。',
     steps: [
       '站立，一脚向前迈出一大步',
@@ -404,7 +404,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['glutes', 'back'],
     difficulty: 'intermediate',
     equipment: 'barbell',
-    animation: { type: 'emoji', value: '🏋️' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '最佳后链训练动作，针对腘绳肌和臀大肌。',
     steps: [
       '双脚与肩同宽，微屈膝，双手握杠铃',
@@ -423,7 +423,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: [],
     difficulty: 'beginner',
     equipment: 'bodyweight',
-    animation: { type: 'emoji', value: '🩰' },
+    animation: { type: 'icon', value: 'Footprints' },
     description: '锻炼小腿腓肠肌和比目鱼肌。',
     steps: [
       '双脚站立于台阶边缘，脚跟悬空',
@@ -444,7 +444,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['shoulders'],
     difficulty: 'beginner',
     equipment: 'bodyweight',
-    animation: { type: 'emoji', value: '🧱' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '最经典的核心训练，锻炼腹横肌和整体核心稳定性。',
     steps: [
       '前臂和脚尖撑地，身体呈一条直线',
@@ -463,7 +463,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: [],
     difficulty: 'beginner',
     equipment: 'bodyweight',
-    animation: { type: 'emoji', value: '🐛' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '安全高效的核心训练，锻炼腹肌的同时保护腰椎。',
     steps: [
       '仰卧，双手伸直朝天花板，双腿屈膝抬起90°',
@@ -482,7 +482,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: [],
     difficulty: 'intermediate',
     equipment: 'bodyweight',
-    animation: { type: 'emoji', value: '🔄' },
+    animation: { type: 'icon', value: 'RefreshCw' },
     description: '锻炼腹斜肌，塑造腰部线条。',
     steps: [
       '坐于地面，上身后倾45°，双脚离地',
@@ -503,7 +503,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['legs'],
     difficulty: 'intermediate',
     equipment: 'barbell',
-    animation: { type: 'emoji', value: '🍑' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '臀部激活之王，孤立刺激臀大肌。',
     steps: [
       '上背靠于凳面，杠铃置于髋部',
@@ -522,7 +522,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['legs'],
     difficulty: 'beginner',
     equipment: 'bodyweight',
-    animation: { type: 'emoji', value: '🌉' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '臀部激活入门动作，适合热身和初学者。',
     steps: [
       '仰卧，双脚踩地，双膝弯曲',
@@ -543,7 +543,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['chest', 'legs', 'core'],
     difficulty: 'intermediate',
     equipment: 'bodyweight',
-    animation: { type: 'emoji', value: '🔥' },
+    animation: { type: 'icon', value: 'Flame' },
     description: '全身爆发力训练，极佳的燃脂和心肺训练动作。',
     steps: [
       '站立位，下蹲双手撑地',
@@ -562,7 +562,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['core', 'legs'],
     difficulty: 'beginner',
     equipment: 'bodyweight',
-    animation: { type: 'emoji', value: '⛰️' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '全身有氧训练动作，同时锻炼核心和心肺。',
     steps: [
       '俯卧撑起始位，身体呈一条直线',
@@ -581,7 +581,7 @@ export const exercises: ExerciseDef[] = [
     secondaryMuscles: ['shoulders', 'core', 'legs'],
     difficulty: 'advanced',
     equipment: 'dumbbell',
-    animation: { type: 'emoji', value: '🤸' },
+    animation: { type: 'icon', value: 'Dumbbell' },
     description: '最复杂的全身训练动作，提升稳定性和协调性。',
     steps: [
       '仰卧，单手持哑铃伸直朝天花板',

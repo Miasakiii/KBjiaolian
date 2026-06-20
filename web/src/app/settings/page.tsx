@@ -1,7 +1,8 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Settings } from 'lucide-react';
 import { UserProfile, UserGoals, goalLabels, experienceLabels, genderLabels } from '@/types/user';
 import { getUserProfile, saveUserProfile, getUserGoals, saveUserGoals, calculateBMI, calculateBMR } from '@/lib/userStorage';
 
@@ -40,7 +41,7 @@ export default function SettingsPage() {
       <header className="text-center pt-12 pb-8">
         <div className="inline-flex items-center gap-3 mb-2">
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30">
-            <span className="text-2xl">⚙️</span>
+            <Settings size={24} className="text-primary-600" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-700 to-primary-500 bg-clip-text text-transparent">个人设置</h1>
         </div>

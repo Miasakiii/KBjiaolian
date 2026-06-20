@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -53,19 +53,19 @@ export default function QuotaBar({ action }: { action?: string }) {
     const isExhausted = remaining === 0
 
     return (
-      <div className={`rounded-xl p-3 text-sm ${isExhausted ? 'bg-red-50 border border-red-200' : isLow ? 'bg-yellow-50 border border-yellow-200' : 'bg-gray-50 border border-gray-200'}`}>
+      <div className={`rounded-xl p-3 text-sm ${isExhausted ? 'bg-red-50 border border-red-200' : isLow ? 'bg-yellow-50 border border-yellow-200' : 'bg-primary-50 border border-primary-200'}`}>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <span className="text-gray-500">{ACTION_ICONS[action] || <BarChart3 size={16} />}</span>
-            <span className="font-medium text-gray-700">{ACTION_LABELS[action] || action}</span>
+            <span className="text-primary-400">{ACTION_ICONS[action] || <BarChart3 size={16} />}</span>
+            <span className="font-medium text-primary-600">{ACTION_LABELS[action] || action}</span>
           </div>
-          <span className={`text-xs ${isExhausted ? 'text-red-500 font-medium' : isLow ? 'text-yellow-600' : 'text-gray-400'}`}>
+          <span className={`text-xs ${isExhausted ? 'text-red-500 font-medium' : isLow ? 'text-yellow-600' : 'text-primary-300'}`}>
             {used}/{limit}
           </span>
         </div>
-        <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-primary-100 rounded-full overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all ${isExhausted ? 'bg-red-500' : isLow ? 'bg-yellow-500' : 'bg-gray-900'}`}
+            className={`h-full rounded-full transition-all ${isExhausted ? 'bg-red-500' : isLow ? 'bg-yellow-500' : 'bg-primary-500'}`}
             style={{ width: `${Math.min(percentage, 100)}%` }}
           />
         </div>
@@ -74,7 +74,7 @@ export default function QuotaBar({ action }: { action?: string }) {
             <span className="text-xs text-red-500">今日次数已用完</span>
             <Link
               href="/pricing"
-              className="text-xs text-gray-900 font-medium"
+              className="text-xs text-primary-800 font-medium"
             >
               升级 Pro
             </Link>
@@ -91,16 +91,16 @@ export default function QuotaBar({ action }: { action?: string }) {
 
   // 显示所有配额概览
   return (
-    <div className="bg-white rounded-2xl p-4 border border-gray-200">
+    <div className="bg-white rounded-2xl p-4 border border-primary-200">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-900">今日用量</span>
-          <span className="text-xs px-2 py-0.5 bg-gray-100 rounded-full text-gray-500">
+          <span className="text-sm font-medium text-primary-800">今日用量</span>
+          <span className="text-xs px-2 py-0.5 bg-primary-50 rounded-full text-primary-400">
             {quota.planName}
           </span>
         </div>
         {quota.plan === 'free' && (
-          <Link href="/pricing" className="text-xs text-gray-900 font-medium">
+          <Link href="/pricing" className="text-xs text-primary-800 font-medium">
             升级 Pro
           </Link>
         )}
@@ -111,15 +111,15 @@ export default function QuotaBar({ action }: { action?: string }) {
           const isExhausted = val.remaining === 0
           return (
             <div key={key} className="text-center">
-              <div className="text-gray-500 flex justify-center mb-1">{ACTION_ICONS[key] || <BarChart3 size={18} />}</div>
-              <div className="text-xs text-gray-500 mb-1">{ACTION_LABELS[key] || key}</div>
-              <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
+              <div className="text-primary-400 flex justify-center mb-1">{ACTION_ICONS[key] || <BarChart3 size={18} />}</div>
+              <div className="text-xs text-primary-400 mb-1">{ACTION_LABELS[key] || key}</div>
+              <div className="h-1 bg-primary-50 rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full ${isExhausted ? 'bg-red-400' : 'bg-gray-900'}`}
+                  className={`h-full rounded-full ${isExhausted ? 'bg-red-400' : 'bg-primary-500'}`}
                   style={{ width: `${Math.min(percentage, 100)}%` }}
                 />
               </div>
-              <div className="text-xs text-gray-400 mt-1">
+              <div className="text-xs text-primary-300 mt-1">
                 {val.used}/{val.limit}
               </div>
             </div>

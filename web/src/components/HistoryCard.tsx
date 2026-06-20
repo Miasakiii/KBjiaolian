@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { HistoryRecord } from '@/types/analysis';
 
@@ -31,7 +31,7 @@ export default function HistoryCard({ record, onSelect, onDelete }: HistoryCardP
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-200/50 p-4 hover:shadow-lg hover:border-primary-300 transition-all cursor-pointer group">
       <div className="flex gap-4">
         {/* 缩略图 */}
-        <div className="w-20 h-28 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
+        <div className="w-20 h-28 rounded-xl overflow-hidden flex-shrink-0 bg-primary-50">
           <img
             src={record.imagePreview}
             alt="体态照片"

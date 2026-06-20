@@ -1,6 +1,7 @@
-'use client';
+﻿'use client';
 
 import { WorkoutRecord } from '@/types/workout';
+import { Clock } from 'lucide-react';
 
 interface WorkoutCardProps {
   record: WorkoutRecord;
@@ -53,9 +54,9 @@ export default function WorkoutCard({ record, onDelete }: WorkoutCardProps) {
       </div>
 
       <div className="flex items-center gap-4 text-sm text-primary-600">
-        <span>⏱️ {record.duration} 分钟</span>
-        <span>💪 {record.exercises.length} 个动作</span>
-        <span>✅ {completedSets}/{totalSets} 组</span>
+        <span className="flex items-center gap-1"><Clock size={14} /> {record.duration} 分钟</span>
+        <span>{record.exercises.length} 个动作</span>
+        <span>{completedSets}/{totalSets} 组</span>
       </div>
 
       {record.notes && (

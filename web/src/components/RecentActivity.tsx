@@ -1,6 +1,8 @@
-'use client';
+﻿'use client';
 
 import { Activity } from '@/lib/dashboard';
+import { Clock } from 'lucide-react';
+import { DynamicIcon } from '@/lib/iconMap';
 
 interface RecentActivityProps {
   activities: Activity[];
@@ -11,11 +13,11 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
     return (
       <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-200/50 p-5">
         <h3 className="font-semibold text-primary-800 mb-4 flex items-center gap-2">
-          <span>⏱️</span>
+          <Clock size={18} className="text-primary-600" />
           最近活动
         </h3>
         <div className="text-center py-8">
-          <span className="text-4xl">📭</span>
+          <Clock size={48} className="text-primary-300 mx-auto" />
           <p className="text-primary-500 text-sm mt-2">暂无活动记录</p>
         </div>
       </div>
@@ -37,7 +39,7 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-200/50 p-5">
       <h3 className="font-semibold text-primary-800 mb-4 flex items-center gap-2">
-        <span>⏱️</span>
+        <Clock size={18} className="text-primary-600" />
         最近活动
       </h3>
 
@@ -47,7 +49,7 @@ export default function RecentActivity({ activities }: RecentActivityProps) {
             key={activity.id}
             className="flex items-center gap-3 p-3 bg-primary-50/50 rounded-xl"
           >
-            <span className="text-xl">{activity.icon}</span>
+            <DynamicIcon name={activity.icon} size={20} className="text-primary-500" />
             <div className="flex-1 min-w-0">
               <div className="text-sm font-medium text-primary-800 truncate">
                 {activity.title}

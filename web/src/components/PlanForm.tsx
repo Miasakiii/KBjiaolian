@@ -1,6 +1,7 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
+import { Target } from 'lucide-react';
 import {
   PlanParams,
   TrainingGoal,
@@ -152,7 +153,7 @@ export default function PlanForm({ onSubmit, isGenerating }: PlanFormProps) {
           </>
         ) : (
           <>
-            <span>🎯</span>
+            <Target size={16} />
             生成训练方案
           </>
         )}

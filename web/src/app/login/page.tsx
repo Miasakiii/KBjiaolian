@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -151,28 +151,28 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <main className="min-h-screen bg-primary-50 flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-gray-900 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 bg-primary-500 rounded-xl flex items-center justify-center mx-auto mb-4">
             <Dumbbell size={22} className="text-white" />
           </div>
-          <h1 className="text-xl font-bold text-gray-900">KB教练</h1>
-          <p className="text-gray-500 text-sm mt-1">
+          <h1 className="text-xl font-bold text-primary-800">KB教练</h1>
+          <p className="text-primary-400 text-sm mt-1">
             {mode === 'login' ? '登录你的账号' : '创建新账号'}
           </p>
         </div>
 
         {/* 表单卡片 */}
-        <div className="bg-white rounded-2xl border border-gray-200 p-6">
+        <div className="bg-white rounded-2xl border border-primary-200 p-6">
           {/* 模式切换 */}
-          <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg p-1">
+          <div className="flex gap-1 mb-6 bg-primary-50 rounded-lg p-1">
             <button
               type="button"
               onClick={() => { setMode('login'); setError(''); }}
               className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${
-                mode === 'login' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                mode === 'login' ? 'bg-white text-primary-700 shadow-sm' : 'text-primary-400 hover:text-primary-600'
               }`}
             >
               登录
@@ -181,7 +181,7 @@ export default function LoginPage() {
               type="button"
               onClick={() => { setMode('register'); setRegStep('email'); setError(''); }}
               className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${
-                mode === 'register' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                mode === 'register' ? 'bg-white text-primary-700 shadow-sm' : 'text-primary-400 hover:text-primary-600'
               }`}
             >
               注册
@@ -192,23 +192,23 @@ export default function LoginPage() {
           {mode === 'login' && (
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+                <label className="block text-sm font-medium text-primary-600 mb-1">邮箱</label>
                 <div className="relative">
-                  <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400" />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     placeholder="your@email.com"
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-gray-400 focus:outline-none text-sm"
+                    className="w-full pl-10 pr-4 py-2.5 bg-primary-50 rounded-xl border border-primary-200 focus:border-gray-400 focus:outline-none text-sm"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                <label className="block text-sm font-medium text-primary-600 mb-1">密码</label>
                 <div className="relative">
-                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400" />
                   <input
                     type="password"
                     value={password}
@@ -216,12 +216,12 @@ export default function LoginPage() {
                     required
                     minLength={6}
                     placeholder="至少 6 个字符"
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-gray-400 focus:outline-none text-sm"
+                    className="w-full pl-10 pr-4 py-2.5 bg-primary-50 rounded-xl border border-primary-200 focus:border-gray-400 focus:outline-none text-sm"
                   />
                 </div>
               </div>
               <div className="text-right">
-                <Link href="/forgot-password" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+                <Link href="/forgot-password" className="text-sm text-primary-400 hover:text-primary-800 transition-colors">
                   忘记密码？
                 </Link>
               </div>
@@ -229,7 +229,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-2.5 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-medium rounded-xl transition-colors text-sm"
+                className="w-full py-2.5 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-400 text-white font-medium rounded-xl transition-colors text-sm"
               >
                 {loading ? '处理中...' : '登录'}
               </button>
@@ -243,23 +243,23 @@ export default function LoginPage() {
               {regStep === 'email' && (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+                    <label className="block text-sm font-medium text-primary-600 mb-1">邮箱</label>
                     <div className="relative">
-                      <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400" />
                       <input
                         type="email"
                         value={regEmail}
                         onChange={(e) => setRegEmail(e.target.value)}
                         required
                         placeholder="your@email.com"
-                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-gray-400 focus:outline-none text-sm"
+                        className="w-full pl-10 pr-4 py-2.5 bg-primary-50 rounded-xl border border-primary-200 focus:border-gray-400 focus:outline-none text-sm"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">密码</label>
+                    <label className="block text-sm font-medium text-primary-600 mb-1">密码</label>
                     <div className="relative">
-                      <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400" />
                       <input
                         type="password"
                         value={regPassword}
@@ -267,22 +267,22 @@ export default function LoginPage() {
                         required
                         minLength={6}
                         placeholder="至少 6 个字符"
-                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-gray-400 focus:outline-none text-sm"
+                        className="w-full pl-10 pr-4 py-2.5 bg-primary-50 rounded-xl border border-primary-200 focus:border-gray-400 focus:outline-none text-sm"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      昵称 <span className="text-gray-400 font-normal">(可选)</span>
+                    <label className="block text-sm font-medium text-primary-600 mb-1">
+                      昵称 <span className="text-primary-300 font-normal">(可选)</span>
                     </label>
                     <div className="relative">
-                      <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-400" />
                       <input
                         type="text"
                         value={regNickname}
                         onChange={(e) => setRegNickname(e.target.value)}
                         placeholder="给自己起个名字"
-                        className="w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-gray-400 focus:outline-none text-sm"
+                        className="w-full pl-10 pr-4 py-2.5 bg-primary-50 rounded-xl border border-primary-200 focus:border-gray-400 focus:outline-none text-sm"
                       />
                     </div>
                   </div>
@@ -291,7 +291,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={handleSendCode}
                     disabled={sending || !regEmail || !regPassword}
-                    className="w-full py-2.5 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-medium rounded-xl transition-colors text-sm"
+                    className="w-full py-2.5 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-400 text-white font-medium rounded-xl transition-colors text-sm"
                   >
                     {sending ? '发送中...' : '发送验证码'}
                   </button>
@@ -301,23 +301,23 @@ export default function LoginPage() {
               {/* Step 2: 输入验证码 */}
               {regStep === 'code' && (
                 <form onSubmit={handleRegister} className="space-y-4">
-                  <div className="bg-gray-50 rounded-xl p-3 flex items-center gap-3">
-                    <Shield size={16} className="text-gray-400 flex-shrink-0" />
+                  <div className="bg-primary-50 rounded-xl p-3 flex items-center gap-3">
+                    <Shield size={16} className="text-primary-300 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-xs text-gray-500">验证码已发送至</div>
-                      <div className="text-sm font-medium text-gray-900 truncate">{regEmail}</div>
+                      <div className="text-xs text-primary-400">验证码已发送至</div>
+                      <div className="text-sm font-medium text-primary-800 truncate">{regEmail}</div>
                     </div>
                     <button
                       type="button"
                       onClick={resetRegister}
-                      className="text-xs text-gray-500 hover:text-gray-900"
+                      className="text-xs text-primary-400 hover:text-primary-800"
                     >
                       更换
                     </button>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">验证码</label>
+                    <label className="block text-sm font-medium text-primary-600 mb-1">验证码</label>
                     <input
                       ref={codeInputRef}
                       type="text"
@@ -326,19 +326,19 @@ export default function LoginPage() {
                       required
                       maxLength={6}
                       placeholder="6 位数字验证码"
-                      className="w-full px-4 py-2.5 bg-gray-50 rounded-xl border border-gray-200 focus:border-gray-400 focus:outline-none text-sm tracking-[0.3em] font-mono text-center"
+                      className="w-full px-4 py-2.5 bg-primary-50 rounded-xl border border-primary-200 focus:border-gray-400 focus:outline-none text-sm tracking-[0.3em] font-mono text-center"
                     />
                   </div>
 
                   <div className="text-center">
                     {cooldown > 0 ? (
-                      <span className="text-xs text-gray-400">{cooldown} 秒后可重新发送</span>
+                      <span className="text-xs text-primary-400">{cooldown} 秒后可重新发送</span>
                     ) : (
                       <button
                         type="button"
                         onClick={handleSendCode}
                         disabled={sending}
-                        className="text-xs text-gray-500 hover:text-gray-900"
+                        className="text-xs text-primary-400 hover:text-primary-800"
                       >
                         重新发送验证码
                       </button>
@@ -349,12 +349,12 @@ export default function LoginPage() {
                   <button
                     type="submit"
                     disabled={loading || regCode.length !== 6}
-                    className="w-full py-2.5 bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-medium rounded-xl transition-colors text-sm"
+                    className="w-full py-2.5 bg-primary-500 hover:bg-primary-600 disabled:bg-gray-400 text-white font-medium rounded-xl transition-colors text-sm"
                   >
                     {loading ? '注册中...' : '完成注册'}
                   </button>
 
-                  <p className="text-xs text-gray-400 text-center">
+                  <p className="text-xs text-primary-300 text-center">
                     提示：验证码已打印到后端控制台
                   </p>
                 </form>
@@ -368,11 +368,11 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleGuestMode}
-            className="text-sm text-gray-500 hover:text-gray-900 transition-colors"
+            className="text-sm text-primary-400 hover:text-primary-800 transition-colors"
           >
             先体验一下
           </button>
-          <p className="text-xs text-gray-400 mt-1">游客模式下数据仅保存在本地</p>
+          <p className="text-xs text-primary-300 mt-1">游客模式下数据仅保存在本地</p>
         </div>
       </div>
     </main>

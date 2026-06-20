@@ -1,4 +1,4 @@
-export default function TipsCard() {
+﻿export default function TipsCard() {
   const tips = [
     { icon: '📷', title: '拍照姿势', desc: '自然站立，双脚与肩同宽，正面拍摄' },
     { icon: '💡', title: '光线要求', desc: '选择光线均匀的环境，避免逆光' },

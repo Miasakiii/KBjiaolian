@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Suggestion } from '@/types/analysis';
 
@@ -82,7 +82,7 @@ export default function ExerciseDetail({ exercise, onClose }: ExerciseDetailProp
         </div>
 
         {/* 底部按钮 */}
-        <div className="sticky bottom-0 p-4 bg-gray-50 rounded-b-2xl border-t">
+        <div className="sticky bottom-0 p-4 bg-primary-50 rounded-b-2xl border-t">
           <button
             onClick={onClose}
             className="w-full py-3 bg-primary-500 hover:bg-primary-600 text-white font-medium rounded-xl transition-colors"

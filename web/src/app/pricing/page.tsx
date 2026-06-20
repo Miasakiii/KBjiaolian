@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -123,7 +123,7 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-24">
+    <div className="min-h-screen bg-primary-50 pb-24">
       {/* Header */}
       <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white pt-8 pb-16 px-5">
         <div className="max-w-lg mx-auto text-center">
@@ -132,7 +132,7 @@ export default function PricingPage() {
             <span>升级 Pro</span>
           </div>
           <h1 className="text-2xl font-bold mb-2">解锁全部 AI 能力</h1>
-          <p className="text-gray-400 text-sm">
+          <p className="text-primary-300 text-sm">
             线下私教 ¥300/节 — Pro 会员仅 ¥14/月
           </p>
         </div>
@@ -154,13 +154,13 @@ export default function PricingPage() {
               className={`rounded-2xl p-5 transition-all relative ${
                 config.highlight
                   ? 'bg-white border-2 border-gray-900 shadow-xl'
-                  : 'bg-white border border-gray-200'
+                  : 'bg-white border border-primary-200'
               }`}
             >
               {/* Badge */}
               {config.badge && (
                 <div className="absolute -top-3 right-5">
-                  <span className="bg-gray-900 text-white text-xs font-bold px-3 py-1 rounded-full">
+                  <span className="bg-primary-500 text-white text-xs font-bold px-3 py-1 rounded-full">
                     {config.badge}
                   </span>
                 </div>
@@ -168,18 +168,18 @@ export default function PricingPage() {
 
               {/* Title & Price */}
               <div className="flex items-baseline justify-between mb-1">
-                <h3 className="text-lg font-bold text-gray-900">{config.label}</h3>
+                <h3 className="text-lg font-bold text-primary-800">{config.label}</h3>
                 <div className="text-right">
-                  <span className="text-2xl font-bold text-gray-900">{config.price}</span>
+                  <span className="text-2xl font-bold text-primary-800">{config.price}</span>
                   {config.period && (
-                    <span className="text-sm text-gray-400">{config.period}</span>
+                    <span className="text-sm text-primary-300">{config.period}</span>
                   )}
                 </div>
               </div>
 
               {/* Per-month for yearly */}
               {planId === 'pro_yearly' && (
-                <div className="text-xs text-gray-400 mb-4">
+                <div className="text-xs text-primary-300 mb-4">
                   折合 ¥14/月，比月度省 ¥190.80
                 </div>
               )}
@@ -189,21 +189,21 @@ export default function PricingPage() {
               <ul className="space-y-2.5 mb-5">
                 {plan.features.map((feature, i) => (
                   <li key={i} className="flex items-center gap-2.5 text-sm">
-                    <span className={config.highlight ? 'text-gray-900' : 'text-gray-400'}>
+                    <span className={config.highlight ? 'text-primary-800' : 'text-primary-300'}>
                       {getFeatureIcon(feature)}
                     </span>
-                    <span className="text-gray-700">{feature}</span>
+                    <span className="text-primary-600">{feature}</span>
                   </li>
                 ))}
               </ul>
 
               {/* CTA */}
               {isCurrent ? (
-                <div className="py-3 text-center text-sm font-medium text-gray-400 bg-gray-50 rounded-xl">
+                <div className="py-3 text-center text-sm font-medium text-primary-300 bg-primary-50 rounded-xl">
                   当前方案
                 </div>
               ) : planId === 'free' ? (
-                <div className="py-3 text-center text-sm text-gray-400">
+                <div className="py-3 text-center text-sm text-primary-300">
                   已包含基础功能
                 </div>
               ) : (
@@ -213,8 +213,8 @@ export default function PricingPage() {
                   disabled={isLoading}
                   className={`w-full py-3.5 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2 ${
                     config.highlight
-                      ? 'bg-gray-900 text-white hover:bg-gray-800 active:scale-[0.98]'
-                      : 'bg-gray-100 text-gray-900 hover:bg-gray-200 active:scale-[0.98]'
+                      ? 'bg-primary-500 text-white hover:bg-primary-600 active:scale-[0.98]'
+                      : 'bg-primary-50 text-primary-800 hover:bg-primary-100 active:scale-[0.98]'
                   } disabled:opacity-50`}
                 >
                   {isLoading ? '处理中...' : config.cta}
@@ -228,22 +228,22 @@ export default function PricingPage() {
 
       {/* Value comparison */}
       <div className="px-5 mt-8 max-w-lg mx-auto">
-        <div className="bg-white rounded-2xl border border-gray-200 p-5">
-          <h3 className="font-bold text-gray-900 mb-4 text-sm">价值对比</h3>
+        <div className="bg-white rounded-2xl border border-primary-200 p-5">
+          <h3 className="font-bold text-primary-800 mb-4 text-sm">价值对比</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">线下私教课（1节）</span>
-              <span className="font-medium text-gray-400 line-through">¥300-500</span>
+              <span className="text-primary-400">线下私教课（1节）</span>
+              <span className="font-medium text-primary-300 line-through">¥300-500</span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500">健身房月卡</span>
-              <span className="font-medium text-gray-400 line-through">¥200-400</span>
+              <span className="text-primary-400">健身房月卡</span>
+              <span className="font-medium text-primary-300 line-through">¥200-400</span>
             </div>
-            <div className="border-t border-gray-100 pt-3 flex items-center justify-between">
-              <span className="text-gray-900 font-medium">KB教练 Pro 年度</span>
+            <div className="border-t border-primary-100 pt-3 flex items-center justify-between">
+              <span className="text-primary-800 font-medium">KB教练 Pro 年度</span>
               <div className="text-right">
-                <span className="text-xl font-bold text-gray-900">¥14</span>
-                <span className="text-sm text-gray-400">/月</span>
+                <span className="text-xl font-bold text-primary-800">¥14</span>
+                <span className="text-sm text-primary-300">/月</span>
               </div>
             </div>
           </div>
@@ -252,7 +252,7 @@ export default function PricingPage() {
 
       {/* FAQ */}
       <div className="px-5 mt-8 max-w-lg mx-auto">
-        <h3 className="font-bold text-gray-900 mb-4">常见问题</h3>
+        <h3 className="font-bold text-primary-800 mb-4">常见问题</h3>
         <div className="space-y-3">
           <FaqItem
             question="免费版有什么限制？"
@@ -279,17 +279,17 @@ export default function PricingPage() {
 function FaqItem({ question, answer }: { question: string; answer: string }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+    <div className="bg-white border border-primary-200 rounded-xl overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="w-full px-4 py-3.5 text-left text-sm font-medium flex justify-between items-center text-gray-900"
+        className="w-full px-4 py-3.5 text-left text-sm font-medium flex justify-between items-center text-primary-800"
       >
         <span>{question}</span>
-        <span className="text-gray-400 text-xs">{open ? '收起' : '展开'}</span>
+        <span className="text-primary-300 text-xs">{open ? '收起' : '展开'}</span>
       </button>
       {open && (
-        <div className="px-4 pb-3.5 text-sm text-gray-600 leading-relaxed">
+        <div className="px-4 pb-3.5 text-sm text-primary-500 leading-relaxed">
           {answer}
         </div>
       )}

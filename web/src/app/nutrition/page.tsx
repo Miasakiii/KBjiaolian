@@ -1,8 +1,9 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { Utensils } from 'lucide-react';
 import PhotoUpload from '@/components/PhotoUpload';
 import FoodResult from '@/components/FoodResult';
 import { NutritionAnalysis, NutritionRecord, mealTypeLabels } from '@/types/nutrition';
@@ -77,7 +78,7 @@ export default function NutritionPage() {
       <header className="text-center pt-12 pb-8">
         <div className="inline-flex items-center gap-3 mb-2">
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30">
-            <span className="text-2xl">🍎</span>
+            <span className="text-2xl"></span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-700 to-primary-500 bg-clip-text text-transparent">饮食记录</h1>
         </div>
@@ -132,7 +133,7 @@ export default function NutritionPage() {
 
             {/* 提示 */}
             <div className="bg-primary-50 rounded-2xl p-4">
-              <h3 className="font-medium text-primary-800 mb-2">📸 拍照提示</h3>
+              <h3 className="font-medium text-primary-800 mb-2"> 拍照提示</h3>
               <ul className="text-sm text-primary-600 space-y-1">
                 <li>• 尽量拍到所有食物</li>
                 <li>• 光线充足，避免阴影</li>
@@ -161,7 +162,7 @@ export default function NutritionPage() {
             ) : (
               <div className="h-full flex items-center justify-center bg-white/50 rounded-2xl border border-dashed border-primary-200 p-8">
                 <div className="text-center">
-                  <span className="text-4xl">🍽️</span>
+                  <Utensils size={48} className="text-primary-300 mx-auto" />
                   <p className="text-primary-500 mt-4">拍照或上传食物照片</p>
                   <p className="text-primary-400 text-sm mt-1">AI 将自动识别食物和营养成分</p>
                 </div>

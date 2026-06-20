@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { BarChart3, Dumbbell, Apple, Beef, TrendingUp, TrendingDown } from 'lucide-react';
@@ -15,9 +15,9 @@ interface StatCardProps {
 function StatCard({ title, value, subtitle, icon, trend, link }: StatCardProps) {
   return (
     <Link href={link} className="block">
-      <div className="bg-white rounded-2xl border border-gray-200 p-5 hover:shadow-sm transition-all">
+      <div className="bg-white rounded-2xl border border-primary-200 p-5 hover:shadow-sm transition-all">
         <div className="flex items-start justify-between mb-3">
-          <span className="text-gray-500">{icon}</span>
+          <span className="text-primary-400">{icon}</span>
           {trend !== undefined && trend !== 0 && (
             <span className={`text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 ${
               trend > 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
@@ -27,9 +27,9 @@ function StatCard({ title, value, subtitle, icon, trend, link }: StatCardProps) 
             </span>
           )}
         </div>
-        <div className="text-2xl font-bold text-gray-900 mb-1">{value}</div>
-        <div className="text-sm text-gray-500">{title}</div>
-        {subtitle && <div className="text-xs text-gray-400 mt-1">{subtitle}</div>}
+        <div className="text-2xl font-bold text-primary-800 mb-1">{value}</div>
+        <div className="text-sm text-primary-400">{title}</div>
+        {subtitle && <div className="text-xs text-primary-300 mt-1">{subtitle}</div>}
       </div>
     </Link>
   );

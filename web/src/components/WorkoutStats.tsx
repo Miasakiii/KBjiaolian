@@ -1,6 +1,7 @@
-'use client';
+﻿'use client';
 
 import { WorkoutStats as StatsType } from '@/types/workout';
+import { Calendar, BarChart3, Flame, Clock } from 'lucide-react';
 
 interface WorkoutStatsProps {
   stats: StatsType;
@@ -12,21 +13,21 @@ export default function WorkoutStats({ stats }: WorkoutStatsProps) {
       label: '本周训练',
       value: stats.thisWeekWorkouts,
       unit: '次',
-      icon: '📅',
+      icon: <Calendar size={16} />,
       color: 'bg-blue-100 text-blue-700',
     },
     {
       label: '本月训练',
       value: stats.thisMonthWorkouts,
       unit: '次',
-      icon: '📊',
+      icon: <BarChart3 size={16} />,
       color: 'bg-green-100 text-green-700',
     },
     {
       label: '连续天数',
       value: stats.currentStreak,
       unit: '天',
-      icon: '🔥',
+      icon: <Flame size={16} />,
       color: 'bg-orange-100 text-orange-700',
     },
     {
@@ -35,7 +36,7 @@ export default function WorkoutStats({ stats }: WorkoutStatsProps) {
         ? Math.round(stats.totalDuration / 60)
         : stats.totalDuration,
       unit: stats.totalDuration >= 60 ? '小时' : '分钟',
-      icon: '⏱️',
+      icon: <Clock size={16} />,
       color: 'bg-purple-100 text-purple-700',
     },
   ];

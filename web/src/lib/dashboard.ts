@@ -110,7 +110,7 @@ function generateRecentActivities(analysisRecords: any[], workoutRecords: any[])
       type: 'analysis',
       title: `体态分析 - ${record.result.score}分`,
       time: record.timestamp,
-      icon: '📸',
+      icon: '',
     });
   });
 
@@ -121,7 +121,7 @@ function generateRecentActivities(analysisRecords: any[], workoutRecords: any[])
       type: 'workout',
       title: `${record.dayName} - ${record.duration}分钟`,
       time: record.createdAt,
-      icon: '💪',
+      icon: '',
     });
   });
 
@@ -139,7 +139,7 @@ function generateTodayTasks(hasScore: boolean, weekWorkouts: number, hasNutritio
     tasks.push({
       id: 'analysis',
       title: '完成首次体态分析',
-      icon: '📸',
+      icon: '',
       completed: false,
       link: '/analyze',
     });
@@ -150,7 +150,7 @@ function generateTodayTasks(hasScore: boolean, weekWorkouts: number, hasNutritio
     tasks.push({
       id: 'workout',
       title: '今日训练',
-      icon: '🏋️',
+      icon: '',
       completed: false,
       link: '/workout',
     });
@@ -161,7 +161,7 @@ function generateTodayTasks(hasScore: boolean, weekWorkouts: number, hasNutritio
     tasks.push({
       id: 'nutrition',
       title: '记录今日饮食',
-      icon: '🍎',
+      icon: '',
       completed: false,
       link: '/nutrition',
     });
@@ -172,7 +172,7 @@ function generateTodayTasks(hasScore: boolean, weekWorkouts: number, hasNutritio
     tasks.push({
       id: 'complete',
       title: '今日任务已完成！',
-      icon: '✅',
+      icon: 'Check',
       completed: true,
       link: '/',
     });

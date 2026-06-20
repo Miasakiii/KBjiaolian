@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -51,7 +51,7 @@ export default function WorkoutsPage() {
       <header className="text-center pt-12 pb-8">
         <div className="inline-flex items-center gap-3 mb-2">
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30">
-            <span className="text-2xl">📊</span>
+            <span className="text-2xl"></span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-700 to-primary-500 bg-clip-text text-transparent">训练记录</h1>
         </div>
@@ -128,12 +128,12 @@ export default function WorkoutsPage() {
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">确认清空</h3>
-            <p className="text-gray-600 mb-6">确定要清空所有训练记录吗？此操作无法撤销。</p>
+            <h3 className="text-lg font-semibold text-primary-700 mb-2">确认清空</h3>
+            <p className="text-primary-500 mb-6">确定要清空所有训练记录吗？此操作无法撤销。</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="flex-1 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                className="flex-1 py-2.5 text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-xl transition-colors"
               >
                 取消
               </button>

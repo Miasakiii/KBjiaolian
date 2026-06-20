@@ -1,6 +1,7 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { TrainingPlan, goalLabels, experienceLabels, equipmentLabels } from '@/types/plan';
 import DaySchedule from './DaySchedule';
 import NutritionCard from './NutritionCard';
@@ -71,7 +72,7 @@ export default function PlanResult({ plan, onSave, onBack, saved }: PlanResultPr
       {plan.notes && (
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-200/50 p-6">
           <h3 className="font-semibold text-primary-800 mb-3 flex items-center gap-2">
-            <span>⚠️</span>
+            <AlertTriangle size={14} className="text-yellow-500" />
             注意事项
           </h3>
           <p className="text-sm text-primary-700 leading-relaxed">{plan.notes}</p>

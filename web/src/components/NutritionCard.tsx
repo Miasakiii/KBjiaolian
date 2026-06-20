@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { Nutrition } from '@/types/plan';
 
@@ -16,7 +16,7 @@ export default function NutritionCard({ nutrition }: NutritionCardProps) {
   return (
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-200/50 p-6">
       <h3 className="font-semibold text-primary-800 mb-4 flex items-center gap-2">
-        <span>🍎</span>
+        <span></span>
         营养建议
       </h3>
 

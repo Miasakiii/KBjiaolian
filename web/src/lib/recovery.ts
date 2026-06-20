@@ -33,13 +33,13 @@ export const muscleLabels: Record<MuscleGroup, string> = {
 };
 
 export const muscleEmojis: Record<MuscleGroup, string> = {
-  chest: '💪',
-  back: '🔙',
-  shoulders: '🏋️',
-  arms: '💪',
-  legs: '🦵',
-  core: '🎯',
-  glutes: '🍑',
+  chest: 'Dumbbell',
+  back: 'ArrowLeftCircle',
+  shoulders: 'Dumbbell',
+  arms: 'Dumbbell',
+  legs: 'Footprints',
+  core: 'Target',
+  glutes: 'Dumbbell',
 };
 
 /** 基础恢复时间（小时） */

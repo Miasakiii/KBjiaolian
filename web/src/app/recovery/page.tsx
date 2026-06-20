@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -16,6 +16,8 @@ import {
   getHeatmapColor,
   formatHours,
 } from '@/lib/recovery';
+import { Calendar } from 'lucide-react';
+import { DynamicIcon } from '@/lib/iconMap';
 
 export default function RecoveryPage() {
   const [records, setRecords] = useState<WorkoutRecord[]>([]);
@@ -70,7 +72,7 @@ export default function RecoveryPage() {
       <header className="text-center pt-12 pb-6">
         <div className="inline-flex items-center gap-3 mb-2">
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30">
-            <span className="text-2xl">📊</span>
+            <span className="text-2xl"></span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-700 to-primary-500 bg-clip-text text-transparent">
             恢复追踪
@@ -96,7 +98,7 @@ export default function RecoveryPage() {
           /* 空状态 */
           <div className="text-center py-16">
             <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-4xl">📊</span>
+              <span className="text-4xl"></span>
             </div>
             <h2 className="text-xl font-semibold text-primary-800 mb-2">暂无训练记录</h2>
             <p className="text-primary-500 mb-6">完成训练后即可查看肌肉恢复状态</p>
@@ -111,8 +113,8 @@ export default function RecoveryPage() {
           <div className="space-y-8">
             {/* 训练频率热力图 */}
             <section className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-200/50 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <span>📅</span> 最近 4 周训练频率
+              <h2 className="text-lg font-semibold text-primary-800 mb-4 flex items-center gap-2">
+                <Calendar size={18} className="text-primary-600" /> 最近 4 周训练频率
               </h2>
 
               {/* 热力图 */}
@@ -121,7 +123,7 @@ export default function RecoveryPage() {
                 {dayLabels.map((label) => (
                   <div
                     key={label}
-                    className="text-center text-xs text-gray-500 font-medium pb-1"
+                    className="text-center text-xs text-primary-400 font-medium pb-1"
                   >
                     {label}
                   </div>
@@ -133,7 +135,7 @@ export default function RecoveryPage() {
                     key={day.date}
                     className={`aspect-square rounded-md flex items-center justify-center text-xs font-medium ${
                       getHeatmapColor(day.count)
-                    } ${day.count > 0 ? 'text-white' : 'text-gray-400'}`}
+                    } ${day.count > 0 ? 'text-white' : 'text-primary-300'}`}
                     title={`${day.date}: ${day.count} 次训练`}
                   >
                     {day.count > 0 ? day.count : ''}
@@ -142,9 +144,9 @@ export default function RecoveryPage() {
               </div>
 
               {/* 图例 */}
-              <div className="flex items-center justify-end gap-1.5 mt-3 text-xs text-gray-500">
+              <div className="flex items-center justify-end gap-1.5 mt-3 text-xs text-primary-400">
                 <span>少</span>
-                <div className="w-4 h-4 rounded-sm bg-gray-100" />
+                <div className="w-4 h-4 rounded-sm bg-primary-50" />
                 <div className="w-4 h-4 rounded-sm bg-green-200" />
                 <div className="w-4 h-4 rounded-sm bg-green-400" />
                 <div className="w-4 h-4 rounded-sm bg-green-600" />
@@ -154,8 +156,8 @@ export default function RecoveryPage() {
 
             {/* 肌肉恢复状态总览 */}
             <section className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-200/50 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <span>💪</span> 肌肉恢复状态
+              <h2 className="text-lg font-semibold text-primary-800 mb-4 flex items-center gap-2">
+                <span></span> 肌肉恢复状态
               </h2>
 
               <div className="space-y-3">
@@ -166,21 +168,21 @@ export default function RecoveryPage() {
                   >
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{muscleEmojis[item.muscle]}</span>
-                        <span className="font-medium text-gray-900">
+                        <DynamicIcon name={muscleEmojis[item.muscle]} size={18} className="text-primary-600" />
+                        <span className="font-medium text-primary-800">
                           {muscleLabels[item.muscle]}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-primary-400">
                           {getRecoveryLabel(item.recovery)}
                         </span>
                       </div>
-                      <span className="text-sm font-bold text-gray-700">
+                      <span className="text-sm font-bold text-primary-600">
                         {item.recovery}%
                       </span>
                     </div>
 
                     {/* 进度条 */}
-                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="w-full h-2 bg-primary-100 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${getRecoveryColor(item.recovery)}`}
                         style={{ width: `${item.recovery}%` }}
@@ -188,7 +190,7 @@ export default function RecoveryPage() {
                     </div>
 
                     {/* 详细信息 */}
-                    <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
+                    <div className="flex items-center justify-between mt-2 text-xs text-primary-400">
                       <span>
                         {item.lastTrainedAt
                           ? `上次训练: ${formatHours(item.hoursSinceTraining)}`
@@ -204,7 +206,7 @@ export default function RecoveryPage() {
             {/* 训练建议 */}
             {recentMuscles.length > 0 && (
               <section className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-200/50 p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <h2 className="text-lg font-semibold text-primary-800 mb-4 flex items-center gap-2">
                   <span>💡</span> 训练建议
                 </h2>
                 <div className="space-y-3">
@@ -248,7 +250,7 @@ export default function RecoveryPage() {
               </Link>
               <Link
                 href="/plan"
-                className="flex-1 py-3 bg-white hover:bg-gray-50 text-primary-600 font-medium rounded-xl border border-primary-200 transition-colors text-center"
+                className="flex-1 py-3 bg-white hover:bg-primary-50 text-primary-600 font-medium rounded-xl border border-primary-200 transition-colors text-center"
               >
                 生成方案
               </Link>

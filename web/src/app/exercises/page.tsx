@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
@@ -17,6 +17,8 @@ import {
   searchExercises,
   getExercisesByMuscleGroup,
 } from '@/data/exercises';
+import { Search, BookOpen } from 'lucide-react';
+import { DynamicIcon } from '@/lib/iconMap';
 
 export default function ExercisesPage() {
   const [search, setSearch] = useState('');
@@ -64,7 +66,7 @@ export default function ExercisesPage() {
       <header className="text-center pt-12 pb-6">
         <div className="inline-flex items-center gap-3 mb-2">
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30">
-            <span className="text-2xl">📚</span>
+            <BookOpen size={24} className="text-white" />
           </div>
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-700 to-primary-500 bg-clip-text text-transparent">
             训练动作库
@@ -84,7 +86,7 @@ export default function ExercisesPage() {
 
         {/* 搜索栏 */}
         <div className="relative mb-4">
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">🔍</span>
+          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-300" />
           <input
             type="text"
             placeholder="搜索动作名称..."
@@ -95,7 +97,7 @@ export default function ExercisesPage() {
           {search && (
             <button
               onClick={() => setSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-300 hover:text-primary-500"
               type="button"
             >
               ✕
@@ -112,7 +114,7 @@ export default function ExercisesPage() {
               className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 !selectedMuscle
                   ? 'bg-primary-500 text-white'
-                  : 'bg-white/80 text-gray-600 hover:bg-primary-100'
+                  : 'bg-white/80 text-primary-500 hover:bg-primary-100'
               }`}
               type="button"
             >
@@ -122,14 +124,15 @@ export default function ExercisesPage() {
               <button
                 key={mg}
                 onClick={() => setSelectedMuscle(selectedMuscle === mg ? '' : mg)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1 ${
                   selectedMuscle === mg
                     ? 'bg-primary-500 text-white'
-                    : 'bg-white/80 text-gray-600 hover:bg-primary-100'
+                    : 'bg-white/80 text-primary-500 hover:bg-primary-100'
                 }`}
                 type="button"
               >
-                {muscleGroupEmojis[mg]} {muscleGroupLabels[mg]}
+                <DynamicIcon name={muscleGroupEmojis[mg]} size={14} />
+                {muscleGroupLabels[mg]}
               </button>
             ))}
           </div>
@@ -168,7 +171,7 @@ export default function ExercisesPage() {
                 className={`px-2.5 py-1.5 rounded-lg text-sm ${
                   viewMode === 'group'
                     ? 'bg-primary-500 text-white'
-                    : 'bg-white/80 text-gray-600'
+                    : 'bg-white/80 text-primary-500'
                 }`}
                 type="button"
               >
@@ -179,7 +182,7 @@ export default function ExercisesPage() {
                 className={`px-2.5 py-1.5 rounded-lg text-sm ${
                   viewMode === 'grid'
                     ? 'bg-primary-500 text-white'
-                    : 'bg-white/80 text-gray-600'
+                    : 'bg-white/80 text-primary-500'
                 }`}
                 type="button"
               >
@@ -192,7 +195,7 @@ export default function ExercisesPage() {
         {/* 清除筛选 */}
         {hasFilters && (
           <div className="flex items-center justify-between mb-4">
-            <p className="text-sm text-gray-500">找到 {filtered.length} 个动作</p>
+            <p className="text-sm text-primary-400">找到 {filtered.length} 个动作</p>
             <button
               onClick={clearFilters}
               className="text-sm text-primary-600 hover:text-primary-700"
@@ -206,9 +209,9 @@ export default function ExercisesPage() {
         {/* 动作列表 */}
         {filtered.length === 0 ? (
           <div className="text-center py-16">
-            <div className="text-5xl mb-4">🔍</div>
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">未找到匹配的动作</h3>
-            <p className="text-gray-500 mb-4">试试其他搜索词或筛选条件</p>
+            <Search size={48} className="text-primary-300 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-primary-700 mb-2">未找到匹配的动作</h3>
+            <p className="text-primary-400 mb-4">试试其他搜索词或筛选条件</p>
             <button
               onClick={clearFilters}
               className="px-4 py-2 bg-primary-500 text-white rounded-lg text-sm"
@@ -222,10 +225,10 @@ export default function ExercisesPage() {
           <div className="space-y-6">
             {Array.from(grouped.entries()).map(([mg, exs]) => (
               <div key={mg}>
-                <h2 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
-                  <span>{muscleGroupEmojis[mg]}</span>
+                <h2 className="text-lg font-semibold text-primary-700 mb-3 flex items-center gap-2">
+                  <DynamicIcon name={muscleGroupEmojis[mg]} size={18} />
                   <span>{muscleGroupLabels[mg]}</span>
-                  <span className="text-sm font-normal text-gray-500">({exs.length})</span>
+                  <span className="text-sm font-normal text-primary-400">({exs.length})</span>
                 </h2>
                 <div className="space-y-3">
                   {exs.map((ex) => (

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -46,7 +46,7 @@ export default function ExportPage() {
       <header className="text-center pt-12 pb-8">
         <div className="inline-flex items-center gap-3 mb-2">
           <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl flex items-center justify-center shadow-lg shadow-primary-500/30">
-            <span className="text-2xl">📤</span>
+            <span className="text-2xl"></span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-700 to-primary-500 bg-clip-text text-transparent">数据导出</h1>
         </div>
@@ -115,7 +115,7 @@ export default function ExportPage() {
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-200/50 p-6">
             <div className="flex items-start gap-4">
               <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <span className="text-2xl">📊</span>
+                <span className="text-2xl"></span>
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-primary-800 mb-1">CSV 格式</h3>

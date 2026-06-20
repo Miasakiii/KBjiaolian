@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
@@ -177,10 +177,10 @@ export default function WorkoutPage() {
   // 训练中
   if (isStarted && exercises.length === 0) {
     return (
-      <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4 px-6 text-center">
-        <div className="text-gray-700 font-medium">该训练日没有动作数据</div>
-        <p className="text-sm text-gray-500">请重新生成训练方案后再开始训练</p>
-        <Link href="/plans" className="mt-2 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm">
+      <main className="min-h-screen bg-primary-50 flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <div className="text-primary-600 font-medium">该训练日没有动作数据</div>
+        <p className="text-sm text-primary-400">请重新生成训练方案后再开始训练</p>
+        <Link href="/plans" className="mt-2 px-4 py-2 bg-primary-500 text-white rounded-lg text-sm">
           返回方案列表
         </Link>
       </main>

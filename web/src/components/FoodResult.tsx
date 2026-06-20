@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { NutritionAnalysis, NutritionGoals } from '@/types/nutrition';
 
@@ -78,7 +78,7 @@ export default function FoodResult({ analysis, goals, onSave, saved }: FoodResul
                     {macro.value}{macro.unit} / {macro.goal}{macro.unit}
                   </span>
                 </div>
-                <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                <div className="w-full h-2 bg-primary-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full ${getProgressColor(percentage)} rounded-full transition-all`}
                     style={{ width: `${percentage}%` }}

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { AnalysisResult } from '@/types/analysis';
@@ -79,7 +79,7 @@ export default function ResultPanel({ result, isAnalyzing, imagePreview }: Resul
     return (
       <div className="h-full flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-200/50 p-8 text-center shadow-xl shadow-primary-500/5">
         <div className="w-20 h-20 bg-gradient-to-br from-primary-100 to-primary-200 rounded-2xl flex items-center justify-center mb-4">
-          <span className="text-4xl">📊</span>
+          <span className="text-4xl"></span>
         </div>
         <p className="text-primary-800 font-semibold text-lg">等待上传照片</p>
         <p className="text-primary-500 text-sm mt-2">上传后 AI 将自动分析体态</p>

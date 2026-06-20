@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { Camera, Dumbbell, Apple, Bot } from 'lucide-react';
@@ -47,12 +47,12 @@ export default function QuickActions() {
     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
       {actions.map((action) => (
         <Link key={action.link} href={action.link} className="block group">
-          <div className="bg-white rounded-2xl border border-gray-200 p-5 hover:shadow-sm transition-all text-center">
+          <div className="bg-white rounded-2xl border border-primary-200 p-5 hover:shadow-sm transition-all text-center">
             <div className={`w-12 h-12 ${action.color} rounded-xl flex items-center justify-center mx-auto mb-3 text-white group-hover:scale-105 transition-transform`}>
               {action.icon}
             </div>
-            <div className="font-semibold text-gray-900 mb-0.5 text-sm">{action.label}</div>
-            <div className="text-xs text-gray-400">{action.description}</div>
+            <div className="font-semibold text-primary-800 mb-0.5 text-sm">{action.label}</div>
+            <div className="text-xs text-primary-300">{action.description}</div>
           </div>
         </Link>
       ))}

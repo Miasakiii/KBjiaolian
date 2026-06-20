@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import { RadarData } from '@/types/analysis';
@@ -229,7 +229,7 @@ export default function RadarChart({ data: rawData, size = 240 }: RadarChartProp
           return (
             <div key={l.key} className="flex items-center gap-1">
               <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
-              <span className="text-gray-600 truncate">{l.label}</span>
+              <span className="text-primary-500 truncate">{l.label}</span>
               <span className="font-semibold" style={{ color }}>{value}</span>
             </div>
           );
@@ -237,7 +237,7 @@ export default function RadarChart({ data: rawData, size = 240 }: RadarChartProp
       </div>
 
       {/* 图例说明 */}
-      <div className="flex gap-3 mt-2 text-xs text-gray-400">
+      <div className="flex gap-3 mt-2 text-xs text-primary-300">
         <span>🟢 正常</span>
         <span>🟡 轻微</span>
         <span>🟠 中度</span>

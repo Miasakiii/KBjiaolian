@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -43,7 +43,7 @@ export default function TodayNutrition() {
     <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-primary-200/50 p-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="font-semibold text-primary-800 flex items-center gap-2">
-          <span>🍎</span>
+          <span></span>
           今日营养
         </h3>
         <Link

@@ -1,7 +1,8 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
 import { Task } from '@/lib/dashboard';
+import { DynamicIcon } from '@/lib/iconMap';
 
 interface TodayTasksProps {
   tasks: Task[];
@@ -26,7 +27,7 @@ export default function TodayTasks({ tasks }: TodayTasksProps) {
                 : 'bg-primary-50/50 border border-primary-100 hover:bg-primary-100'
             }`}
           >
-            <span className="text-xl">{task.icon}</span>
+            <span className="text-xl"><DynamicIcon name={task.icon} size={20} /></span>
             <span className={`flex-1 text-sm font-medium ${
               task.completed ? 'text-green-700' : 'text-primary-800'
             }`}>

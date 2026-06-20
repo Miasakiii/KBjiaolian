@@ -1,8 +1,10 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { Utensils } from 'lucide-react';
 import { NutritionRecord, mealTypeLabels, mealTypeIcons } from '@/types/nutrition';
+import { DynamicIcon } from '@/lib/iconMap';
 import { getAllNutritionRecords, deleteNutritionRecord, clearAllNutritionRecords } from '@/lib/nutritionStorage';
 
 export default function NutritionHistoryPage() {
@@ -73,7 +75,7 @@ export default function NutritionHistoryPage() {
         {records.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-4xl">🍽️</span>
+              <Utensils size={48} className="text-primary-300 mx-auto" />
             </div>
             <h2 className="text-xl font-semibold text-primary-800 mb-2">暂无饮食记录</h2>
             <p className="text-primary-500 mb-6">记录一次饮食后，会自动保存到这里</p>
@@ -109,7 +111,7 @@ export default function NutritionHistoryPage() {
                       >
                         <div className="flex gap-4">
                           {/* 缩略图 */}
-                          <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
+                          <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-primary-50">
                             <img
                               src={record.imagePreview}
                               alt="食物照片"
@@ -122,7 +124,7 @@ export default function NutritionHistoryPage() {
                             <div className="flex items-start justify-between">
                               <div>
                                 <span className="text-lg mr-2">
-                                  {mealTypeIcons[record.mealType]}
+                                  <DynamicIcon name={mealTypeIcons[record.mealType]} size={18} />
                                 </span>
                                 <span className="font-medium text-primary-800">
                                   {mealTypeLabels[record.mealType]}
@@ -178,12 +180,12 @@ export default function NutritionHistoryPage() {
       {showConfirm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">确认清空</h3>
-            <p className="text-gray-600 mb-6">确定要清空所有饮食记录吗？此操作无法撤销。</p>
+            <h3 className="text-lg font-semibold text-primary-700 mb-2">确认清空</h3>
+            <p className="text-primary-500 mb-6">确定要清空所有饮食记录吗？此操作无法撤销。</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowConfirm(false)}
-                className="flex-1 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors"
+                className="flex-1 py-2.5 text-primary-600 bg-primary-50 hover:bg-primary-100 rounded-xl transition-colors"
               >
                 取消
               </button>

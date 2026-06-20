@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useEffect, useRef } from 'react';
 import { useServiceWorker } from '@/hooks/useServiceWorker';
@@ -33,7 +33,7 @@ export default function UpdatePrompt() {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:w-80">
-      <div className="bg-gray-800 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3">
+      <div className="bg-primary-600 text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-3">
         <span className="text-lg">📡</span>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium">离线模式</p>

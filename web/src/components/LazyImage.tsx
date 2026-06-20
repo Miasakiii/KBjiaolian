@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useRef, useEffect, ImgHTMLAttributes } from 'react';
 
@@ -64,7 +64,7 @@ export default function LazyImage({
     <div className="relative overflow-hidden" ref={imgRef}>
       {/* Placeholder */}
       {!isLoaded && (
-        <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
+        <div className="absolute inset-0 bg-primary-50 animate-pulse flex items-center justify-center">
           {placeholder || (
             <svg
               className="w-10 h-10 text-gray-300"

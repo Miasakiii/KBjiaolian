@@ -1,35 +1,36 @@
-'use client';
+﻿'use client';
 
 import Link from 'next/link';
+import { Camera, Dumbbell, Apple, Bot, BarChart3, Download, Trash2 } from 'lucide-react';
 
 const features = [
   {
-    icon: '📸',
+    icon: <Camera size={24} />,
     title: 'AI 体态分析',
     description: '拍照即可获得专业体态评估，识别圆肩、头前伸、骨盆前倾等问题',
   },
   {
-    icon: '🏋️',
+    icon: <Dumbbell size={24} />,
     title: '个性化训练方案',
     description: '根据体态分析结果，AI 生成针对性训练计划',
   },
   {
-    icon: '🍎',
+    icon: <Apple size={24} />,
     title: '饮食识别',
     description: '拍照识别食物，自动计算热量和营养成分',
   },
   {
-    icon: '🤖',
+    icon: <Bot size={24} />,
     title: 'AI 教练',
     description: '随时咨询健身、营养、体态问题，获得专业建议',
   },
   {
-    icon: '📊',
+    icon: <BarChart3 size={24} />,
     title: '进度追踪',
     description: '可视化数据图表，直观了解体态变化趋势',
   },
   {
-    icon: '📤',
+    icon: <Download size={24} />,
     title: '数据导出',
     description: '支持 JSON/CSV 格式导出，数据完全由你掌控',
   },
@@ -48,7 +49,7 @@ export default function AboutPage() {
     <main className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-100">
       <header className="text-center pt-16 pb-12">
         <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-primary-700 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg shadow-primary-500/30">
-          <span className="text-4xl">💪</span>
+          <Dumbbell size={32} className="text-white" />
         </div>
         <h1 className="text-4xl font-bold text-primary-800 mb-3">KB教练</h1>
         <p className="text-xl text-primary-600">AI 驱动的健身康复师</p>
@@ -118,14 +119,14 @@ export default function AboutPage() {
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-3xl">📤</span>
+                  <span className="text-3xl"></span>
                 </div>
                 <h3 className="font-semibold text-primary-800 mb-2">自由导出</h3>
                 <p className="text-sm text-primary-600">支持 JSON/CSV 格式导出，数据完全由你掌控</p>
               </div>
               <div className="text-center">
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-3xl">🗑️</span>
+                  <Trash2 size={32} className="text-primary-600" />
                 </div>
                 <h3 className="font-semibold text-primary-800 mb-2">随时删除</h3>
                 <p className="text-sm text-primary-600">可以随时清空所有数据，保护个人隐私</p>
