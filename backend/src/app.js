@@ -6,7 +6,7 @@ import { generatePlan } from './plan.js';
 import { extractExercisePerformance, calculateProgression, buildProgressionPrompt, getProgressionSummary } from './progression.js';
 import { analyzeFood } from './nutrition.js';
 import { sendMessage, sendMessageStream } from './chat.js';
-import { register, login, getProfile, forgotPassword, resetPassword, sendVerificationCode, authMiddleware } from './auth.js';
+import { register, login, wechatLogin, getProfile, forgotPassword, resetPassword, sendVerificationCode, authMiddleware } from './auth.js';
 import {
   saveAnalysisRecord,
   getAnalysisRecords,
@@ -103,7 +103,7 @@ export function createApp() {
     standardHeaders: true,
     legacyHeaders: false,
     // 使用 userId 限流，避免 IPv6 警告
-    validate: { keyGeneratorIpFallback: false },
+    validate: { ipKeyGeneratorFallback: false },
     keyGenerator: (req) => req.userId || req.ip,
   });
 
@@ -118,6 +118,7 @@ export function createApp() {
   app.post('/api/auth/register', authLimiter, register);
   app.post('/api/auth/login', authLimiter, login);
   app.post('/api/auth/send-code', authLimiter, sendVerificationCode);
+  app.post('/api/auth/wechat-login', authLimiter, wechatLogin);
 
   // === 需要认证的端点 ===
 
