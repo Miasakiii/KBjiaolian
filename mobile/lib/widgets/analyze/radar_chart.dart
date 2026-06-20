@@ -8,28 +8,62 @@ class RadarChartWidget extends StatelessWidget {
 
   const RadarChartWidget({super.key, required this.data});
 
+  static const _labels = [
+    '头前伸',
+    '圆肩',
+    '骨盆前倾',
+    '膝超伸',
+    '脊柱侧弯',
+    '高低肩',
+    'XO型腿',
+    '核心稳定',
+  ];
+
+  static const _colors = [
+    Colors.orange,
+    Colors.red,
+    Colors.purple,
+    Colors.blue,
+    Colors.teal,
+    Colors.indigo,
+    Colors.brown,
+    Colors.green,
+  ];
+
+  List<int> get _values => [
+        data.headForward,
+        data.roundShoulder,
+        data.pelvicTilt,
+        data.kneeExtension,
+        data.spinalCurvature,
+        data.shoulderHeight,
+        data.legAlignment,
+        data.coreStability,
+      ];
+
   @override
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             Text(
               '体态问题分析',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+                    fontWeight: FontWeight.bold,
+                  ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             SizedBox(
-              height: 200,
+              height: 280,
+              width: 280,
               child: CustomPaint(
-                size: const Size(200, 200),
+                size: const Size(280, 280),
                 painter: _RadarChartPainter(data: data),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             _buildLegend(),
           ],
         ),
@@ -38,126 +72,115 @@ class RadarChartWidget extends StatelessWidget {
   }
 
   Widget _buildLegend() {
-    final items = [
-      _LegendItem('头前伸', data.headForward, Colors.orange),
-      _LegendItem('圆肩', data.roundShoulder, Colors.red),
-      _LegendItem('骨盆前倾', data.pelvicTilt, Colors.purple),
-      _LegendItem('膝超伸', data.kneeExtension, Colors.blue),
-    ];
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: items.map((item) {
-        return Column(
+    return Wrap(
+      spacing: 12,
+      runSpacing: 8,
+      alignment: WrapAlignment.center,
+      children: List.generate(_labels.length, (i) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              '${item.value}%',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: item.color,
+            Container(
+              width: 10,
+              height: 10,
+              decoration: BoxDecoration(
+                color: _colors[i],
+                shape: BoxShape.circle,
               ),
             ),
+            const SizedBox(width: 4),
             Text(
-              item.label,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+              '${_labels[i]} ${_values[i]}%',
+              style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
             ),
           ],
         );
-      }).toList(),
+      }),
     );
   }
-}
-
-class _LegendItem {
-  final String label;
-  final int value;
-  final Color color;
-
-  _LegendItem(this.label, this.value, this.color);
 }
 
 class _RadarChartPainter extends CustomPainter {
   final RadarData data;
 
+  static const int _axisCount = 8;
+
   _RadarChartPainter({required this.data});
+
+  List<int> get _values => [
+        data.headForward,
+        data.roundShoulder,
+        data.pelvicTilt,
+        data.kneeExtension,
+        data.spinalCurvature,
+        data.shoulderHeight,
+        data.legAlignment,
+        data.coreStability,
+      ];
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-    final radius = min(size.width, size.height) / 2 - 20;
+    final radius = min(size.width, size.height) / 2 - 30;
 
-    // 画背景网格
     _drawGrid(canvas, center, radius);
-
-    // 画数据区域
     _drawData(canvas, center, radius);
-
-    // 画数据点
     _drawPoints(canvas, center, radius);
   }
 
+  double _axisAngle(int index) => -pi / 2 + 2 * pi * index / _axisCount;
+
   void _drawGrid(Canvas canvas, Offset center, double radius) {
-    final paint = Paint()
+    final gridPaint = Paint()
       ..color = Colors.grey.shade200
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1;
 
-    // 画同心圆
-    for (int i = 1; i <= 4; i++) {
-      final r = radius * i / 4;
-      canvas.drawCircle(center, r, paint);
+    for (int ring = 1; ring <= 4; ring++) {
+      final r = radius * ring / 4;
+      final path = Path();
+      for (int i = 0; i < _axisCount; i++) {
+        final angle = _axisAngle(i);
+        final point = Offset(center.dx + r * cos(angle), center.dy + r * sin(angle));
+        if (i == 0) {
+          path.moveTo(point.dx, point.dy);
+        } else {
+          path.lineTo(point.dx, point.dy);
+        }
+      }
+      path.close();
+      canvas.drawPath(path, gridPaint);
     }
 
-    // 画轴线
-    final angles = [-pi / 2, 0, pi / 2, pi];
-    for (final angle in angles) {
+    for (int i = 0; i < _axisCount; i++) {
+      final angle = _axisAngle(i);
       final endPoint = Offset(
         center.dx + radius * cos(angle),
         center.dy + radius * sin(angle),
       );
-      canvas.drawLine(center, endPoint, paint);
+      canvas.drawLine(center, endPoint, gridPaint);
     }
   }
 
   void _drawData(Canvas canvas, Offset center, double radius) {
-    final values = [
-      data.headForward / 100,
-      data.roundShoulder / 100,
-      data.pelvicTilt / 100,
-      data.kneeExtension / 100,
-    ];
-
-    final angles = [-pi / 2, 0, pi / 2, pi];
     final path = Path();
-
-    for (int i = 0; i < values.length; i++) {
-      final angle = angles[i];
-      final r = radius * values[i];
-      final point = Offset(
-        center.dx + r * cos(angle),
-        center.dy + r * sin(angle),
-      );
-
+    for (int i = 0; i < _axisCount; i++) {
+      final angle = _axisAngle(i);
+      final r = radius * (_values[i] / 100).clamp(0.0, 1.0);
+      final point = Offset(center.dx + r * cos(angle), center.dy + r * sin(angle));
       if (i == 0) {
         path.moveTo(point.dx, point.dy);
       } else {
         path.lineTo(point.dx, point.dy);
       }
     }
-
     path.close();
 
-    // 填充
     final fillPaint = Paint()
       ..color = Colors.green.withValues(alpha: 0.2)
       ..style = PaintingStyle.fill;
     canvas.drawPath(path, fillPaint);
 
-    // 边框
     final strokePaint = Paint()
       ..color = Colors.green
       ..style = PaintingStyle.stroke
@@ -166,39 +189,29 @@ class _RadarChartPainter extends CustomPainter {
   }
 
   void _drawPoints(Canvas canvas, Offset center, double radius) {
-    final values = [
-      data.headForward / 100,
-      data.roundShoulder / 100,
-      data.pelvicTilt / 100,
-      data.kneeExtension / 100,
-    ];
-
-    final angles = [-pi / 2, 0, pi / 2, pi];
-    final paint = Paint()
+    final fillPaint = Paint()
       ..color = Colors.green
       ..style = PaintingStyle.fill;
+    final bgPaint = Paint()..color = Colors.white;
 
-    for (int i = 0; i < values.length; i++) {
-      final angle = angles[i];
-      final r = radius * values[i];
-      final point = Offset(
-        center.dx + r * cos(angle),
-        center.dy + r * sin(angle),
-      );
-
-      // 白色背景
-      canvas.drawCircle(point, 6, Paint()..color = Colors.white);
-      // 绿色点
-      canvas.drawCircle(point, 4, paint);
+    for (int i = 0; i < _axisCount; i++) {
+      final angle = _axisAngle(i);
+      final r = radius * (_values[i] / 100).clamp(0.0, 1.0);
+      final point = Offset(center.dx + r * cos(angle), center.dy + r * sin(angle));
+      canvas.drawCircle(point, 6, bgPaint);
+      canvas.drawCircle(point, 4, fillPaint);
     }
   }
 
   @override
   bool shouldRepaint(covariant _RadarChartPainter old) {
-    // 数据未变时不重绘，避免无谓的 CPU 开销
     return old.data.headForward != data.headForward ||
         old.data.roundShoulder != data.roundShoulder ||
         old.data.pelvicTilt != data.pelvicTilt ||
-        old.data.kneeExtension != data.kneeExtension;
+        old.data.kneeExtension != data.kneeExtension ||
+        old.data.spinalCurvature != data.spinalCurvature ||
+        old.data.shoulderHeight != data.shoulderHeight ||
+        old.data.legAlignment != data.legAlignment ||
+        old.data.coreStability != data.coreStability;
   }
 }

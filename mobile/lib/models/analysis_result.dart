@@ -59,12 +59,20 @@ class RadarData {
   final int roundShoulder;
   final int pelvicTilt;
   final int kneeExtension;
+  final int spinalCurvature;
+  final int shoulderHeight;
+  final int legAlignment;
+  final int coreStability;
 
   RadarData({
     required this.headForward,
     required this.roundShoulder,
     required this.pelvicTilt,
     required this.kneeExtension,
+    required this.spinalCurvature,
+    required this.shoulderHeight,
+    required this.legAlignment,
+    required this.coreStability,
   });
 
   factory RadarData.fromJson(Map<String, dynamic> json) {
@@ -73,6 +81,10 @@ class RadarData {
       roundShoulder: json['roundShoulder'] ?? 0,
       pelvicTilt: json['pelvicTilt'] ?? 0,
       kneeExtension: json['kneeExtension'] ?? 0,
+      spinalCurvature: json['spinalCurvature'] ?? 0,
+      shoulderHeight: json['shoulderHeight'] ?? 0,
+      legAlignment: json['legAlignment'] ?? 0,
+      coreStability: json['coreStability'] ?? 0,
     );
   }
 
@@ -82,6 +94,10 @@ class RadarData {
       'roundShoulder': roundShoulder,
       'pelvicTilt': pelvicTilt,
       'kneeExtension': kneeExtension,
+      'spinalCurvature': spinalCurvature,
+      'shoulderHeight': shoulderHeight,
+      'legAlignment': legAlignment,
+      'coreStability': coreStability,
     };
   }
 }
