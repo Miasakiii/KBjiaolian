@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/plan_provider.dart';
 import '../providers/analysis_provider.dart';
+import '../providers/workout_provider.dart';
 
 class PlanScreen extends StatefulWidget {
   const PlanScreen({super.key});
@@ -35,6 +36,10 @@ class _PlanScreenState extends State<PlanScreen> {
 
             // 生成按钮
             _buildGenerateButton(),
+            const SizedBox(height: 12),
+
+            // 渐进式超负荷方案入口
+            _buildProgressiveButton(),
             const SizedBox(height: 24),
 
             // 方案结果
@@ -197,6 +202,63 @@ class _PlanScreenState extends State<PlanScreen> {
         );
       },
     );
+  }
+
+  Widget _buildProgressiveButton() {
+    return Consumer2<PlanProvider, WorkoutProvider>(
+      builder: (context, planProvider, workoutProvider, _) {
+        if (workoutProvider.totalWorkouts < 3) {
+          return const SizedBox.shrink();
+        }
+        return OutlinedButton.icon(
+          onPressed: planProvider.isProgressiveGenerating
+              ? null
+              : _generateProgressivePlan,
+          icon: planProvider.isProgressiveGenerating
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.trending_up),
+          label: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Text(
+              planProvider.isProgressiveGenerating
+                  ? '生成中...'
+                  : '渐进式超负荷方案',
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _generateProgressivePlan() async {
+    final analysisProvider = context.read<AnalysisProvider>();
+    final planProvider = context.read<PlanProvider>();
+
+    if (analysisProvider.currentResult == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('请先完成体态分析')),
+      );
+      return;
+    }
+
+    await planProvider.generateProgressivePlan(
+      goal: _goal,
+      experience: _experience,
+      equipment: _equipment,
+      daysPerWeek: _daysPerWeek,
+      sessionDuration: _sessionDuration,
+      analysisResult: analysisProvider.currentResult!.toJson(),
+    );
+
+    if (planProvider.error != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('生成失败: ${planProvider.error}')),
+      );
+    }
   }
 
   Future<void> _generatePlan() async {

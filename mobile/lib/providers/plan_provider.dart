@@ -7,11 +7,13 @@ import '../services/cloud_storage_service.dart';
 class PlanProvider extends ChangeNotifier {
   Map<String, dynamic>? _currentPlan;
   bool _isGenerating = false;
+  bool _isProgressiveGenerating = false;
   String? _error;
   List<dynamic> _plans = [];
 
   Map<String, dynamic>? get currentPlan => _currentPlan;
   bool get isGenerating => _isGenerating;
+  bool get isProgressiveGenerating => _isProgressiveGenerating;
   String? get error => _error;
   List<dynamic> get plans => _plans;
 
@@ -77,6 +79,43 @@ class PlanProvider extends ChangeNotifier {
       debugPrint('生成方案失败: $e');
     } finally {
       _isGenerating = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> generateProgressivePlan({
+    required String goal,
+    required String experience,
+    required String equipment,
+    required int daysPerWeek,
+    required int sessionDuration,
+    required Map<String, dynamic> analysisResult,
+  }) async {
+    _isProgressiveGenerating = true;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final result = await ApiService.generateProgressivePlan(
+        goal: goal,
+        experience: experience,
+        equipment: equipment,
+        daysPerWeek: daysPerWeek,
+        sessionDuration: sessionDuration,
+        analysisResult: analysisResult,
+      );
+
+      _currentPlan = result;
+
+      await StorageService.savePlan(result);
+      await CloudStorageService.savePlan(result);
+
+      _plans = StorageService.getPlans();
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('生成渐进式方案失败: $e');
+    } finally {
+      _isProgressiveGenerating = false;
       notifyListeners();
     }
   }
