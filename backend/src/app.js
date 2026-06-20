@@ -15,6 +15,7 @@ import {
   savePlan,
   getPlans,
   deletePlanRecord,
+  deleteAllPlanRecords,
   saveWorkoutRecord,
   getWorkoutRecords,
   deleteWorkoutRecord,
@@ -638,6 +639,7 @@ export function createApp() {
   app.post('/api/data/plans', authMiddleware, savePlan);
   app.get('/api/data/plans', authMiddleware, getPlans);
   app.delete('/api/data/plans/:id', authMiddleware, deletePlanRecord);
+  app.delete('/api/data/plans', authMiddleware, deleteAllPlanRecords);
 
   // 训练记录
   app.post('/api/data/workouts', authMiddleware, saveWorkoutRecord);

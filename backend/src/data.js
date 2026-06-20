@@ -87,6 +87,9 @@ const stmts = {
   deletePlan: db.prepare(`
     DELETE FROM training_plans WHERE id = ? AND user_id = ?
   `),
+  deleteAllPlans: db.prepare(`
+    DELETE FROM training_plans WHERE user_id = ?
+  `),
 
   // 训练记录
   insertWorkout: db.prepare(`
@@ -397,6 +400,17 @@ export function deletePlanRecord(req, res) {
   } catch (err) {
     console.error('删除训练方案失败:', err.message);
     res.status(500).json({ error: '删除失败' });
+  }
+}
+
+export function deleteAllPlanRecords(req, res) {
+  try {
+    const userId = req.userId;
+    stmts.deleteAllPlans.run(userId);
+    res.json({ message: '清空成功' });
+  } catch (err) {
+    console.error('清空训练方案失败:', err.message);
+    res.status(500).json({ error: '清空失败' });
   }
 }
 

@@ -1,4 +1,7 @@
-'use client';
+﻿'use client';
+
+import React from 'react';
+import { Bot } from 'lucide-react';
 
 export interface Message {
   role: 'user' | 'assistant';
@@ -10,7 +13,7 @@ interface ChatMessageProps {
   message: Message;
 }
 
-export default function ChatMessage({ message }: ChatMessageProps) {
+const ChatMessage = React.memo(function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === 'user';
 
   // 解析 Markdown 为美观的 JSX
@@ -139,13 +142,13 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         className={`max-w-[85%] rounded-2xl ${
           isUser
             ? 'bg-primary-500 text-white rounded-br-md px-4 py-3'
-            : 'bg-white text-gray-800 rounded-bl-md shadow-sm border border-gray-100'
+            : 'bg-white text-primary-700 rounded-bl-md shadow-sm border border-primary-100'
         }`}
       >
         {!isUser && (
           <div className="flex items-center gap-2 px-4 pt-3 pb-1">
             <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center">
-              <span className="text-xs">🤖</span>
+              <Bot size={12} className="text-primary-600" />
             </div>
             <span className="text-xs font-medium text-primary-600">KB教练</span>
           </div>
@@ -158,7 +161,7 @@ export default function ChatMessage({ message }: ChatMessageProps) {
           )}
         </div>
         <div
-          className={`text-[10px] px-4 pb-2 ${isUser ? 'text-primary-100' : 'text-gray-400'}`}
+          className={`text-[10px] px-4 pb-2 ${isUser ? 'text-primary-100' : 'text-primary-300'}`}
         >
           {new Date(message.timestamp).toLocaleTimeString('zh-CN', {
             hour: '2-digit',
@@ -168,4 +171,6 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       </div>
     </div>
   );
-}
+});
+
+export default ChatMessage;

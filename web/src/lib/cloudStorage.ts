@@ -105,6 +105,11 @@ export const cloudPlans = {
   async delete(id: string): Promise<void> {
     await apiRequest(`/data/plans/${id}`, { method: 'DELETE' });
   },
+
+  // 清空所有方案
+  async clearAll(): Promise<void> {
+    await apiRequest('/data/plans', { method: 'DELETE' });
+  },
 };
 
 // === 训练记录 ===
@@ -233,7 +238,7 @@ export async function syncLocalToCloud(): Promise<void> {
         for (const record of localAnalysis) {
           await cloudAnalysis.save(record.imagePreview, record.result);
         }
-        console.log(`同步了 ${localAnalysis.length} 条分析记录到云端`);
+        // 同步完成
       }
     }
 
@@ -245,7 +250,7 @@ export async function syncLocalToCloud(): Promise<void> {
         for (const plan of localPlans) {
           await cloudPlans.save(plan);
         }
-        console.log(`同步了 ${localPlans.length} 个训练方案到云端`);
+        // 同步完成
       }
     }
 
@@ -257,7 +262,7 @@ export async function syncLocalToCloud(): Promise<void> {
         for (const workout of localWorkouts) {
           await cloudWorkouts.save(workout);
         }
-        console.log(`同步了 ${localWorkouts.length} 条训练记录到云端`);
+        // 同步完成
       }
     }
 
@@ -269,7 +274,7 @@ export async function syncLocalToCloud(): Promise<void> {
         for (const record of localNutrition) {
           await cloudNutrition.save(record);
         }
-        console.log(`同步了 ${localNutrition.length} 条饮食记录到云端`);
+        // 同步完成
       }
     }
   } catch (err) {

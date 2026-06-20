@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, ReactNode } from 'react';
 import {
   User, getToken, getUser, saveAuth, clearAuth,
   isAuthenticated as checkIsAuthenticated,
@@ -88,16 +88,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const value = {
-    user,
-    isAuthenticated,
-    isGuest,
-    isLoading,
-    login,
-    logout,
-    enterGuestMode,
-    refreshUser,
-  };
+  const value = useMemo(
+    () => ({
+      user,
+      isAuthenticated,
+      isGuest,
+      isLoading,
+      login,
+      logout,
+      enterGuestMode,
+      refreshUser,
+    }),
+    [user, isAuthenticated, isGuest, isLoading, login, logout, enterGuestMode, refreshUser]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

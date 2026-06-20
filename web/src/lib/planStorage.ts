@@ -107,4 +107,13 @@ export async function deletePlan(id: string): Promise<void> {
 export async function clearAllPlans(): Promise<void> {
   // 清空本地记录
   clearLocal();
+
+  // 同步清空云端记录
+  if (shouldUseCloud()) {
+    try {
+      await cloudPlans.clearAll();
+    } catch (err) {
+      console.warn('清空云端训练方案失败:', err);
+    }
+  }
 }

@@ -1,20 +1,21 @@
-'use client';
+﻿'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { Bot } from 'lucide-react';
 import ChatMessage, { Message } from '@/components/ChatMessage';
 import { authFetch, isAuthenticated } from '@/lib/auth';
 import { cloudChat } from '@/lib/cloudStorage';
 
 const WELCOME_MESSAGE: Message = {
   role: 'assistant',
-  content: `你好！我是 KB教练 💪
+  content: `你好！我是 KB教练 
 
 **我可以帮你：**
-- 🏋️ 训练动作和计划
-- 🍎 营养和饮食建议
+-  训练动作和计划
+-  营养和饮食建议
 - 🧘 体态改善指导
-- ⚠️ 运动安全提醒
+- 运动安全提醒
 
 有什么想问的？`,
   timestamp: Date.now(),
@@ -91,7 +92,12 @@ export default function ChatPage() {
       timestamp: Date.now(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    // 使用函数式更新获取最新的 messages，避免闭包过期
+    let currentMessages: Message[] = [];
+    setMessages((prev) => {
+      currentMessages = [...prev, userMessage];
+      return currentMessages;
+    });
     setInput('');
     setIsLoading(true);
 
@@ -99,8 +105,8 @@ export default function ChatPage() {
     const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
 
     try {
-      // 只发送最近6条消息作为上下文
-      const history = messages.slice(-6).map((m) => ({
+      // 使用包含当前用户消息的最新消息列表
+      const history = currentMessages.slice(-6).map((m) => ({
         role: m.role,
         content: m.content,
       }));
@@ -147,7 +153,7 @@ export default function ChatPage() {
       setIsLoading(false);
       inputRef.current?.focus();
     }
-  }, [input, isLoading, messages]);
+  }, [input, isLoading]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -186,7 +192,7 @@ export default function ChatPage() {
             </Link>
             <div className="h-4 w-px bg-primary-200" />
             <div className="flex items-center gap-2">
-              <span>🤖</span>
+              <Bot size={16} className="text-primary-600" />
               <span className="font-semibold text-primary-800 text-sm">AI 教练</span>
             </div>
           </div>
@@ -208,10 +214,10 @@ export default function ChatPage() {
 
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 shadow-sm border border-gray-100">
+              <div className="bg-white rounded-2xl rounded-bl-md px-4 py-3 shadow-sm border border-primary-100">
                 <div className="flex items-center gap-3">
                   <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center">
-                    <span className="text-xs">🤖</span>
+                    <Bot size={12} className="text-primary-600" />
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex gap-1">
