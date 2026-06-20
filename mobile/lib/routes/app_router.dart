@@ -14,6 +14,7 @@ import '../screens/about_screen.dart';
 import '../screens/progress_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/profile_screen.dart';
+import '../screens/goal_screen.dart';
 import '../widgets/common/main_scaffold.dart';
 
 // 公开路由（不需要登录）
@@ -92,6 +93,10 @@ GoRouter createAppRouter(ChangeNotifier authProvider) {
           GoRoute(
             path: '/profile',
             builder: (context, state) => const ProfileScreen(),
+          ),
+          GoRoute(
+            path: '/goal',
+            builder: (context, state) => const GoalScreen(),
           ),
           GoRoute(
             path: '/about',

@@ -49,9 +49,7 @@ class SettingsScreen extends StatelessWidget {
                 title: '训练目标',
                 subtitle: '设置训练和营养目标',
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('训练目标功能即将推出')),
-                  );
+                  context.go('/goal');
                 },
               ),
             ],
