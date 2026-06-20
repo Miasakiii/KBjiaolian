@@ -15,10 +15,11 @@ import '../screens/progress_screen.dart';
 import '../screens/login_screen.dart';
 import '../screens/profile_screen.dart';
 import '../screens/goal_screen.dart';
+import '../screens/privacy_screen.dart';
 import '../widgets/common/main_scaffold.dart';
 
 // 公开路由（不需要登录）
-const _publicPaths = {'/login', '/about'};
+const _publicPaths = {'/login', '/about', '/privacy'};
 
 /// 创建 appRouter，传入 AuthProvider 作为 refreshListenable，
 /// 登录态变化时 GoRouter 会自动重新评估 redirect，无需手动刷新页面。
@@ -109,6 +110,10 @@ GoRouter createAppRouter(ChangeNotifier authProvider) {
           GoRoute(
             path: '/progress',
             builder: (context, state) => const ProgressScreen(),
+          ),
+          GoRoute(
+            path: '/privacy',
+            builder: (context, state) => const PrivacyScreen(),
           ),
         ],
       ),

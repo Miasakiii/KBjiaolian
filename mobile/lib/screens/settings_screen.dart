@@ -131,7 +131,7 @@ class SettingsScreen extends StatelessWidget {
                 icon: Icons.privacy_tip,
                 title: '隐私政策',
                 onTap: () {
-                  // Show privacy policy
+                  context.go('/privacy');
                 },
               ),
             ],
