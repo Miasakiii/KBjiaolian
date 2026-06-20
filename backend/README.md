@@ -94,7 +94,7 @@ backend/
 | POST | `/api/payment/mock-pay/:id` | **仅非生产** 模拟支付 | 60/min |
 | POST | `/api/payment/wechat/notify` | 微信支付回调 | - |
 | CRUD | `/api/data/analysis` `(/:id)` | 体态分析记录 | 60/min |
-| CRUD | `/api/data/plans` `(/:id)` | 训练方案 | 60/min |
+| CRUD | `/api/data/plans` `(/:id)` | 训练方案（DELETE 无 :id 则清空全部） | 60/min |
 | CRUD | `/api/data/workouts` `(/:id)` | 训练记录 | 60/min |
 | CRUD | `/api/data/nutrition` `(/:id)` | 饮食记录 | 60/min |
 | GET/DELETE | `/api/data/chat` | 聊天历史 | 60/min |
