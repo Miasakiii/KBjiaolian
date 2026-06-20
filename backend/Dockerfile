@@ -1,6 +1,9 @@
 # 后端 Dockerfile
 FROM node:20-alpine AS base
 
+# 安装编译依赖（better-sqlite3 需要）
+RUN apk add --no-cache python3 make g++
+
 # 安装依赖（使用淘宝镜像加速）
 WORKDIR /app
 COPY package*.json ./
