@@ -164,9 +164,26 @@ export FLUTTER_STORAGE_BASE_URL="https://storage.flutter-io.cn"
 npm config set registry https://registry.npmmirror.com
 ```
 
-## 代码审查与修复记录（2026-06）
+## 代码审查与修复记录
 
-本轮对 Web / Backend / Mobile 三个模块全量审查并修复 **88 个问题**，详见各模块 README 的"本轮代码审查修复"章节：
+### 2026-06-20 审查（Web 前端 + 后端）
+
+修复 **7 个问题**，含 2 个 CRITICAL 运行时崩溃：
+
+| 等级 | 问题 | 状态 |
+|------|------|------|
+| CRITICAL | `ChatMessage.tsx` / `chat/page.tsx` `Bot` 未导入致聊天页崩溃 | ✅ 已修复 |
+| HIGH | `handleSend` 闭包过期致 AI 缺少当前消息上下文 | ✅ 已修复 |
+| MEDIUM | `AuthContext` value 未 memo 导致级联重渲染 | ✅ 已修复 |
+| MEDIUM | `planStorage.clearAllPlans()` 不同步云端 | ✅ 已修复 |
+| MEDIUM | `compare/page.tsx` `Camera` 未导入 | ✅ 已修复 |
+| LOW | `iconMap.tsx` TypeScript 类型错误 | ✅ 已修复 |
+
+**安全发现**（待处理）：JWT Secret 弱值、Token 存 localStorage、微信支付回调未验证签名、验证码无尝试次数限制
+
+### 2026-06-13 全量审查
+
+对 Web / Backend / Mobile 三个模块全量审查并修复 **88 个问题**：
 
 | 等级 | Backend | Web | Mobile | 合计 |
 |------|---------|-----|--------|------|

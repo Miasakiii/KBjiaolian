@@ -164,11 +164,14 @@ web/
 
 | 用途 | Tailwind 类 | 色值 |
 |------|-------------|------|
-| 主背景 | `bg-primary-50` | `#fafafa` |
-| 边框 | `border-primary-200` | `#e5e5e5` |
-| 次要文字 | `text-primary-400` | `#a3a3a3` |
-| 主要文字 | `text-primary-700` | `#404040` |
-| 按钮/强调 | `bg-primary-900` | `#171717` |
+| 主背景 | `bg-primary-50` | `#f0fdf4` |
+| 边框 | `border-primary-200` | `#bbf7d0` |
+| 次要文字 | `text-primary-400` | `#4ade80` |
+| 主要文字 | `text-primary-700` | `#15803d` |
+| 按钮/强调 | `bg-primary-500` | `#22c55e` |
+| 深色背景 | `bg-primary-900` | `#14532d` |
+
+> 2026-06-20 从灰色系迁移至绿色系，详见 `tailwind.config.js`
 
 ## 部署
 
@@ -188,7 +191,27 @@ docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=https://api.example.com/api kb-co
 - `NEXT_PUBLIC_API_URL` — 必填，后端 API 基址（HTTPS）
 - `NODE_ENV=production`
 
-## 本轮代码审查修复（2026-06）
+## 代码审查修复（2026-06-20）
+
+### Critical
+- `ChatMessage.tsx` / `chat/page.tsx` `Bot` 图标未导入导致聊天页崩溃 → 添加 `import { Bot } from 'lucide-react'`
+- `compare/page.tsx` `Camera` 图标未导入 → 添加导入
+
+### High
+- `chat/page.tsx` `handleSend` 闭包过期导致 AI 缺少当前消息上下文 → 改用函数式更新获取最新 `messages`
+- `AuthContext.tsx` value 对象每次渲染重建导致级联重渲染 → `useMemo` 包装
+
+### Medium
+- `planStorage.ts` `clearAllPlans()` 不同步云端 → 添加后端 `DELETE /api/data/plans` 端点 + 前端云端同步
+- `iconMap.tsx` TypeScript 类型转换错误 → 通过 `unknown` 中间类型修复
+
+### 构建验证
+- ✅ TypeScript 编译零错误
+- ✅ Next.js 构建全部 22 页面成功
+
+---
+
+## 代码审查修复（2026-06-13）
 
 ### Critical
 - 登录后未更新 AuthContext 导致被 AuthGuard 踢回 `/login` → 改用 `useAuth().login`
@@ -227,15 +250,18 @@ docker run -p 3000:3000 -e NEXT_PUBLIC_API_URL=https://api.example.com/api kb-co
 
 ## 已知限制 / 后续改进
 
-| 项 | 说明 |
-|----|------|
-| Token 存 localStorage | 易遭 XSS，长期方案应迁 httpOnly cookie + SameSite=Strict |
-| Toast / Loading 状态分散 | 各页面自行管理，可抽统一 `useRequest` hook |
-| Modal a11y | 多个弹窗无 Escape 关闭、focus trap、`aria-modal`，建议迁 Headless UI Dialog |
-| `lib/dashboard.ts` 用 `any[]` | 类型不安全，应改用具体 Record 类型 |
-| 无 CSP 头 | next.config.js 已设基础安全头，但未配置 CSP |
-| 没有 E2E | 仅有 Vitest 单测，建议加 Playwright |
-| 无 ESLint 配置 | `next lint` 启动需要交互式配置，建议加 `eslint.config.js` |
+| 优先级 | 项 | 说明 |
+|--------|----|------|
+| HIGH | Token 存 localStorage | 易遭 XSS，长期方案应迁 httpOnly cookie + SameSite=Strict |
+| HIGH | `iconMap.tsx` 全量导入 lucide-react | ~1000 图标全量打包，应改为按需导入 |
+| HIGH | 全站零 a11y 属性 | WCAG 2.1 AA 合规性缺失，需系统性添加 `aria-*` / `role` |
+| MEDIUM | `cloudStorage.ts` 大量 `any` 类型 | 类型不安全，应为各存储模块定义云端数据接口 |
+| MEDIUM | `cloudStorage.ts` 4 处 `console.log` 残留 | 生产环境信息泄露 |
+| MEDIUM | Toast / Loading 状态分散 | 各页面自行管理，可抽统一 `useRequest` hook |
+| MEDIUM | Modal a11y | 多个弹窗无 Escape 关闭、focus trap、`aria-modal` |
+| LOW | 无 CSP 头 | next.config.js 已设基础安全头，但未配置 CSP |
+| LOW | 没有 E2E | 仅有 Vitest 单测，建议加 Playwright |
+| LOW | 无 ESLint 配置 | `next lint` 启动需要交互式配置，建议加 `eslint.config.js` |
 
 ---
 *Web 前端文档 — 随开发进度更新*
