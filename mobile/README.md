@@ -41,15 +41,20 @@ mobile/
 │   ├── app.dart                     # MaterialApp.router 配置
 │   ├── routes/
 │   │   └── app_router.dart          # createAppRouter(authProvider) + refreshListenable
-│   ├── screens/                     # 10 个页面
+│   ├── screens/                     # 15 个页面
 │   │   ├── home_screen.dart         # 首页（统计 + 快捷操作 + 任务）
-│   │   ├── analyze_screen.dart      # 体态分析
+│   │   ├── analyze_screen.dart      # 体态分析（8 维度）
+│   │   ├── compare_screen.dart      # 前后对比分析
+│   │   ├── progress_screen.dart     # 进度趋势（折线图）
+│   │   ├── plan_screen.dart         # 训练方案生成 + 渐进式超负荷
+│   │   ├── workout_screen.dart      # 训练进行中 + 历史
 │   │   ├── nutrition_screen.dart    # 饮食识别
 │   │   ├── chat_screen.dart         # AI 教练对话
-│   │   ├── plan_screen.dart         # 训练方案生成
-│   │   ├── workout_screen.dart      # 训练进行中 + 历史
 │   │   ├── history_screen.dart      # 体态分析历史
-│   │   ├── settings_screen.dart     # 设置 + 清空数据
+│   │   ├── settings_screen.dart     # 设置 + 数据导出
+│   │   ├── profile_screen.dart      # 个人资料编辑
+│   │   ├── goal_screen.dart         # 训练目标设置
+│   │   ├── privacy_screen.dart      # 隐私政策
 │   │   ├── login_screen.dart        # 登录/注册
 │   │   └── about_screen.dart        # 关于
 │   ├── providers/                   # 6 个 ChangeNotifier
@@ -90,14 +95,19 @@ mobile/
 |------|------|------|
 | `/login` | 登录/注册 | 公开 |
 | `/about` | 关于 | 公开 |
+| `/privacy` | 隐私政策 | 公开 |
 | `/` | 首页仪表盘 | 受保护 |
-| `/analyze` | 体态分析 | 受保护 |
-| `/plan` | 训练方案生成 | 受保护 |
+| `/analyze` | 体态分析（8维度） | 受保护 |
+| `/compare` | 前后对比分析 | 受保护 |
+| `/progress` | 进度趋势 | 受保护 |
+| `/plan` | 训练方案生成 + 渐进式 | 受保护 |
 | `/workout` | 训练进行中 | 受保护 |
 | `/nutrition` | 饮食识别 | 受保护 |
 | `/chat` | AI 对话 | 受保护 |
 | `/history` | 体态分析历史 | 受保护 |
-| `/settings` | 设置 | 受保护 |
+| `/settings` | 设置 + 数据导出 | 受保护 |
+| `/profile` | 个人资料编辑 | 受保护 |
+| `/goal` | 训练目标设置 | 受保护 |
 
 路由守卫：`createAppRouter(authProvider)` 接收 AuthProvider 作为 `refreshListenable`，登录态变化自动重新评估 redirect，无需手动刷新页面。`redirect` 同步读取 AuthProvider 状态，不再做 async I/O。
 
@@ -264,8 +274,15 @@ flutter test
 | `flutter_lints` 配置过简 | 建议启用 `avoid_dynamic_calls` / `unawaited_futures` / `use_build_context_synchronously` |
 | 无 404 fallback 路由 | GoRouter 默认空白屏 |
 | 字体回退 | 当前用平台默认字体，未来需要 NotoSansSC 时需在 pubspec 声明字体资源 |
-| `NutritionRecord` model 字段结构 | model 与 provider 实际使用的 schema 不一致，需统一 |
 | `dart_code_metrics` 未接入 | 建议接入 CI 跑 `flutter analyze` 与 `flutter test` |
+
+## 内测版完善记录（2026-06-20）
+
+从 10 页扩展到 15 页，补齐所有后端 API 对接：
+
+**新增页面：** 前后对比(compare)、进度趋势(progress)、个人资料(profile)、训练目标(goal)、隐私政策(privacy)
+**核心改进：** 雷达图 8 维度、渐进式超负荷方案、聊天历史加载、数据导出(JSON+分享)
+**代码质量：** Provider 全部使用 Model 类型、空状态引导、assets 声明
 
 ---
 *移动端文档 — 随开发进度更新*

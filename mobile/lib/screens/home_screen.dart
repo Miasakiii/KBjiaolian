@@ -267,9 +267,7 @@ class HomeScreen extends StatelessWidget {
             _FeatureChip(
               icon: '📈',
               label: '进度趋势',
-              onTap: () {
-                _showTODOToast(context, '进度趋势功能开发中');
-              },
+              onTap: () => context.go('/progress'),
             ),
             _FeatureChip(
               icon: '📤',
