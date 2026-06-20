@@ -22,6 +22,7 @@ export default function ScoreCard({ score, issues }: ScoreCardProps) {
     let start = 0;
     const duration = 800;
     const startTime = Date.now();
+    let rafId: number;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
@@ -30,11 +31,12 @@ export default function ScoreCard({ score, issues }: ScoreCardProps) {
       setDisplayScore(Math.round(eased * score));
 
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        rafId = requestAnimationFrame(animate);
       }
     };
 
-    requestAnimationFrame(animate);
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
   }, [score]);
 
   const scoreColor = score >= 80 ? 'from-primary-500 to-primary-600' : score >= 60 ? 'from-orange-400 to-orange-500' : 'from-red-400 to-red-500';

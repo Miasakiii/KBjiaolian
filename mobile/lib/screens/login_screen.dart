@@ -38,21 +38,36 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    // 邮箱格式校验
+    final emailRegex = RegExp(r'^[\w.+-]+@[\w-]+\.[\w.-]+$');
+    if (!emailRegex.hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('邮箱格式不正确')),
+      );
+      return;
+    }
+
+    // 密码长度校验
     if (password.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('密码至少 6 位')),
       );
       return;
     }
+    if (password.length > 128) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('密码不能超过 128 位')),
+      );
+      return;
+    }
 
     bool success;
     if (_isRegister) {
+      final nickname = _nicknameController.text.trim();
       success = await auth.register(
         email: email,
         password: password,
-        nickname: _nicknameController.text.trim().isNotEmpty
-            ? _nicknameController.text.trim()
-            : null,
+        nickname: nickname.isNotEmpty ? nickname : null,
       );
     } else {
       success = await auth.login(email: email, password: password);

@@ -13,7 +13,9 @@ class MainScaffold extends StatelessWidget {
     if (location.startsWith('/nutrition')) return 2;
     if (location.startsWith('/chat')) return 3;
     if (location.startsWith('/settings')) return 4;
-    return 0;
+    // 其他路由（/plan、/workout、/history、/about 等）不在底栏直接映射中，
+    // 返回 -1 让 NavigationBar 不高亮任何 tab，避免误导
+    return -1;
   }
 
   void _onTap(BuildContext context, int index) {
@@ -38,11 +40,13 @@ class MainScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final index = _getCurrentIndex(context);
     return Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(
-        selectedIndex: _getCurrentIndex(context),
-        onDestinationSelected: (index) => _onTap(context, index),
+        // 非主导航路由（plan/workout/history/about） selectedIndex=-1 时不高亮
+        selectedIndex: index < 0 ? 0 : index,
+        onDestinationSelected: (i) => _onTap(context, i),
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),

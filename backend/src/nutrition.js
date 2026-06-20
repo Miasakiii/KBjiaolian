@@ -2,6 +2,14 @@ const API_URL = process.env.MIMO_API_URL;
 const API_KEY = process.env.MIMO_API_KEY;
 const MODEL = process.env.MIMO_MODEL || 'mimo-v2.5';
 
+// 启动时校验关键环境变量（测试环境跳过以方便 mock）
+if (process.env.NODE_ENV !== 'test' && (!API_URL || !API_KEY)) {
+  throw new Error('MIMO_API_URL / MIMO_API_KEY 环境变量未设置');
+}
+
+import crypto from 'crypto';
+import { extractJsonObject } from './validation.js';
+
 const FOOD_ANALYSIS_PROMPT = `你是一位专业的营养师和食品识别专家。请识别这张图片中的食物，并估算营养成分。
 
 **识别要求：**
@@ -40,14 +48,7 @@ const analysisCache = new Map();
 const CACHE_MAX_SIZE = 50;
 
 function getCacheKey(base64Image) {
-  let hash = 0;
-  const str = base64Image.substring(0, 500);
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return hash.toString(36);
+  return crypto.createHash('sha256').update(base64Image).digest('hex');
 }
 
 function normalizeResult(result) {
@@ -126,12 +127,7 @@ export async function analyzeFood(base64Image) {
       throw new Error('MiMo API 返回为空');
     }
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('无法解析 AI 返回的 JSON');
-    }
-
-    const rawResult = JSON.parse(jsonMatch[0]);
+    const rawResult = extractJsonObject(content);
     const normalizedResult = normalizeResult(rawResult);
 
     // 存入缓存

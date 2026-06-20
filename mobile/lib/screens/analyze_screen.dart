@@ -29,15 +29,17 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
       );
 
       if (image != null) {
+        if (!mounted) return;
         setState(() {
           _imageFile = File(image.path);
         });
         _analyzeImage();
       }
     } catch (e) {
+      debugPrint('选择图片失败: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('选择图片失败: $e')),
+          const SnackBar(content: Text('选择图片失败，请重试')),
         );
       }
     }
@@ -49,7 +51,8 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     final provider = context.read<AnalysisProvider>();
     await provider.analyzePhoto(_imageFile!);
 
-    if (provider.error != null && mounted) {
+    if (!mounted) return;
+    if (provider.error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('分析失败: ${provider.error}')),
       );

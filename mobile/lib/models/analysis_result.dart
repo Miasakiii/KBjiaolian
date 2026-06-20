@@ -107,13 +107,13 @@ class Suggestion {
 
   factory Suggestion.fromJson(Map<String, dynamic> json) {
     return Suggestion(
-      exercise: json['exercise'] ?? '',
-      sets: json['sets'] ?? '',
-      description: json['description'] ?? '',
-      targetMuscle: json['targetMuscle'] ?? '',
-      difficulty: json['difficulty'] ?? '初级',
-      steps: List<String>.from(json['steps'] ?? []),
-      tips: List<String>.from(json['tips'] ?? []),
+      exercise: json['exercise']?.toString() ?? '',
+      sets: json['sets']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      targetMuscle: json['targetMuscle']?.toString() ?? '',
+      difficulty: json['difficulty']?.toString() ?? '初级',
+      steps: (json['steps'] as List?)?.map((e) => e.toString()).toList() ?? const [],
+      tips: (json['tips'] as List?)?.map((e) => e.toString()).toList() ?? const [],
     );
   }
 

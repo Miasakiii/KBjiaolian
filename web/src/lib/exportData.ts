@@ -14,6 +14,21 @@ export interface ExportData {
   trainingPlans: any[];
 }
 
+/**
+ * CSV 字段转义：
+ * - 始终用双引号包裹
+ * - 内部双引号转义为 ""
+ * - 以 =/+/-/@ 开头的字段前置单引号，防止 Excel 公式注入
+ */
+function csvEscape(value: unknown): string {
+  const s = value == null ? '' : String(value);
+  const escaped = s.replace(/"/g, '""');
+  if (/^[=+\-@]/.test(escaped)) {
+    return `'${escaped}`;
+  }
+  return `"${escaped}"`;
+}
+
 export async function collectAllData(): Promise<ExportData> {
   return {
     exportDate: new Date().toISOString(),
@@ -55,10 +70,10 @@ function generateAnalysisCSV(records: any[]): string {
     const issues = r.result.issues.map((i: any) => i.name).join('; ');
     const radar = r.result.radar;
     const metrics = r.result.bodyMetrics || {};
-    return `${date},${r.result.score},${radar.headForward ?? 0},${radar.roundShoulder ?? 0},${radar.pelvicTilt ?? 0},${radar.kneeExtension ?? 0},${radar.spineCurve ?? 0},${radar.shoulderHeight ?? 0},${radar.legAlignment ?? 0},${radar.coreStability ?? 0},"${metrics.postureType || ''}","${metrics.riskLevel || ''}","${issues}"`;
+    return [csvEscape(date), r.result.score, radar.headForward ?? 0, radar.roundShoulder ?? 0, radar.pelvicTilt ?? 0, radar.kneeExtension ?? 0, radar.spineCurve ?? 0, radar.shoulderHeight ?? 0, radar.legAlignment ?? 0, radar.coreStability ?? 0, csvEscape(metrics.postureType || ''), csvEscape(metrics.riskLevel || ''), csvEscape(issues)].join(',');
   });
 
-  return [headers.join(','), ...rows].join('\n');
+  return [headers.map(csvEscape).join(','), ...rows].join('\n');
 }
 
 function generateWorkoutCSV(records: any[]): string {
@@ -67,10 +82,10 @@ function generateWorkoutCSV(records: any[]): string {
   const headers = ['日期', '方案', '训练日', '时长(分钟)', '动作数', '评分'];
   const rows = records.map((r) => {
     const date = new Date(r.createdAt).toLocaleDateString('zh-CN');
-    return `${date},"${r.planName}","${r.dayName}",${r.duration},${r.exercises.length},${r.rating}`;
+    return [csvEscape(date), csvEscape(r.planName), csvEscape(r.dayName), r.duration, r.exercises.length, r.rating].join(',');
   });
 
-  return [headers.join(','), ...rows].join('\n');
+  return [headers.map(csvEscape).join(','), ...rows].join('\n');
 }
 
 function generateNutritionCSV(records: any[]): string {
@@ -80,10 +95,10 @@ function generateNutritionCSV(records: any[]): string {
   const rows = records.map((r) => {
     const date = new Date(r.createdAt).toLocaleDateString('zh-CN');
     const foods = r.analysis.foods.map((f: any) => f.name).join('; ');
-    return `${date},${r.mealType},${r.analysis.totalCalories},${r.analysis.totalProtein},${r.analysis.totalCarbs},${r.analysis.totalFat},"${foods}"`;
+    return [csvEscape(date), csvEscape(r.mealType), r.analysis.totalCalories, r.analysis.totalProtein, r.analysis.totalCarbs, r.analysis.totalFat, csvEscape(foods)].join(',');
   });
 
-  return [headers.join(','), ...rows].join('\n');
+  return [headers.map(csvEscape).join(','), ...rows].join('\n');
 }
 
 function downloadFile(content: string, filename: string, mimeType: string): void {

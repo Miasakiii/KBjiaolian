@@ -70,3 +70,66 @@ export function isValidChatHistory(history) {
     msg.content.length <= 5000
   );
 }
+
+/**
+ * 从 AI 模型输出中稳健地提取首个 JSON 对象。
+ * 1. 优先匹配 ```json ... ``` 围栏
+ * 2. 退回到平衡括号扫描，捕获第一段完整的 JSON 对象
+ * 3. 失败抛错
+ */
+export function extractJsonObject(content) {
+  if (typeof content !== 'string') {
+    throw new Error('AI 返回内容不是字符串');
+  }
+
+  // 优先：markdown 围栏
+  const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenced) {
+    try {
+      return JSON.parse(fenced[1].trim());
+    } catch {
+      // 围栏内容非合法 JSON，继续走平衡括号
+    }
+  }
+
+  // 平衡括号扫描：找到第一个 '{' 开始的合法 JSON 对象
+  let depth = 0;
+  let start = -1;
+  let inString = false;
+  let escape = false;
+
+  for (let i = 0; i < content.length; i++) {
+    const c = content[i];
+    if (inString) {
+      if (escape) {
+        escape = false;
+      } else if (c === '\\') {
+        escape = true;
+      } else if (c === '"') {
+        inString = false;
+      }
+      continue;
+    }
+    if (c === '"') {
+      inString = true;
+    } else if (c === '{') {
+      if (depth === 0) start = i;
+      depth++;
+    } else if (c === '}') {
+      if (depth > 0) {
+        depth--;
+        if (depth === 0 && start !== -1) {
+          const slice = content.slice(start, i + 1);
+          try {
+            return JSON.parse(slice);
+          } catch {
+            // 该段不合法，继续往后找
+            start = -1;
+          }
+        }
+      }
+    }
+  }
+
+  throw new Error('无法解析 AI 返回的 JSON');
+}

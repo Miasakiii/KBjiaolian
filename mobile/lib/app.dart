@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'routes/app_router.dart';
+import 'package:go_router/go_router.dart';
 
 class KBCoachApp extends StatelessWidget {
-  const KBCoachApp({super.key});
+  final GoRouter router;
+  const KBCoachApp({super.key, required this.router});
 
   @override
   Widget build(BuildContext context) {
@@ -13,7 +14,8 @@ class KBCoachApp extends StatelessWidget {
         useMaterial3: true,
         colorSchemeSeed: const Color(0xFF16a34a),
         brightness: Brightness.light,
-        fontFamily: 'NotoSansSC',
+        // 不指定 fontFamily，使用平台默认字体（Android: Roboto，iOS: SF）
+        // 若未来需要 NotoSansSC，请在 pubspec.yaml 添加 fonts 资源后再启用
         scaffoldBackgroundColor: const Color(0xFFF0FDF4),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
@@ -69,7 +71,7 @@ class KBCoachApp extends StatelessWidget {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         ),
       ),
-      routerConfig: appRouter,
+      routerConfig: router,
     );
   }
 }

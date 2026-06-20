@@ -85,4 +85,11 @@ class PlanProvider extends ChangeNotifier {
     _error = null;
     notifyListeners();
   }
+
+  Future<void> clearPlans() async {
+    await StorageService.saveList('training_plans', []);
+    _plans = [];
+    _currentPlan = null;
+    notifyListeners();
+  }
 }

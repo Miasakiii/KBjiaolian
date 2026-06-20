@@ -72,24 +72,28 @@ class HistoryScreen extends StatelessWidget {
             itemCount: records.length,
             itemBuilder: (context, index) {
               final record = records[index];
-              final result = record['result'];
-              final date = DateTime.parse(record['timestamp']);
+              final rawResult = record['result'];
+              final result = rawResult is Map
+                  ? Map<String, dynamic>.from(rawResult)
+                  : <String, dynamic>{};
+              final date = DateTime.tryParse(record['timestamp']?.toString() ?? '') ?? DateTime.now();
+              final score = (result['score'] is num) ? (result['score'] as num).toInt() : 0;
 
               return Card(
                 margin: const EdgeInsets.only(bottom: 12),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: _getScoreColor(result['score']).withValues(alpha: 0.1),
+                    backgroundColor: _getScoreColor(score).withValues(alpha: 0.1),
                     child: Text(
-                      '${result['score']}',
+                      '$score',
                       style: TextStyle(
-                        color: _getScoreColor(result['score']),
+                        color: _getScoreColor(score),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                   title: Text(
-                    '体态评分: ${result['score']}',
+                    '体态评分: $score',
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
@@ -191,9 +195,11 @@ class HistoryScreen extends StatelessWidget {
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: (result['issues'] as List).map((issue) {
+                    children: ((result['issues'] as List?) ?? const [])
+                        .whereType<Map>()
+                        .map((issue) {
                       return Chip(
-                        label: Text(issue['name']),
+                        label: Text(issue['name']?.toString() ?? ''),
                         backgroundColor: Colors.orange.shade50,
                       );
                     }).toList(),

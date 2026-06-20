@@ -16,43 +16,66 @@ function generateId(): string {
 }
 
 function compressImage(base64: string): Promise<string> {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d')!;
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          reject(new Error('canvas 不可用'));
+          return;
+        }
 
-      let width = img.width;
-      let height = img.height;
+        let width = img.width;
+        let height = img.height;
 
-      if (width > MAX_IMAGE_WIDTH) {
-        height = (height * MAX_IMAGE_WIDTH) / width;
-        width = MAX_IMAGE_WIDTH;
+        if (width > MAX_IMAGE_WIDTH) {
+          height = (height * MAX_IMAGE_WIDTH) / width;
+          width = MAX_IMAGE_WIDTH;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        resolve(canvas.toDataURL('image/jpeg', 0.6));
+      } catch (err) {
+        reject(err);
       }
-
-      canvas.width = width;
-      canvas.height = height;
-      ctx.drawImage(img, 0, 0, width, height);
-
-      resolve(canvas.toDataURL('image/jpeg', 0.6));
     };
+    img.onerror = () => reject(new Error('图片加载失败'));
     img.src = base64;
   });
 }
 
 // 本地存储操作
+const MAX_RECORDS = 100;
+
 function saveToLocal(record: HistoryRecord): void {
   const records = getAllFromLocal();
   records.unshift(record);
+  // 限制最大条数
+  while (records.length > MAX_RECORDS) records.pop();
+
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
   } catch (error) {
     if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-      const trimmed = records.slice(0, -1);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
-    } else {
-      throw error;
+      // 持续丢弃最旧记录直到能存
+      while (records.length > 1) {
+        records.pop();
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+          return;
+        } catch {
+          // 继续丢弃
+        }
+      }
+      // 仍失败时抛错让调用方感知
+      throw new Error('本地存储空间已满，请清理旧记录');
     }
+    throw error;
   }
 }
 
@@ -76,11 +99,41 @@ function clearLocal(): void {
 
 // 云端存储转换
 function cloudToLocal(record: any): HistoryRecord {
+  if (!record || typeof record !== 'object') {
+    return {
+      id: generateId(),
+      timestamp: Date.now(),
+      imagePreview: '',
+      result: {
+        score: 0,
+        summary: '',
+        issues: [],
+        radar: {
+          headForward: 0,
+          roundShoulder: 0,
+          pelvicTilt: 0,
+          kneeExtension: 0,
+          spineCurve: 0,
+          shoulderHeight: 0,
+          legAlignment: 0,
+          coreStability: 0,
+        },
+        suggestions: [],
+      },
+    };
+  }
+  const result = record.result && typeof record.result === 'object' ? record.result : {};
   return {
-    id: record.id,
-    timestamp: record.timestamp,
-    imagePreview: record.imagePreview || '',
-    result: record.result,
+    id: record.id ?? generateId(),
+    timestamp: record.timestamp ?? Date.now(),
+    imagePreview: typeof record.imagePreview === 'string' ? record.imagePreview : '',
+    result: {
+      score: typeof result.score === 'number' ? result.score : 0,
+      summary: typeof result.summary === 'string' ? result.summary : '',
+      issues: Array.isArray(result.issues) ? result.issues : [],
+      radar: result.radar && typeof result.radar === 'object' ? result.radar : {},
+      suggestions: Array.isArray(result.suggestions) ? result.suggestions : [],
+    },
   };
 }
 

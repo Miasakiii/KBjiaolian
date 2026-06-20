@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class StorageService {
@@ -54,8 +55,16 @@ class StorageService {
 
   static Map<String, dynamic>? getJson(String key) {
     final str = _prefs.getString(key);
-    if (str == null) return null;
-    return jsonDecode(str);
+    if (str == null || str.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(str);
+      if (decoded is Map<String, dynamic>) return decoded;
+      if (decoded is Map) return Map<String, dynamic>.from(decoded);
+      return null;
+    } catch (e) {
+      debugPrint('StorageService.getJson 解码 $key 失败: $e');
+      return null;
+    }
   }
 
   // 列表存储
@@ -65,8 +74,15 @@ class StorageService {
 
   static List<dynamic> getList(String key) {
     final str = _prefs.getString(key);
-    if (str == null) return [];
-    return jsonDecode(str);
+    if (str == null || str.isEmpty) return [];
+    try {
+      final decoded = jsonDecode(str);
+      if (decoded is List) return decoded;
+      return [];
+    } catch (e) {
+      debugPrint('StorageService.getList 解码 $key 失败: $e');
+      return [];
+    }
   }
 
   // 分析记录

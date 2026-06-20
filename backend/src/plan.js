@@ -1,6 +1,14 @@
+import crypto from 'crypto';
+import { extractJsonObject } from './validation.js';
+
 const API_URL = process.env.MIMO_API_URL;
 const API_KEY = process.env.MIMO_API_KEY;
 const MODEL = process.env.MIMO_MODEL || 'mimo-v2.5';
+
+// 启动时校验关键环境变量（测试环境跳过以方便 mock）
+if (process.env.NODE_ENV !== 'test' && (!API_URL || !API_KEY)) {
+  throw new Error('MIMO_API_URL / MIMO_API_KEY 环境变量未设置');
+}
 
 function buildPlanPrompt(params, analysisResult) {
   const { goal, experience, equipment, daysPerWeek, sessionDuration } = params;
@@ -127,15 +135,10 @@ export async function generatePlan(params, analysisResult, extraPrompt = '') {
       throw new Error('MiMo API 返回为空');
     }
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('无法解析 AI 返回的 JSON');
-    }
-
-    const plan = JSON.parse(jsonMatch[0]);
+    const plan = extractJsonObject(content);
 
     return {
-      id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).substring(2),
       ...plan,
       goal: params.goal,
       experience: params.experience,

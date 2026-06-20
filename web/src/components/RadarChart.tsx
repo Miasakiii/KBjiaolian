@@ -58,6 +58,7 @@ export default function RadarChart({ data: rawData, size = 240 }: RadarChartProp
     setIsVisible(true);
     const duration = 800;
     const startTime = Date.now();
+    let rafId: number;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
@@ -66,11 +67,12 @@ export default function RadarChart({ data: rawData, size = 240 }: RadarChartProp
       setAnimProgress(eased);
 
       if (progress < 1) {
-        requestAnimationFrame(animate);
+        rafId = requestAnimationFrame(animate);
       }
     };
 
-    requestAnimationFrame(animate);
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
   }, []);
 
   const center = size / 2;

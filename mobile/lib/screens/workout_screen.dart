@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/workout_provider.dart';
@@ -121,7 +122,7 @@ class _WorkoutHome extends StatelessWidget {
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.pushNamed(context, '/plan');
+                      context.push('/plan');
                     },
                     child: const Text('生成训练方案'),
                   ),
@@ -190,7 +191,7 @@ class _WorkoutHome extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         ...records.take(5).map((record) {
-          final date = DateTime.parse(record['createdAt']);
+          final date = DateTime.tryParse(record['createdAt']?.toString() ?? '') ?? DateTime.now();
           return Card(
             child: ListTile(
               leading: CircleAvatar(
@@ -224,22 +225,38 @@ class _ActiveWorkout extends StatefulWidget {
 class _ActiveWorkoutState extends State<_ActiveWorkout> {
   int _currentExerciseIndex = 0;
   int _rating = 4;
+  late final Stream<int> _timerStream;
+
+  @override
+  void initState() {
+    super.initState();
+    // 在 initState 创建 stream 避免每次 build 都重置订阅
+    _timerStream = Stream.periodic(const Duration(seconds: 1), (i) => i);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final workout = widget.provider.currentWorkout!;
-    final exercises = workout['exercises'] as List;
-    final currentExercise = exercises[_currentExerciseIndex];
-    final completedSets = (currentExercise['completedSets'] as List)
-        .where((s) => s['completed'] == true)
-        .length;
-    final totalSets = (currentExercise['completedSets'] as List).length;
+    final workout = widget.provider.currentWorkout;
+    // 防御 currentWorkout 可能在 _ActiveWorkout 构造后被置 null（如 cancelWorkout）
+    if (workout == null) {
+      return const Center(child: Text('训练已结束'));
+    }
+    final exercises = (workout['exercises'] as List?) ?? const [];
+    if (exercises.isEmpty || _currentExerciseIndex >= exercises.length) {
+      return const Center(child: Text('没有动作数据'));
+    }
+    final currentExercise = exercises[_currentExerciseIndex] as Map? ?? const {};
+    final completedSets = (currentExercise['completedSets'] as List?)
+            ?.where((s) => s is Map && s['completed'] == true)
+            .length ??
+        0;
+    final totalSets = (currentExercise['completedSets'] as List?)?.length ?? 0;
 
     return Column(
       children: [
         // 进度指示
         LinearProgressIndicator(
-          value: (_currentExerciseIndex + 1) / exercises.length,
+          value: exercises.isEmpty ? 0 : (_currentExerciseIndex + 1) / exercises.length,
           backgroundColor: Colors.green.shade100,
         ),
 
@@ -251,10 +268,14 @@ class _ActiveWorkoutState extends State<_ActiveWorkout> {
             children: [
               const Icon(Icons.timer, color: Colors.green),
               const SizedBox(width: 8),
-              StreamBuilder(
-                stream: Stream.periodic(const Duration(seconds: 1)),
+              StreamBuilder<int>(
+                stream: _timerStream,
                 builder: (context, _) {
-                  final duration = DateTime.now().difference(widget.provider.startTime!);
+                  final startTime = widget.provider.startTime;
+                  if (startTime == null) {
+                    return const Text('--:--');
+                  }
+                  final duration = DateTime.now().difference(startTime);
                   return Text(
                     '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
@@ -307,9 +328,9 @@ class _ActiveWorkoutState extends State<_ActiveWorkout> {
                 const SizedBox(height: 16),
 
                 // 组列表
-                ...(currentExercise['completedSets'] as List).asMap().entries.map((entry) {
+                ...((currentExercise['completedSets'] as List?) ?? const []).asMap().entries.map((entry) {
                   final setIndex = entry.key;
-                  final set = entry.value;
+                  final set = entry.value as Map? ?? const {};
                   final isCompleted = set['completed'] == true;
 
                   return Card(

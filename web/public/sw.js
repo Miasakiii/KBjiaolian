@@ -63,7 +63,15 @@ self.addEventListener('fetch', (event) => {
   // 跳过非同源请求（如 CDN 字体等允许浏览器默认处理）
   if (url.origin !== self.location.origin) return;
 
-  // API 请求 → Network-First
+  // 敏感 API（含个人信息、订单、支付）永不缓存，让浏览器默认处理
+  if (
+    url.pathname.startsWith('/api/auth/') ||
+    url.pathname.startsWith('/api/orders') ||
+    url.pathname.startsWith('/api/payment/') ) {
+    return;
+  }
+
+  // 其他 API 请求 → Network-First
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(networkFirst(request, API_CACHE));
     return;
@@ -165,7 +173,17 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  if (event.action === 'open' || !event.action) {
-    event.waitUntil(clients.openWindow('/'));
+  if (event.action === 'close') return;
+  // 限定只能打开同源 URL，防止被恶意推送引导到外部站点
+  const target = event.notification.data && event.notification.data.url;
+  let path = '/';
+  if (typeof target === 'string') {
+    try {
+      const u = new URL(target, self.location.origin);
+      if (u.origin === self.location.origin) path = u.pathname + u.search;
+    } catch {
+      path = '/';
+    }
   }
+  event.waitUntil(clients.openWindow(path));
 });

@@ -45,20 +45,25 @@ export default function ChatPage() {
 
   // 加载聊天历史
   useEffect(() => {
+    let cancelled = false;
     if (isAuthenticated()) {
       cloudChat.getHistory().then((history) => {
-        if (history.length > 0) {
-          const loadedMessages: Message[] = history.map((m) => ({
-            role: m.role as 'user' | 'assistant',
-            content: m.content,
-            timestamp: m.timestamp,
-          }));
-          setMessages([WELCOME_MESSAGE, ...loadedMessages]);
-        }
+        if (cancelled || history.length === 0) return;
+        const loadedMessages: Message[] = history.map((m) => ({
+          role: m.role as 'user' | 'assistant',
+          content: m.content,
+          timestamp: m.timestamp,
+        }));
+        // 保留用户在加载期间已发送的消息
+        setMessages((prev) => {
+          const userAdded = prev.filter(m => m !== WELCOME_MESSAGE);
+          return [WELCOME_MESSAGE, ...loadedMessages, ...userAdded];
+        });
       }).catch((err) => {
         console.warn('加载聊天历史失败:', err);
       });
     }
+    return () => { cancelled = true; };
   }, []);
 
   // 加载动画
@@ -90,15 +95,15 @@ export default function ChatPage() {
     setInput('');
     setIsLoading(true);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
+
     try {
       // 只发送最近6条消息作为上下文
       const history = messages.slice(-6).map((m) => ({
         role: m.role,
         content: m.content,
       }));
-
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30秒超时
 
       const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
       const response = await authFetch(`${API_BASE}/chat`, {
@@ -109,8 +114,6 @@ export default function ChatPage() {
         }),
         signal: controller.signal,
       });
-
-      clearTimeout(timeoutId);
 
       if (!response.ok) {
         throw new Error('请求失败');
@@ -125,11 +128,11 @@ export default function ChatPage() {
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error: any) {
-      console.error('对话错误:', error);
+    } catch (err) {
+      console.error('对话错误:', err);
 
       let errorContent = '抱歉，出现了问题。请稍后重试。';
-      if (error.name === 'AbortError') {
+      if (err instanceof Error && err.name === 'AbortError') {
         errorContent = '响应超时，请检查网络后重试。';
       }
 
@@ -140,6 +143,7 @@ export default function ChatPage() {
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
+      clearTimeout(timeoutId);
       setIsLoading(false);
       inputRef.current?.focus();
     }

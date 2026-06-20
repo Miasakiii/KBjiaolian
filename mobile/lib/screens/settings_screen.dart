@@ -3,6 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../providers/analysis_provider.dart';
+import '../providers/plan_provider.dart';
+import '../providers/workout_provider.dart';
+import '../providers/nutrition_provider.dart';
+import '../providers/chat_provider.dart';
 import '../services/storage_service.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -299,9 +304,16 @@ class SettingsScreen extends StatelessWidget {
             child: const Text('取消'),
           ),
           ElevatedButton(
-            onPressed: () {
-              StorageService.clear();
+            onPressed: () async {
               Navigator.pop(context);
+              await StorageService.clear();
+              // 重置内存中的数据，避免页面继续展示旧数据
+              if (!context.mounted) return;
+              context.read<AnalysisProvider>().clearHistory();
+              context.read<PlanProvider>().clearPlans();
+              context.read<WorkoutProvider>().cancelWorkout();
+              context.read<NutritionProvider>().clearError();
+              context.read<ChatProvider>().clearChat();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('数据已清空')),
               );

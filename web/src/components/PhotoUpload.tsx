@@ -1,6 +1,8 @@
 'use client';
 
-import { useCallback, useState, DragEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, DragEvent } from 'react';
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 interface PhotoUploadProps {
   onUpload: (file: File) => void;
@@ -10,13 +12,33 @@ interface PhotoUploadProps {
 export default function PhotoUpload({ onUpload, isAnalyzing }: PhotoUploadProps) {
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const previewRef = useRef<string | null>(null);
 
   const handleFile = useCallback((file: File) => {
     if (!file.type.startsWith('image/')) return;
+    if (file.size > MAX_FILE_SIZE) {
+      alert('图片超过 10MB 限制');
+      return;
+    }
+    // 释放旧的 blob URL
+    if (previewRef.current) {
+      URL.revokeObjectURL(previewRef.current);
+    }
     const url = URL.createObjectURL(file);
+    previewRef.current = url;
     setPreview(url);
     onUpload(file);
   }, [onUpload]);
+
+  // 组件卸载时释放 blob URL
+  useEffect(() => {
+    return () => {
+      if (previewRef.current) {
+        URL.revokeObjectURL(previewRef.current);
+        previewRef.current = null;
+      }
+    };
+  }, []);
 
   const handleDrop = useCallback((e: DragEvent) => {
     e.preventDefault();

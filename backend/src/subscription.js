@@ -95,6 +95,13 @@ const stmts = {
   insertUsage: db.prepare(`
     INSERT INTO usage_logs (user_id, action, created_at) VALUES (?, ?, ?)
   `),
+  deleteUsageById: db.prepare('DELETE FROM usage_logs WHERE id = ?'),
+  downgradeExpired: db.prepare(`
+    UPDATE users SET plan = 'free', plan_expires_at = NULL, updated_at = ? WHERE id = ? AND plan != 'free' AND plan_expires_at IS NOT NULL AND plan_expires_at < ?
+  `),
+  upgradePlan: db.prepare(`
+    UPDATE users SET plan = ?, plan_expires_at = ?, updated_at = ? WHERE id = ?
+  `),
 };
 
 /**
@@ -107,10 +114,9 @@ export function getUserPlan(userId) {
 
   const { plan, plan_expires_at } = row;
 
-  // Pro 套餐过期检查
+  // Pro 套餐过期检查（原子操作，避免重复降级）
   if (plan !== 'free' && plan_expires_at && Date.now() > plan_expires_at) {
-    db.prepare('UPDATE users SET plan = ?, plan_expires_at = NULL, updated_at = ? WHERE id = ?')
-      .run('free', Date.now(), userId);
+    stmts.downgradeExpired.run(Date.now(), userId, Date.now());
     return 'free';
   }
 
@@ -118,13 +124,24 @@ export function getUserPlan(userId) {
 }
 
 /**
+ * 中国时区下的"今日 0 点"对应的 UTC 毫秒数
+ * 解决 Railway/Docker 默认 UTC 时区导致"今日"边界错误的问题
+ */
+function getTodayStartMs() {
+  const now = new Date();
+  // 转换到中国时区 (UTC+8)
+  const cnOffset = 8 * 3600000;
+  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
+  const cnDate = new Date(utcMs + cnOffset);
+  cnDate.setHours(0, 0, 0, 0);
+  return cnDate.getTime() - cnOffset;
+}
+
+/**
  * 获取用户今日已用次数
  */
 export function getTodayUsage(userId, action) {
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  const ts = todayStart.getTime();
-
+  const ts = getTodayStartMs();
   const row = stmts.countTodayUsage.get(userId, action, ts);
   return row?.count || 0;
 }
@@ -185,6 +202,45 @@ export function checkQuota(userId, action) {
 }
 
 /**
+ * 预占配额：在同事务内 check + insert，避免 TOCTOU 并发绕过。
+ * 返回 usage 记录 id。AI 调用失败时调用 releaseQuota(id) 释放。
+ */
+export function reserveQuota(userId, action) {
+  const limitKey = ACTION_TO_LIMIT_KEY[action];
+  if (!limitKey) return null;
+
+  return db.transaction(() => {
+    const plan = getUserPlan(userId);
+    const planConfig = PLANS[plan] || PLANS.free;
+    const limit = planConfig.limits[limitKey];
+    const used = getTodayUsage(userId, action);
+
+    if (used >= limit) {
+      const err = new Error(`今日${getActionLabel(action)}次数已用完，升级 Pro 解锁更多`);
+      err.statusCode = 429;
+      err.quotaExceeded = true;
+      err.action = action;
+      throw err;
+    }
+
+    const result = stmts.insertUsage.run(userId, action, Date.now());
+    return Number(result.lastInsertRowid);
+  })();
+}
+
+/**
+ * 释放预占的配额（AI 调用失败时调用）
+ */
+export function releaseQuota(usageId) {
+  if (!usageId) return;
+  try {
+    stmts.deleteUsageById.run(usageId);
+  } catch (err) {
+    console.error('释放配额失败:', err.message);
+  }
+}
+
+/**
  * 检查 Pro 订阅是否有效
  */
 export function isProUser(userId) {
@@ -193,12 +249,15 @@ export function isProUser(userId) {
 }
 
 /**
- * 升级用户套餐
+ * 升级用户套餐 —— 在剩余时长基础上叠加，避免续费丢失未到期天数
  */
 export function upgradePlan(userId, planId, durationMs) {
-  const expiresAt = Date.now() + durationMs;
-  db.prepare('UPDATE users SET plan = ?, plan_expires_at = ?, updated_at = ? WHERE id = ?')
-    .run(planId, expiresAt, Date.now(), userId);
+  const row = stmts.getUserPlan.get(userId);
+  const base = row && row.plan_expires_at && row.plan_expires_at > Date.now()
+    ? row.plan_expires_at
+    : Date.now();
+  const expiresAt = base + durationMs;
+  stmts.upgradePlan.run(planId, expiresAt, Date.now(), userId);
 }
 
 function getActionLabel(action) {

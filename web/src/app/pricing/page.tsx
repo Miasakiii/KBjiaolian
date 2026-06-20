@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { getToken, isAuthenticated } from '@/lib/auth'
+import { getToken, isAuthenticated, authFetch } from '@/lib/auth'
 import { toast } from 'sonner'
 import {
   Crown, Check, Camera, Dumbbell, Apple, MessageCircle,
@@ -87,11 +87,9 @@ export default function PricingPage() {
       .catch(() => {})
 
     if (isAuthenticated()) {
-      fetch(`${API_BASE}/auth/profile`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
-      })
+      authFetch(`${API_BASE}/auth/profile`)
         .then(r => r.json())
-        .then(data => setCurrentPlan(data.plan || 'free'))
+        .then(data => { if (data && data.plan) setCurrentPlan(data.plan) })
         .catch(() => {})
     }
   }, [])
@@ -107,19 +105,15 @@ export default function PricingPage() {
 
     setLoading(planId)
     try {
-      const res = await fetch(`${API_BASE}/orders`, {
+      const res = await authFetch(`${API_BASE}/orders`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
         body: JSON.stringify({ plan: planId }),
       })
 
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
+      const data = await res.json().catch(() => ({} as Record<string, unknown>))
+      if (!res.ok) throw new Error((data && typeof data === 'object' && 'error' in data ? String((data as Record<string, unknown>).error) : '') || '创建订单失败')
 
-      router.push(`/payment?orderId=${data.order.id}`)
+      router.push(`/payment?orderId=${(data as { order?: { id?: string } }).order?.id ?? ''}`)
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : '创建订单失败'
       toast.error(message)

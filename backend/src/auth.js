@@ -8,21 +8,27 @@ const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET 环境变量未设置。请在 .env 文件中配置安全的密钥。');
 }
-const JWT_EXPIRES_IN = '7d';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 // 验证码配置
 const CODE_LENGTH = 6;
 const CODE_EXPIRE_MS = 5 * 60 * 1000; // 5 分钟
 const CODE_COOLDOWN_MS = 60 * 1000; // 60 秒冷却
 
-// 验证邮箱格式
+// 验证邮箱格式（RFC 5322 简化版）
 function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/.test(email);
 }
 
-// 验证密码强度
+// 验证密码强度：6-100 字符，且必须同时包含字母和数字
 function isValidPassword(password) {
-  return typeof password === 'string' && password.length >= 6 && password.length <= 100;
+  if (typeof password !== 'string' || password.length < 6 || password.length > 100) {
+    return false;
+  }
+  // 至少包含一个字母和一个数字
+  const hasLetter = /[a-zA-Z]/.test(password);
+  const hasDigit = /\d/.test(password);
+  return hasLetter && hasDigit;
 }
 
 // 生成 JWT Token
@@ -30,9 +36,9 @@ function generateToken(userId) {
   return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 }
 
-// 生成用户 ID
+// 生成用户 ID（使用 crypto.randomUUID 避免可预测与碰撞）
 function generateUserId() {
-  return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
+  return crypto.randomUUID();
 }
 
 // 生成 6 位数字验证码
@@ -105,15 +111,19 @@ export async function sendVerificationCode(req, res) {
     stmts.insertCode.run(normalizedEmail, code, type, expiresAt);
 
     // TODO: 接入真实邮件服务（Resend / QQ邮箱 SMTP / SendGrid）
-    // 当前为开发模式，控制台打印验证码
-    console.log('');
-    console.log('='.repeat(50));
-    console.log(`📧 验证码 [${type === 'register' ? '注册' : '重置密码'}]`);
-    console.log(`   邮箱: ${normalizedEmail}`);
-    console.log(`   验证码: ${code}`);
-    console.log(`   有效期: 5 分钟`);
-    console.log('='.repeat(50));
-    console.log('');
+    // 开发模式打印验证码到控制台；生产环境只记录发送事件不打印验证码本身
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('');
+      console.log('='.repeat(50));
+      console.log(`📧 验证码 [${type === 'register' ? '注册' : '重置密码'}]`);
+      console.log(`   邮箱: ${normalizedEmail}`);
+      console.log(`   验证码: ${code}`);
+      console.log(`   有效期: 5 分钟`);
+      console.log('='.repeat(50));
+      console.log('');
+    } else {
+      console.log(`📧 验证码已发送 [${type === 'register' ? '注册' : '重置密码'}] 邮箱:${normalizedEmail}`);
+    }
 
     res.json({
       message: '验证码已发送',
@@ -128,7 +138,7 @@ export async function sendVerificationCode(req, res) {
   }
 }
 
-// === 验证验证码 ===
+// === 验证验证码（不立即标记已用，由调用方在动作成功后调用 markCodeUsed） ===
 export function verifyCode(email, code, type = 'register') {
   const normalizedEmail = email.toLowerCase().trim();
   const record = stmts.findValidCode.get(normalizedEmail, code, type, Date.now());
@@ -137,9 +147,14 @@ export function verifyCode(email, code, type = 'register') {
     return { valid: false, error: '验证码无效或已过期' };
   }
 
-  // 标记已使用
-  stmts.markCodeUsed.run(record.id);
-  return { valid: true };
+  // 仅返回 codeId，调用方在动作真正成功后再调用 markCodeUsed
+  return { valid: true, codeId: record.id };
+}
+
+// 标记验证码已用
+export function markCodeUsed(codeId) {
+  if (!codeId) return;
+  stmts.markCodeUsed.run(codeId);
 }
 
 // === 注册（需要验证码）===
@@ -155,10 +170,10 @@ export async function register(req, res) {
       return res.status(400).json({ error: '邮箱格式不正确' });
     }
     if (!isValidPassword(password)) {
-      return res.status(400).json({ error: '密码长度需要 6-100 个字符' });
+      return res.status(400).json({ error: '密码需要 6-100 个字符，且必须包含字母和数字' });
     }
 
-    // 验证码校验
+    // 验证码校验（不立即标记已用）
     const normalizedEmail = email.toLowerCase().trim();
     const codeResult = verifyCode(normalizedEmail, code, 'register');
     if (!codeResult.valid) {
@@ -171,24 +186,35 @@ export async function register(req, res) {
       return res.status(409).json({ error: '该邮箱已注册' });
     }
 
-    // 创建用户
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const userId = generateUserId();
-    const userNickname = (nickname || email.split('@')[0]).substring(0, 50);
+    try {
+      // 创建用户
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const userId = generateUserId();
+      const userNickname = (nickname || email.split('@')[0]).substring(0, 50);
 
-    stmts.createUser.run(userId, normalizedEmail, hashedPassword, userNickname);
+      stmts.createUser.run(userId, normalizedEmail, hashedPassword, userNickname);
 
-    // 生成 token
-    const token = generateToken(userId);
+      // 注册成功后才标记验证码已用
+      markCodeUsed(codeResult.codeId);
 
-    res.status(201).json({
-      token,
-      user: {
-        id: userId,
-        email: normalizedEmail,
-        nickname: userNickname,
-      },
-    });
+      // 生成 token
+      const token = generateToken(userId);
+
+      res.status(201).json({
+        token,
+        user: {
+          id: userId,
+          email: normalizedEmail,
+          nickname: userNickname,
+        },
+      });
+    } catch (err) {
+      // 注册过程失败，不标记验证码已用，用户可重试
+      if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+        return res.status(409).json({ error: '该邮箱已注册' });
+      }
+      throw err;
+    }
   } catch (err) {
     console.error('注册失败:', err.message);
     res.status(500).json({ error: '注册失败，请稍后重试' });
@@ -196,6 +222,9 @@ export async function register(req, res) {
 }
 
 // === 登录（不需要验证码）===
+// 预生成的固定 bcrypt 哈希，用于不存在用户时的时序攻击防御
+const DUMMY_HASH = '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
+
 export async function login(req, res) {
   try {
     const { email, password } = req.body;
@@ -207,12 +236,10 @@ export async function login(req, res) {
     const normalizedEmail = email.toLowerCase().trim();
     const user = stmts.findUserByEmail.get(normalizedEmail);
 
-    if (!user) {
-      return res.status(401).json({ error: '邮箱或密码错误' });
-    }
+    // 无论用户是否存在都执行一次 bcrypt 比较，避免用户枚举的时序攻击
+    const isValid = await bcrypt.compare(password, user?.password || DUMMY_HASH);
 
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
+    if (!user || !isValid) {
       return res.status(401).json({ error: '邮箱或密码错误' });
     }
 
@@ -234,19 +261,24 @@ export async function login(req, res) {
 
 // === 获取当前用户信息 ===
 export function getProfile(req, res) {
-  const user = stmts.findUserById.get(req.userId);
-  if (!user) {
-    return res.status(404).json({ error: '用户不存在' });
-  }
+  try {
+    const user = stmts.findUserById.get(req.userId);
+    if (!user) {
+      return res.status(404).json({ error: '用户不存在' });
+    }
 
-  res.json({
-    id: user.id,
-    email: user.email,
-    nickname: user.nickname,
-    plan: user.plan || 'free',
-    planExpiresAt: user.plan_expires_at,
-    createdAt: user.created_at,
-  });
+    res.json({
+      id: user.id,
+      email: user.email,
+      nickname: user.nickname,
+      plan: user.plan || 'free',
+      planExpiresAt: user.plan_expires_at,
+      createdAt: user.created_at,
+    });
+  } catch (err) {
+    console.error('获取用户信息失败:', err.message);
+    res.status(500).json({ error: '获取用户信息失败' });
+  }
 }
 
 // === 忘记密码 — 发送重置验证码 ===
@@ -282,14 +314,18 @@ export async function forgotPassword(req, res) {
     stmts.insertCode.run(normalizedEmail, code, 'reset', expiresAt);
 
     // TODO: 接入真实邮件服务
-    console.log('');
-    console.log('='.repeat(50));
-    console.log(`📧 重置密码验证码`);
-    console.log(`   邮箱: ${normalizedEmail}`);
-    console.log(`   验证码: ${code}`);
-    console.log(`   有效期: 5 分钟`);
-    console.log('='.repeat(50));
-    console.log('');
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('');
+      console.log('='.repeat(50));
+      console.log(`📧 重置密码验证码`);
+      console.log(`   邮箱: ${normalizedEmail}`);
+      console.log(`   验证码: ${code}`);
+      console.log(`   有效期: 5 分钟`);
+      console.log('='.repeat(50));
+      console.log('');
+    } else {
+      console.log(`📧 重置密码验证码已发送 邮箱:${normalizedEmail}`);
+    }
 
     res.json({
       message: '如果该邮箱已注册，验证码已发送',
@@ -313,7 +349,7 @@ export async function resetPassword(req, res) {
     }
 
     if (!isValidPassword(newPassword)) {
-      return res.status(400).json({ error: '密码长度需要 6-100 个字符' });
+      return res.status(400).json({ error: '密码需要 6-100 个字符，且必须包含字母和数字' });
     }
 
     const normalizedEmail = email.toLowerCase().trim();
@@ -322,17 +358,25 @@ export async function resetPassword(req, res) {
       return res.status(400).json({ error: '验证码无效或已过期' });
     }
 
-    // 验证码校验
+    // 验证码校验（不立即标记已用）
     const codeResult = verifyCode(normalizedEmail, code, 'reset');
     if (!codeResult.valid) {
       return res.status(400).json({ error: codeResult.error });
     }
 
-    // 更新密码
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    stmts.updatePassword.run(hashedPassword, Date.now(), user.id);
+    try {
+      // 更新密码
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      stmts.updatePassword.run(hashedPassword, Date.now(), user.id);
 
-    res.json({ message: '密码重置成功，请使用新密码登录' });
+      // 重置成功后才标记验证码已用
+      markCodeUsed(codeResult.codeId);
+
+      res.json({ message: '密码重置成功，请使用新密码登录' });
+    } catch (err) {
+      // 重置过程失败，不标记验证码已用，用户可重试
+      throw err;
+    }
   } catch (err) {
     console.error('重置密码失败:', err.message);
     res.status(500).json({ error: '重置失败，请稍后重试' });

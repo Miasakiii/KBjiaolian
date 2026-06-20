@@ -73,24 +73,28 @@ class NutritionProvider extends ChangeNotifier {
 
   Map<String, dynamic> get todayNutrition {
     final today = DateTime.now();
-    final todayRecords = _records.where((r) {
-      final date = DateTime.parse(r['createdAt']);
-      return date.year == today.year &&
-          date.month == today.month &&
-          date.day == today.day;
-    }).toList();
-
     int totalCalories = 0;
     int totalProtein = 0;
     int totalCarbs = 0;
     int totalFat = 0;
+    int count = 0;
 
-    for (final record in todayRecords) {
+    for (final record in _records) {
+      if (record is! Map) continue;
+      final createdStr = record['createdAt']?.toString();
+      final date = createdStr == null ? null : DateTime.tryParse(createdStr);
+      if (date == null) continue;
+      if (date.year != today.year || date.month != today.month || date.day != today.day) {
+        continue;
+      }
+
       final analysis = record['analysis'];
-      totalCalories += (analysis['totalCalories'] ?? 0) as int;
-      totalProtein += (analysis['totalProtein'] ?? 0) as int;
-      totalCarbs += (analysis['totalCarbs'] ?? 0) as int;
-      totalFat += (analysis['totalFat'] ?? 0) as int;
+      if (analysis is! Map) continue;
+      totalCalories += _toInt(analysis['totalCalories']);
+      totalProtein += _toInt(analysis['totalProtein']);
+      totalCarbs += _toInt(analysis['totalCarbs']);
+      totalFat += _toInt(analysis['totalFat']);
+      count++;
     }
 
     return {
@@ -98,8 +102,16 @@ class NutritionProvider extends ChangeNotifier {
       'protein': totalProtein,
       'carbs': totalCarbs,
       'fat': totalFat,
-      'recordCount': todayRecords.length,
+      'recordCount': count,
     };
+  }
+
+  // 安全转 int：兼容 num/double/String/null
+  static int _toInt(dynamic v) {
+    if (v is int) return v;
+    if (v is num) return v.round();
+    if (v is String) return int.tryParse(v) ?? 0;
+    return 0;
   }
 
   void clearError() {

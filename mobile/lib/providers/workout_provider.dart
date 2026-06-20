@@ -39,17 +39,27 @@ class WorkoutProvider extends ChangeNotifier {
   }
 
   void startWorkout(Map<String, dynamic> plan, int dayIndex) {
+    final schedule = (plan['schedule'] as List?) ?? const [];
+    if (dayIndex < 0 || dayIndex >= schedule.length) return;
+    final day = schedule[dayIndex] as Map? ?? const {};
+    final exercisesRaw = (day['exercises'] as List?) ?? const [];
+
     _currentWorkout = {
       'planId': plan['id'],
       'planName': plan['name'],
       'dayIndex': dayIndex,
-      'day': plan['schedule'][dayIndex],
-      'exercises': (plan['schedule'][dayIndex]['exercises'] as List).map((e) {
+      'day': day,
+      'exercises': exercisesRaw.map((raw) {
+        final e = raw is Map ? Map<String, dynamic>.from(raw) : <String, dynamic>{};
+        final setsValue = e['sets'];
+        final setsCount = setsValue is int
+            ? setsValue
+            : (int.tryParse(setsValue?.toString() ?? '') ?? 3);
         return {
           ...e,
           'completedSets': List.generate(
-            e['sets'] ?? 3,
-            (_) => {'reps': 0, 'completed': false},
+            setsCount,
+            (_) => <String, dynamic>{'reps': 0, 'completed': false},
           ),
         };
       }).toList(),
@@ -62,8 +72,12 @@ class WorkoutProvider extends ChangeNotifier {
   void completeSet(int exerciseIndex, int setIndex, int reps) {
     if (_currentWorkout == null) return;
 
-    final exercises = _currentWorkout!['exercises'] as List;
-    final sets = exercises[exerciseIndex]['completedSets'] as List;
+    final exercises = (_currentWorkout!['exercises'] as List?) ?? const [];
+    if (exerciseIndex < 0 || exerciseIndex >= exercises.length) return;
+    final exercise = exercises[exerciseIndex] as Map? ?? const {};
+    final sets = (exercise['completedSets'] as List?) ?? const [];
+    if (setIndex < 0 || setIndex >= sets.length) return;
+
     sets[setIndex] = {'reps': reps, 'completed': true};
     notifyListeners();
   }
@@ -114,9 +128,12 @@ class WorkoutProvider extends ChangeNotifier {
 
   int get thisWeekWorkouts {
     final now = DateTime.now();
-    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    // 以本周一 00:00 为起点（locale 无关），修正原逻辑把本周一 now 之前的记录排除掉的问题
+    final startOfWeek = DateTime(now.year, now.month, now.day)
+        .subtract(Duration(days: now.weekday - 1));
     return _records.where((r) {
-      final date = DateTime.parse(r['createdAt']);
+      final date = DateTime.tryParse(r['createdAt']?.toString() ?? '');
+      if (date == null) return false;
       return date.isAfter(startOfWeek);
     }).length;
   }

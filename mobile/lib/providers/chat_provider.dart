@@ -21,11 +21,9 @@ class ChatMessage {
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     return ChatMessage(
-      role: json['role'] ?? 'user',
-      content: json['content'] ?? '',
-      timestamp: json['timestamp'] != null
-          ? DateTime.parse(json['timestamp'])
-          : DateTime.now(),
+      role: (json['role'] ?? 'user').toString(),
+      content: (json['content'] ?? '').toString(),
+      timestamp: DateTime.tryParse(json['timestamp']?.toString() ?? '') ?? DateTime.now(),
     );
   }
 }
@@ -82,12 +80,15 @@ class ChatProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      // 准备历史消息
-      final history = _messages
-          .where((m) => m.role != 'system')
-          .take(_messages.length - 1)
-          .map((m) => {'role': m.role, 'content': m.content})
-          .toList();
+      // 准备历史消息：跳过欢迎消息（首条 assistant）；排除刚刚插入的用户消息
+      final history = <Map<String, String>>[];
+      if (_messages.length > 1) {
+        // skip(1) 跳过欢迎消息；take 排除最后一条用户消息
+        final skipCount = (_messages.length - 1).clamp(0, _messages.length);
+        for (final m in _messages.skip(1).take(skipCount - 1 < 0 ? 0 : skipCount - 1)) {
+          history.add({'role': m.role, 'content': m.content});
+        }
+      }
 
       final reply = await ApiService.sendMessage(content, history);
 
@@ -110,7 +111,7 @@ class ChatProvider extends ChangeNotifier {
     }
   }
 
-  void clearChat() {
+  Future<void> clearChat() async {
     _messages.clear();
     _messages.add(ChatMessage(
       role: 'assistant',
@@ -118,6 +119,15 @@ class ChatProvider extends ChangeNotifier {
       timestamp: DateTime.now(),
     ));
     notifyListeners();
+
+    // 同步清空云端聊天历史
+    try {
+      if (await ApiService.isAuthenticated()) {
+        await ApiService.authenticatedDelete('/data/chat');
+      }
+    } catch (e) {
+      debugPrint('清空云端聊天历史失败: $e');
+    }
   }
 
   void clearError() {

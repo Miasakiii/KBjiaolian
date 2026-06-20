@@ -39,7 +39,14 @@ class AnalysisProvider extends ChangeNotifier {
 
     if (_history.isNotEmpty) {
       try {
-        _currentResult = AnalysisResult.fromJson(_history.first['result']);
+        final first = _history.first;
+        // 后端响应可能是 {result: {...}} 或直接 {...}，兼容两种结构
+        final raw = first is Map ? (first['result'] ?? first) : null;
+        if (raw is Map) {
+          _currentResult = AnalysisResult.fromJson(
+            Map<String, dynamic>.from(raw),
+          );
+        }
       } catch (e) {
         debugPrint('加载历史记录失败: $e');
       }
@@ -48,6 +55,8 @@ class AnalysisProvider extends ChangeNotifier {
   }
 
   Future<void> analyzePhoto(dynamic imageFile) async {
+    // 防止重入：UI 已用 isAnalyzing 禁用按钮，但 provider 层也兜底
+    if (_isAnalyzing) return;
     _isAnalyzing = true;
     _error = null;
     notifyListeners();
@@ -69,7 +78,30 @@ class AnalysisProvider extends ChangeNotifier {
       // 保存到云端
       await CloudStorageService.saveAnalysisRecord(record);
 
+      // 合并本地+云端，避免丢失其他设备的记录
       _history = StorageService.getAnalysisRecords();
+      try {
+        if (await ApiService.isAuthenticated()) {
+          final cloudRecords = await CloudStorageService.getAnalysisRecords();
+          if (cloudRecords.isNotEmpty) {
+            // 简单合并：本地最新 + 云端剩余
+            final localIds = _history.map((r) => r['id']?.toString()).toSet();
+            for (final r in cloudRecords) {
+              if (r is Map && !localIds.contains(r['id']?.toString())) {
+                _history.add(r);
+              }
+            }
+            // 按时间倒序
+            _history.sort((a, b) {
+              final ta = a is Map ? (a['timestamp']?.toString() ?? '') : '';
+              final tb = b is Map ? (b['timestamp']?.toString() ?? '') : '';
+              return tb.compareTo(ta);
+            });
+          }
+        }
+      } catch (e) {
+        debugPrint('合并云端分析记录失败: $e');
+      }
     } catch (e) {
       _error = e.toString();
       debugPrint('分析失败: $e');
@@ -84,8 +116,8 @@ class AnalysisProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void clearHistory() {
-    StorageService.saveList('analysis_records', []);
+  Future<void> clearHistory() async {
+    await StorageService.saveList('analysis_records', []);
     _history = [];
     _currentResult = null;
     notifyListeners();

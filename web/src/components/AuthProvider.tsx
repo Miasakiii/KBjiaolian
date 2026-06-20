@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { syncLocalToCloud } from '@/lib/cloudStorage';
@@ -18,6 +18,8 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const pathname = usePathname();
   const { isAuthenticated, isGuest, isLoading } = useAuth();
   const [checking, setChecking] = useState(true);
+  // 用 ref 标记本次会话是否已同步过，避免每次路由切换都触发 N+1 网络请求
+  const syncedRef = useRef(false);
 
   useEffect(() => {
     if (isLoading) return;
@@ -31,9 +33,14 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     } else {
       setChecking(false);
 
-      // 如果已登录，尝试同步本地数据到云端
-      if (isAuthenticated) {
+      // 已登录且本会话未同步过本地→云端，触发一次
+      if (isAuthenticated && !syncedRef.current) {
+        syncedRef.current = true;
         syncLocalToCloud().catch(console.warn);
+      }
+      // 登出后 isAuthenticated 变 false，下次重新登录需要再次同步
+      if (!isAuthenticated) {
+        syncedRef.current = false;
       }
     }
   }, [pathname, router, isAuthenticated, isGuest, isLoading]);

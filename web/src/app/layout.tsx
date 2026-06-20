@@ -28,11 +28,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#16a34a',
+  // 与 tailwind primary-900 一致，避免 PWA 状态栏绿而 UI 内部灰的不协调
+  themeColor: '#171717',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  // 允许用户缩放，符合 WCAG 1.4.4 (Resize text)
+  maximumScale: 5,
+  userScalable: true,
 };
 
 export default function RootLayout({

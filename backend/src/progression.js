@@ -4,6 +4,33 @@
  */
 
 /**
+ * 解析 reps/sets/weight 字符串为数字。
+ * 支持 "8-12" → 10（均值）、"3组" → 3、"10kg" → 10。
+ */
+function parseRangeNum(value) {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value !== 'string') return 0;
+  const trimmed = value.trim();
+  if (trimmed === '') return 0;
+
+  // "8-12" 取均值
+  const rangeMatch = trimmed.match(/(\d+(?:\.\d+)?)\s*[-~到]\s*(\d+(?:\.\d+)?)/);
+  if (rangeMatch) {
+    const a = Number(rangeMatch[1]);
+    const b = Number(rangeMatch[2]);
+    if (Number.isFinite(a) && Number.isFinite(b)) return Math.round((a + b) / 2);
+  }
+
+  // 提取首个数字
+  const numMatch = trimmed.match(/(\d+(?:\.\d+)?)/);
+  if (numMatch) {
+    const n = Number(numMatch[1]);
+    if (Number.isFinite(n)) return n;
+  }
+  return 0;
+}
+
+/**
  * 从历史训练记录中提取每个动作的表现数据
  * @param {Array} workoutRecords - 训练记录列表
  * @returns {Object} 动作名称 -> 表现数据
@@ -35,9 +62,9 @@ export function extractExercisePerformance(workoutRecords) {
       const perf = performance[name];
       perf.sessions++;
 
-      const weight = Number(exercise.weight) || 0;
-      const reps = Number(exercise.reps) || Number(String(exercise.reps)?.replace(/[^0-9]/g, '')) || 0;
-      const sets = Number(exercise.sets) || Number(String(exercise.sets)?.replace(/[^0-9]/g, '')) || 0;
+      const weight = parseRangeNum(exercise.weight);
+      const reps = parseRangeNum(exercise.reps);
+      const sets = parseRangeNum(exercise.sets);
 
       perf.maxWeight = Math.max(perf.maxWeight, weight);
       perf.maxReps = Math.max(perf.maxReps, reps);
@@ -109,9 +136,9 @@ export function calculateProgression(performance, userProfile = {}) {
       previousSets: perf.lastSets,
     };
 
-    if (perf.sessions === 0) {
-      // 新动作：使用保守起点
-      suggestion.weight = 0;
+    if (perf.sessions === 1) {
+      // 新动作（仅训练过 1 次）：使用保守起点
+      suggestion.weight = perf.lastWeight || 0;
       suggestion.reps = '8-12';
       suggestion.sets = 3;
       suggestion.reason = '首次训练，建议从轻重量开始';
@@ -199,9 +226,11 @@ export function getProgressionSummary(progression) {
   const summary = [];
 
   for (const [name, s] of Object.entries(progression)) {
-    if (s.adjustment === 'new') continue;
-
-    const emoji = s.adjustment === 'increase' ? '📈' : s.adjustment === 'decrease' ? '📉' : '➡️';
+    // 包含 new 状态（首次训练）的建议
+    const emoji = s.adjustment === 'increase' ? '📈'
+      : s.adjustment === 'decrease' ? '📉'
+      : s.adjustment === 'new' ? '🆕'
+      : '➡️';
     summary.push({
       exercise: name,
       emoji,
@@ -211,9 +240,9 @@ export function getProgressionSummary(progression) {
     });
   }
 
-  // 按调整类型排序：增加 > 保持 > 降低
+  // 按调整类型排序：增加 > 保持 > 降低 > 新
   summary.sort((a, b) => {
-    const order = { increase: 0, maintain: 1, decrease: 2 };
+    const order = { increase: 0, maintain: 1, decrease: 2, new: 3 };
     return (order[a.adjustment] ?? 1) - (order[b.adjustment] ?? 1);
   });
 

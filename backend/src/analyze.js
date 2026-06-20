@@ -1,21 +1,23 @@
+import crypto from 'crypto';
+
 const API_URL = process.env.MIMO_API_URL;
 const API_KEY = process.env.MIMO_API_KEY;
 const MODEL = process.env.MIMO_MODEL || 'mimo-v2.5';
+
+// 启动时校验关键环境变量（测试环境跳过以方便 mock）
+if (process.env.NODE_ENV !== 'test' && (!API_URL || !API_KEY)) {
+  throw new Error('MIMO_API_URL / MIMO_API_KEY 环境变量未设置');
+}
+
+import { extractJsonObject } from './validation.js';
 
 // 结果缓存：对相同图片返回一致结果
 const analysisCache = new Map();
 const CACHE_MAX_SIZE = 100;
 
 function getCacheKey(base64Image) {
-  // 使用图片的前1000字符作为缓存key（避免内存过大）
-  let hash = 0;
-  const str = base64Image.substring(0, 1000);
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return hash.toString(36);
+  // 使用 sha256 计算完整图片哈希，避免前缀/哈希碰撞导致返回错误结果
+  return crypto.createHash('sha256').update(base64Image).digest('hex');
 }
 
 function normalizeScore(value, min = 0, max = 100) {
@@ -203,12 +205,7 @@ export async function analyzePhoto(base64Image) {
       throw new Error('MiMo API 返回为空');
     }
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('无法解析 AI 返回的 JSON');
-    }
-
-    const rawResult = JSON.parse(jsonMatch[0]);
+    const rawResult = extractJsonObject(content);
     const normalizedResult = normalizeResult(rawResult);
 
     // 存入缓存
@@ -318,12 +315,7 @@ export async function compareAnalysis(beforeResult, afterResult) {
       throw new Error('MiMo API 返回为空');
     }
 
-    const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('无法解析 AI 返回的 JSON');
-    }
-
-    const result = JSON.parse(jsonMatch[0]);
+    const result = extractJsonObject(content);
 
     // 标准化对比结果
     return {

@@ -91,9 +91,12 @@ export function clearRedirectPath(): void {
 export async function authFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const token = getToken();
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...((options.headers as Record<string, string>) || {}),
   };
+  // 仅在有 body 时设置 Content-Type，避免无谓的 CORS preflight
+  if (options.body && !headers['Content-Type']) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -104,35 +107,36 @@ export async function authFetch(url: string, options: RequestInit = {}): Promise
   // 如果 token 过期，清除认证信息
   if (response.status === 401) {
     if (isGuest()) {
+      clearGuest();
       throw new Error('游客模式下无法使用此功能，请先登录');
     }
     clearAuth();
-    window.location.href = '/login';
+    // 异步跳转，给调用方处理错误的机会
+    setTimeout(() => { window.location.href = '/login'; }, 0);
     throw new Error('登录已过期，请重新登录');
   }
 
   return response;
 }
 
-// 注册
-export async function register(email: string, password: string, nickname?: string): Promise<AuthResponse> {
+// 注册（仅调用 API 返回 token+user，不写 localStorage —— 由调用方决定通过 AuthContext.login 写入）
+export async function register(email: string, password: string, nickname?: string, code?: string): Promise<AuthResponse> {
   const response = await fetch(`${API_BASE}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, nickname }),
+    body: JSON.stringify({ email, password, nickname, code }),
   });
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({} as Record<string, unknown>));
 
   if (!response.ok) {
-    throw new Error(data.error || '注册失败');
+    throw new Error((data && typeof data === 'object' && 'error' in data ? String((data as Record<string, unknown>).error) : '') || '注册失败，请稍后重试');
   }
 
-  saveAuth(data);
-  return data;
+  return data as AuthResponse;
 }
 
-// 登录
+// 登录（仅调用 API 返回 token+user，不写 localStorage —— 由调用方决定通过 AuthContext.login 写入）
 export async function login(email: string, password: string): Promise<AuthResponse> {
   const response = await fetch(`${API_BASE}/auth/login`, {
     method: 'POST',
@@ -140,38 +144,53 @@ export async function login(email: string, password: string): Promise<AuthRespon
     body: JSON.stringify({ email, password }),
   });
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({} as Record<string, unknown>));
 
   if (!response.ok) {
-    throw new Error(data.error || '登录失败');
+    throw new Error((data && typeof data === 'object' && 'error' in data ? String((data as Record<string, unknown>).error) : '') || '登录失败，请稍后重试');
   }
 
-  saveAuth(data);
-  return data;
+  return data as AuthResponse;
 }
 
 // 登出
 export function logout(): void {
   clearAuth();
   clearGuest();
+  // 清理 Service Worker 中可能缓存的含个人信息 API 响应，避免多用户/共享设备泄露
+  if (typeof window !== 'undefined' && 'caches' in window) {
+    caches.delete('kb-coach-api-v1').catch(() => {});
+  }
   window.location.href = '/login';
 }
 
-// 忘记密码
-export async function forgotPassword(email: string): Promise<{ message: string; token?: string; resetUrl?: string }> {
+// 忘记密码（只接收 message 字段，避免重置 token 等敏感字段流向客户端）
+export interface ForgotPasswordResponse {
+  message: string;
+  devHint?: string;
+}
+
+export async function forgotPassword(email: string): Promise<ForgotPasswordResponse> {
   const response = await fetch(`${API_BASE}/auth/forgot-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email }),
   });
 
-  const data = await response.json();
+  const data = await response.json().catch(() => ({} as Record<string, unknown>));
 
   if (!response.ok) {
-    throw new Error(data.error || '操作失败');
+    throw new Error((data && typeof data === 'object' && 'error' in data ? String((data as Record<string, unknown>).error) : '') || '操作失败');
   }
 
-  return data;
+  // 仅保留白名单字段，丢弃任何 token/resetUrl 等敏感字段
+  const safe: ForgotPasswordResponse = {
+    message: typeof data.message === 'string' ? data.message : '请查收邮件',
+  };
+  if (process.env.NODE_ENV !== 'production' && typeof data.devHint === 'string') {
+    safe.devHint = data.devHint;
+  }
+  return safe;
 }
 
 // 重置密码

@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import db from './database.js';
 import { PLANS, upgradePlan } from './subscription.js';
 
@@ -13,8 +14,12 @@ const stmts = {
   getUserOrders: db.prepare(`
     SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC LIMIT 20
   `),
-  updateOrderStatus: db.prepare(`
-    UPDATE orders SET status = ?, trade_no = ?, paid_at = ? WHERE id = ?
+  // 带 WHERE status='pending' 的更新：避免并发重复支付，依赖 SQLite 行锁
+  updateOrderStatusIfPending: db.prepare(`
+    UPDATE orders SET status = ?, trade_no = ?, paid_at = ? WHERE id = ? AND status = 'pending'
+  `),
+  closeExpired: db.prepare(`
+    UPDATE orders SET status = 'failed' WHERE status = 'pending' AND created_at < ?
   `),
   getPendingOrder: db.prepare(`
     SELECT * FROM orders WHERE user_id = ? AND status = 'pending' AND created_at > ?
@@ -22,11 +27,11 @@ const stmts = {
 };
 
 /**
- * 生成订单 ID
+ * 生成订单 ID（KB 前缀 + 时间戳 + 短随机，便于人眼识别；内部熵由 crypto 提供）
  */
 function generateOrderId() {
   const now = Date.now().toString(36).toUpperCase();
-  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+  const rand = crypto.randomBytes(4).toString('hex').toUpperCase().substring(0, 4);
   return `KB${now}${rand}`;
 }
 
@@ -78,37 +83,48 @@ export function getUserOrders(userId) {
 }
 
 /**
- * 完成订单（支付成功后调用）
+ * 完成订单（支付成功后调用）—— 使用事务保证原子性，并通过 WHERE status='pending' 防止并发重复支付
  */
 export function completeOrder(orderId, tradeNo) {
-  const order = stmts.getOrderById.get(orderId);
-  if (!order) {
-    const err = new Error('订单不存在');
-    err.statusCode = 404;
-    throw err;
-  }
+  return db.transaction(() => {
+    const order = stmts.getOrderById.get(orderId);
+    if (!order) {
+      const err = new Error('订单不存在');
+      err.statusCode = 404;
+      throw err;
+    }
 
-  if (order.status === 'paid') {
-    return order; // 已处理，幂等返回
-  }
+    if (order.status === 'paid') {
+      return order; // 已处理，幂等返回
+    }
 
-  if (order.status !== 'pending') {
-    const err = new Error('订单状态异常');
-    err.statusCode = 400;
-    throw err;
-  }
+    if (order.status !== 'pending') {
+      const err = new Error('订单状态异常');
+      err.statusCode = 400;
+      throw err;
+    }
 
-  const now = Date.now();
-  stmts.updateOrderStatus.run('paid', tradeNo, now, orderId);
+    const now = Date.now();
+    const result = stmts.updateOrderStatusIfPending.run('paid', tradeNo, now, orderId);
 
-  // 升级用户套餐
-  const durationMs = order.plan === 'pro_monthly'
-    ? 30 * 24 * 60 * 60 * 1000   // 30 天
-    : 365 * 24 * 60 * 60 * 1000;  // 365 天
+    // 并发场景：另一个事务已更新了状态
+    if (result.changes === 0) {
+      const fresh = stmts.getOrderById.get(orderId);
+      if (fresh && fresh.status === 'paid') return fresh;
+      const err = new Error('订单状态异常');
+      err.statusCode = 400;
+      throw err;
+    }
 
-  upgradePlan(order.user_id, order.plan, durationMs);
+    // 升级用户套餐
+    const durationMs = order.plan === 'pro_monthly'
+      ? 30 * 24 * 60 * 60 * 1000   // 30 天
+      : 365 * 24 * 60 * 60 * 1000;  // 365 天
 
-  return { ...order, status: 'paid', trade_no: tradeNo, paid_at: now };
+    upgradePlan(order.user_id, order.plan, durationMs);
+
+    return { ...order, status: 'paid', trade_no: tradeNo, paid_at: now };
+  })();
 }
 
 /**
@@ -116,10 +132,7 @@ export function completeOrder(orderId, tradeNo) {
  */
 export function closeExpiredOrders() {
   const thirtyMinAgo = Date.now() - 30 * 60 * 1000;
-  db.prepare(`
-    UPDATE orders SET status = 'failed'
-    WHERE status = 'pending' AND created_at < ?
-  `).run(thirtyMinAgo);
+  stmts.closeExpired.run(thirtyMinAgo);
 }
 
 /**
@@ -136,7 +149,9 @@ export function generatePaymentParams(order) {
     planName: PLANS[order.plan]?.name || order.plan,
     // 生产环境：调用微信支付 Native 下单 API，获取 code_url
     codeUrl: `weixin://wxpay/bizpayurl?pr=${order.id.toLowerCase()}`,
-    // 模拟支付回调（开发用）
-    mockPayUrl: `/api/payment/mock-pay/${order.id}`,
+    // 模拟支付回调（仅开发环境返回，避免生产被白嫖）
+    ...(process.env.NODE_ENV !== 'production' && {
+      mockPayUrl: `/api/payment/mock-pay/${order.id}`,
+    }),
   };
 }

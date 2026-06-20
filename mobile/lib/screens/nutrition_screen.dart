@@ -289,13 +289,14 @@ class _NutritionScreenState extends State<NutritionScreen> {
                   ),
                 ),
                 const SizedBox(height: 12),
-                ...foods.map((food) {
+                ...foods.whereType<Map>().map((food) {
+                  final calories = food['calories'];
                   return ListTile(
                     leading: const Text('🍽️', style: TextStyle(fontSize: 24)),
-                    title: Text(food['name'] ?? ''),
-                    subtitle: Text(food['portion'] ?? ''),
+                    title: Text(food['name']?.toString() ?? ''),
+                    subtitle: Text(food['portion']?.toString() ?? ''),
                     trailing: Text(
-                      '${food['calories']} kcal',
+                      calories != null ? '$calories kcal' : '--',
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                   );

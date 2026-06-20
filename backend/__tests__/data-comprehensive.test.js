@@ -53,7 +53,9 @@ const mockStmts = {
       const record = mockRecords.analysis.get(id);
       if (record && record.userId === userId) {
         mockRecords.analysis.delete(id);
+        return { changes: 1 };
       }
+      return { changes: 0 };
     }),
   },
   deleteAllAnalysis: {
@@ -99,7 +101,9 @@ const mockStmts = {
       const record = mockRecords.plans.get(id);
       if (record && record.userId === userId) {
         mockRecords.plans.delete(id);
+        return { changes: 1 };
       }
+      return { changes: 0 };
     }),
   },
 
@@ -136,7 +140,9 @@ const mockStmts = {
       const record = mockRecords.workouts.get(id);
       if (record && record.userId === userId) {
         mockRecords.workouts.delete(id);
+        return { changes: 1 };
       }
+      return { changes: 0 };
     }),
   },
   deleteAllWorkouts: {
@@ -182,7 +188,9 @@ const mockStmts = {
       const record = mockRecords.nutrition.get(id);
       if (record && record.userId === userId) {
         mockRecords.nutrition.delete(id);
+        return { changes: 1 };
       }
+      return { changes: 0 };
     }),
   },
   deleteAllNutrition: {

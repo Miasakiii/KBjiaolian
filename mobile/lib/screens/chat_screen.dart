@@ -15,6 +15,15 @@ class _ChatScreenState extends State<ChatScreen> {
   final ScrollController _scrollController = ScrollController();
 
   @override
+  void initState() {
+    super.initState();
+    // 首次进入页面时滚动到底部
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _scrollToBottom();
+    });
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
@@ -38,8 +47,9 @@ class _ChatScreenState extends State<ChatScreen> {
     _controller.clear();
     await context.read<ChatProvider>().sendMessage(text);
 
+    if (!mounted) return;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToBottom();
+      if (mounted) _scrollToBottom();
     });
   }
 
@@ -99,6 +109,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
                     final message = provider.messages[index];
                     return _MessageBubble(
+                      key: ValueKey('${message.timestamp.millisecondsSinceEpoch}_$index'),
                       message: message,
                       isUser: message.role == 'user',
                     );
@@ -173,7 +184,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 Expanded(
                   child: TextField(
                     controller: _controller,
+                    maxLength: 2000,
                     decoration: InputDecoration(
+                      counterText: '',
                       hintText: '输入你的问题...',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(24),
@@ -249,6 +262,7 @@ class _MessageBubble extends StatelessWidget {
   final bool isUser;
 
   const _MessageBubble({
+    super.key,
     required this.message,
     required this.isUser,
   });

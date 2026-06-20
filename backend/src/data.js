@@ -1,4 +1,48 @@
 import db from './database.js';
+import crypto from 'crypto';
+
+// 输入校验上限
+const MAX_IMAGE_PREVIEW_BYTES = 2_000_000; // 单条预览图最大 2MB
+const MAX_STRING_LENGTH = 5_000;
+const MAX_RECORDS_PER_PAGE = 100;
+
+// 生成 ID（使用 randomUUID 避免碰撞）
+function generateId() {
+  return crypto.randomUUID();
+}
+
+// 安全清理字符串
+function safeStr(v, max = MAX_STRING_LENGTH) {
+  if (typeof v !== 'string') return '';
+  return v.slice(0, max);
+}
+
+// 校验预览图大小并返回标准化字符串
+function safeImagePreview(v) {
+  if (typeof v !== 'string') return null;
+  if (v.length > MAX_IMAGE_PREVIEW_BYTES) {
+    const err = new Error('预览图过大');
+    err.statusCode = 400;
+    throw err;
+  }
+  return v;
+}
+
+// 限定数值字段
+function safeInt(v, fallback = 0, max = Number.MAX_SAFE_INTEGER) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) return fallback;
+  if (n < 0) return fallback;
+  return Math.min(n, max);
+}
+
+// 分页参数解析（带最大值约束）
+function parsePagination(query) {
+  const pageNum = Math.max(1, parseInt(query.page, 10) || 1);
+  const limitNum = Math.min(Math.max(1, parseInt(query.limit, 10) || 20), MAX_RECORDS_PER_PAGE);
+  const offset = (pageNum - 1) * limitNum;
+  return { pageNum, limitNum, offset };
+}
 
 // 预编译 SQL 语句
 const stmts = {
@@ -98,11 +142,6 @@ const stmts = {
   `),
 };
 
-// 生成 ID
-function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).substring(2, 8);
-}
-
 // === 分析记录 API ===
 
 export function saveAnalysisRecord(req, res) {
@@ -110,7 +149,7 @@ export function saveAnalysisRecord(req, res) {
     const { imagePreview, result } = req.body;
     const userId = req.userId;
 
-    if (!result) {
+    if (!result || typeof result !== 'object') {
       return res.status(400).json({ error: '请提供分析结果' });
     }
 
@@ -118,16 +157,17 @@ export function saveAnalysisRecord(req, res) {
     stmts.insertAnalysis.run(
       id,
       userId,
-      imagePreview || null,
-      result.score || 0,
-      result.summary || '',
-      JSON.stringify(result.issues || []),
-      JSON.stringify(result.radar || {}),
-      JSON.stringify(result.suggestions || [])
+      safeImagePreview(imagePreview),
+      safeInt(result.score),
+      safeStr(result.summary, 2000),
+      JSON.stringify(Array.isArray(result.issues) ? result.issues : []),
+      JSON.stringify(result.radar && typeof result.radar === 'object' ? result.radar : {}),
+      JSON.stringify(Array.isArray(result.suggestions) ? result.suggestions : [])
     );
 
     res.status(201).json({ id, message: '保存成功' });
   } catch (err) {
+    if (err.statusCode) return res.status(err.statusCode).json({ error: err.message });
     console.error('保存分析记录失败:', err.message);
     res.status(500).json({ error: '保存失败' });
   }
@@ -140,9 +180,7 @@ export function getAnalysisRecords(req, res) {
 
     // 如果提供了分页参数，使用分页查询
     if (page && limit) {
-      const pageNum = parseInt(page, 10) || 1;
-      const limitNum = parseInt(limit, 10) || 20;
-      const offset = (pageNum - 1) * limitNum;
+      const { pageNum, limitNum, offset } = parsePagination({ page, limit });
 
       const records = stmts.getAnalysisByUserPaginated.all(userId, limitNum, offset);
       const { total } = stmts.countAnalysisByUser.get(userId);
@@ -198,7 +236,10 @@ export function deleteAnalysisRecord(req, res) {
   try {
     const { id } = req.params;
     const userId = req.userId;
-    stmts.deleteAnalysis.run(id, userId);
+    const result = stmts.deleteAnalysis.run(id, userId);
+    if (result.changes === 0) {
+      return res.status(404).json({ error: '记录不存在' });
+    }
     res.json({ message: '删除成功' });
   } catch (err) {
     console.error('删除分析记录失败:', err.message);
@@ -247,27 +288,32 @@ export function savePlan(req, res) {
     const plan = req.body;
     const userId = req.userId;
 
-    if (!plan) {
+    if (!plan || typeof plan !== 'object') {
       return res.status(400).json({ error: '请提供训练方案' });
     }
 
-    const id = plan.id || generateId();
+    // 校验 plan.id 长度避免过长主键
+    const planId = (typeof plan.id === 'string' && plan.id.length <= 64) ? plan.id : generateId();
+    // 校验 schedule/nutrition 大小，避免 JSON 序列化超大对象
+    const scheduleSafe = Array.isArray(plan.schedule) ? plan.schedule.slice(0, 100) : [];
+    const nutritionSafe = plan.nutrition && typeof plan.nutrition === 'object' ? plan.nutrition : {};
+
     stmts.insertPlan.run(
-      id,
+      planId,
       userId,
-      plan.name || '',
-      plan.goal || '',
-      plan.experience || '',
-      plan.equipment || '',
-      plan.daysPerWeek || 4,
-      plan.sessionDuration || 60,
-      JSON.stringify(plan.schedule || []),
-      JSON.stringify(plan.nutrition || {}),
-      plan.notes || '',
-      plan.durationWeeks || 8
+      safeStr(plan.name, 200),
+      safeStr(plan.goal, 50),
+      safeStr(plan.experience, 50),
+      safeStr(plan.equipment, 50),
+      safeInt(plan.daysPerWeek, 4, 7),
+      safeInt(plan.sessionDuration, 60, 180),
+      JSON.stringify(scheduleSafe),
+      JSON.stringify(nutritionSafe),
+      safeStr(plan.notes, 2000),
+      safeInt(plan.durationWeeks, 8, 52)
     );
 
-    res.status(201).json({ id, message: '保存成功' });
+    res.status(201).json({ id: planId, message: '保存成功' });
   } catch (err) {
     console.error('保存训练方案失败:', err.message);
     res.status(500).json({ error: '保存失败' });
@@ -343,7 +389,10 @@ export function deletePlanRecord(req, res) {
   try {
     const { id } = req.params;
     const userId = req.userId;
-    stmts.deletePlan.run(id, userId);
+    const result = stmts.deletePlan.run(id, userId);
+    if (result.changes === 0) {
+      return res.status(404).json({ error: '记录不存在' });
+    }
     res.json({ message: '删除成功' });
   } catch (err) {
     console.error('删除训练方案失败:', err.message);
@@ -358,24 +407,26 @@ export function saveWorkoutRecord(req, res) {
     const workout = req.body;
     const userId = req.userId;
 
-    if (!workout) {
+    if (!workout || typeof workout !== 'object') {
       return res.status(400).json({ error: '请提供训练记录' });
     }
 
-    const id = workout.id || generateId();
+    const id = (typeof workout.id === 'string' && workout.id.length <= 64) ? workout.id : generateId();
+    const exercisesSafe = Array.isArray(workout.exercises) ? workout.exercises.slice(0, 100) : [];
+
     stmts.insertWorkout.run(
       id,
       userId,
-      workout.planId || null,
-      workout.planName || '',
-      workout.dayNumber || 1,
-      workout.dayName || '',
-      workout.startTime || Date.now(),
-      workout.endTime || Date.now(),
-      workout.duration || 0,
-      JSON.stringify(workout.exercises || []),
-      workout.rating || 0,
-      workout.notes || ''
+      safeStr(workout.planId, 64) || null,
+      safeStr(workout.planName, 200),
+      safeInt(workout.dayNumber, 1, 99),
+      safeStr(workout.dayName, 200),
+      safeInt(workout.startTime),
+      safeInt(workout.endTime),
+      safeInt(workout.duration, 0, 24 * 60),
+      JSON.stringify(exercisesSafe),
+      safeInt(workout.rating, 0, 5),
+      safeStr(workout.notes, 2000)
     );
 
     res.status(201).json({ id, message: '保存成功' });
@@ -454,7 +505,10 @@ export function deleteWorkoutRecord(req, res) {
   try {
     const { id } = req.params;
     const userId = req.userId;
-    stmts.deleteWorkout.run(id, userId);
+    const result = stmts.deleteWorkout.run(id, userId);
+    if (result.changes === 0) {
+      return res.status(404).json({ error: '记录不存在' });
+    }
     res.json({ message: '删除成功' });
   } catch (err) {
     console.error('删除训练记录失败:', err.message);
@@ -480,27 +534,32 @@ export function saveNutritionRecord(req, res) {
     const nutrition = req.body;
     const userId = req.userId;
 
-    if (!nutrition) {
+    if (!nutrition || typeof nutrition !== 'object') {
       return res.status(400).json({ error: '请提供饮食记录' });
     }
 
-    const id = nutrition.id || generateId();
+    const id = (typeof nutrition.id === 'string' && nutrition.id.length <= 64) ? nutrition.id : generateId();
+    const foodsSafe = Array.isArray(nutrition.foods) ? nutrition.foods.slice(0, 100) : [];
+    const allowedMealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
+    const mealType = allowedMealTypes.includes(nutrition.mealType) ? nutrition.mealType : 'lunch';
+
     stmts.insertNutrition.run(
       id,
       userId,
-      nutrition.imagePreview || null,
-      nutrition.mealType || 'lunch',
-      JSON.stringify(nutrition.foods || []),
-      nutrition.totalCalories || 0,
-      nutrition.totalProtein || 0,
-      nutrition.totalCarbs || 0,
-      nutrition.totalFat || 0,
-      nutrition.tips || '',
-      nutrition.notes || ''
+      safeImagePreview(nutrition.imagePreview),
+      mealType,
+      JSON.stringify(foodsSafe),
+      safeInt(nutrition.totalCalories, 0, 100000),
+      safeInt(nutrition.totalProtein, 0, 10000),
+      safeInt(nutrition.totalCarbs, 0, 10000),
+      safeInt(nutrition.totalFat, 0, 10000),
+      safeStr(nutrition.tips, 500),
+      safeStr(nutrition.notes, 2000)
     );
 
     res.status(201).json({ id, message: '保存成功' });
   } catch (err) {
+    if (err.statusCode) return res.status(err.statusCode).json({ error: err.message });
     console.error('保存饮食记录失败:', err.message);
     res.status(500).json({ error: '保存失败' });
   }
@@ -573,7 +632,10 @@ export function deleteNutritionRecord(req, res) {
   try {
     const { id } = req.params;
     const userId = req.userId;
-    stmts.deleteNutrition.run(id, userId);
+    const result = stmts.deleteNutrition.run(id, userId);
+    if (result.changes === 0) {
+      return res.status(404).json({ error: '记录不存在' });
+    }
     res.json({ message: '删除成功' });
   } catch (err) {
     console.error('删除饮食记录失败:', err.message);

@@ -26,9 +26,11 @@ import {
   saveChatMessage,
   getChatHistory,
   deleteChatHistory,
+  getAnalysisRecordById,
+  getWorkoutRecordsRaw,
 } from './data.js';
-import { getQuotaStatus, checkQuota, logUsage, PLANS } from './subscription.js';
-import { createOrder, getOrder, getUserOrders, completeOrder, generatePaymentParams } from './orders.js';
+import { getQuotaStatus, checkQuota, logUsage, reserveQuota, releaseQuota, PLANS } from './subscription.js';
+import { createOrder, getOrder, getUserOrders, completeOrder, generatePaymentParams, closeExpiredOrders } from './orders.js';
 import {
   isValidBase64Image,
   isValidGoal,
@@ -41,17 +43,38 @@ import {
   sanitizeString,
 } from './validation.js';
 
+// 全局兜底未处理的 Promise rejection 与未捕获异常，避免进程崩溃
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled Rejection:', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err.message);
+});
+
+// 定时清理过期订单（每 5 分钟）
+setInterval(() => {
+  try { closeExpiredOrders(); } catch (err) { console.error('清理过期订单失败:', err.message); }
+}, 5 * 60 * 1000).unref();
+
 export function createApp() {
   const app = express();
 
   // 信任反向代理（Nginx / Docker 网络），以便正确获取客户端 IP
   app.set('trust proxy', 1);
 
-  // CORS：从环境变量读取，支持逗号分隔多域名，回退 localhost 开发环境
-  const corsOrigin = process.env.CORS_ORIGIN
-    ? process.env.CORS_ORIGIN.split(',').map(s => s.trim())
-    : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'];
-  app.use(cors({ origin: corsOrigin }));
+  // CORS：从环境变量读取，支持逗号分隔多域名；生产环境未配置则禁用跨域
+  let corsOrigin;
+  if (process.env.CORS_ORIGIN) {
+    corsOrigin = process.env.CORS_ORIGIN.split(',').map(s => s.trim());
+  } else if (process.env.NODE_ENV === 'production') {
+    corsOrigin = false; // 生产环境默认不允许跨域
+  } else {
+    corsOrigin = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'];
+  }
+  app.use(cors({
+    origin: corsOrigin,
+    methods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
+  }));
   app.use(express.json({ limit: '10mb' }));
 
   // === 速率限制 ===
@@ -141,7 +164,10 @@ export function createApp() {
       });
     } catch (err) {
       console.error('创建订单失败:', err.message);
-      res.status(err.statusCode || 500).json({ error: err.message || '创建订单失败' });
+      if (err.statusCode) {
+        return res.status(err.statusCode).json({ error: err.message });
+      }
+      res.status(500).json({ error: '创建订单失败' });
     }
   });
 
@@ -188,32 +214,37 @@ export function createApp() {
     }
   });
 
-  // 模拟支付（开发/测试用，生产环境应替换为微信支付回调）
-  app.post('/api/payment/mock-pay/:orderId', authMiddleware, (req, res) => {
-    try {
-      const order = getOrder(req.params.orderId);
-      if (!order || order.user_id !== req.userId) {
-        return res.status(404).json({ error: '订单不存在' });
-      }
-      if (order.status !== 'pending') {
-        return res.status(400).json({ error: '订单状态异常' });
-      }
+  // 模拟支付（仅开发/测试环境，生产环境必须使用真实支付回调）
+  if (process.env.NODE_ENV !== 'production') {
+    app.post('/api/payment/mock-pay/:orderId', authMiddleware, (req, res) => {
+      try {
+        const order = getOrder(req.params.orderId);
+        if (!order || order.user_id !== req.userId) {
+          return res.status(404).json({ error: '订单不存在' });
+        }
+        if (order.status !== 'pending') {
+          return res.status(400).json({ error: '订单状态异常' });
+        }
 
-      const result = completeOrder(order.id, `MOCK_${Date.now()}`);
-      res.json({
-        message: '支付成功',
-        order: {
-          id: result.id,
-          plan: result.plan,
-          status: result.status,
-          paid_at: result.paid_at,
-        },
-      });
-    } catch (err) {
-      console.error('模拟支付失败:', err.message);
-      res.status(err.statusCode || 500).json({ error: err.message || '支付失败' });
-    }
-  });
+        const result = completeOrder(order.id, `MOCK_${Date.now()}`);
+        res.json({
+          message: '支付成功',
+          order: {
+            id: result.id,
+            plan: result.plan,
+            status: result.status,
+            paid_at: result.paid_at,
+          },
+        });
+      } catch (err) {
+        console.error('模拟支付失败:', err.message);
+        if (err.statusCode) {
+          return res.status(err.statusCode).json({ error: err.message });
+        }
+        res.status(500).json({ error: '支付失败' });
+      }
+    });
+  }
 
   // 微信支付回调（生产环境）
   app.post('/api/payment/wechat/notify', express.raw({ type: 'application/json' }), (req, res) => {
@@ -240,14 +271,25 @@ export function createApp() {
         return res.status(400).json({ error: '图片格式不正确，请上传 JPG 或 PNG 格式' });
       }
 
-      checkQuota(req.userId, 'analyze');
-      const result = await analyzePhoto(image);
-      logUsage(req.userId, 'analyze');
-      res.json(result);
-    } catch (err) {
-      if (err.quotaExceeded) {
-        return res.status(429).json({ error: err.message, quotaExceeded: true });
+      // 预占配额，避免并发请求绕过配额（TOCTOU）
+      let usageId;
+      try {
+        usageId = reserveQuota(req.userId, 'analyze');
+      } catch (err) {
+        if (err.quotaExceeded) {
+          return res.status(429).json({ error: err.message, quotaExceeded: true });
+        }
+        throw err;
       }
+
+      try {
+        const result = await analyzePhoto(image);
+        res.json(result);
+      } catch (err) {
+        releaseQuota(usageId); // AI 调用失败，补偿释放
+        throw err;
+      }
+    } catch (err) {
       console.error('分析失败:', err.message);
       res.status(500).json({ error: '分析失败，请稍后重试' });
     }
@@ -262,8 +304,6 @@ export function createApp() {
         return res.status(400).json({ error: '请提供两次分析记录的 ID' });
       }
 
-      // 从数据库获取两次分析记录
-      const { getAnalysisRecordById } = await import('./data.js');
       const beforeRecord = getAnalysisRecordById(req.userId, beforeId);
       const afterRecord = getAnalysisRecordById(req.userId, afterId);
 
@@ -271,15 +311,19 @@ export function createApp() {
         return res.status(404).json({ error: '分析记录不存在' });
       }
 
+      const safeParse = (s, fallback) => {
+        try { return JSON.parse(s ?? JSON.stringify(fallback)); } catch { return fallback; }
+      };
+
       const beforeResult = {
-        score: beforeRecord.score,
-        issues: JSON.parse(beforeRecord.issues || '[]'),
-        radar: JSON.parse(beforeRecord.radar || '{}')
+        score: Number(beforeRecord.score) || 0,
+        issues: Array.isArray(safeParse(beforeRecord.issues, [])) ? safeParse(beforeRecord.issues, []) : [],
+        radar: safeParse(beforeRecord.radar, {}),
       };
       const afterResult = {
-        score: afterRecord.score,
-        issues: JSON.parse(afterRecord.issues || '[]'),
-        radar: JSON.parse(afterRecord.radar || '{}')
+        score: Number(afterRecord.score) || 0,
+        issues: Array.isArray(safeParse(afterRecord.issues, [])) ? safeParse(afterRecord.issues, []) : [],
+        radar: safeParse(afterRecord.radar, {}),
       };
 
       const comparison = await compareAnalysis(beforeResult, afterResult);
@@ -310,14 +354,24 @@ export function createApp() {
       params.daysPerWeek = isValidDaysPerWeek(daysPerWeek) ? Number(daysPerWeek) : 4;
       params.sessionDuration = isValidSessionDuration(sessionDuration) ? Number(sessionDuration) : 60;
 
-      checkQuota(req.userId, 'plan');
-      const plan = await generatePlan(params, analysisResult);
-      logUsage(req.userId, 'plan');
-      res.json(plan);
-    } catch (err) {
-      if (err.quotaExceeded) {
-        return res.status(429).json({ error: err.message, quotaExceeded: true });
+      let usageId;
+      try {
+        usageId = reserveQuota(req.userId, 'plan');
+      } catch (err) {
+        if (err.quotaExceeded) {
+          return res.status(429).json({ error: err.message, quotaExceeded: true });
+        }
+        throw err;
       }
+
+      try {
+        const plan = await generatePlan(params, analysisResult);
+        res.json(plan);
+      } catch (err) {
+        releaseQuota(usageId);
+        throw err;
+      }
+    } catch (err) {
       console.error('生成训练方案失败:', err.message);
       res.status(500).json({ error: '生成训练方案失败，请稍后重试' });
     }
@@ -332,11 +386,8 @@ export function createApp() {
         return res.status(400).json({ error: '请提供体态分析结果' });
       }
 
-      // 获取用户历史训练记录
-      const { getWorkoutRecordsRaw } = await import('./data.js');
-      const workoutHistory = getWorkoutRecordsRaw(req.userId, 20); // 最近 20 次
+      const workoutHistory = getWorkoutRecordsRaw(req.userId, 20);
 
-      // 分析历史表现
       const performance = extractExercisePerformance(workoutHistory);
       const progression = calculateProgression(performance, { experience });
       const progressionPrompt = buildProgressionPrompt(progression);
@@ -349,31 +400,38 @@ export function createApp() {
       params.daysPerWeek = isValidDaysPerWeek(daysPerWeek) ? Number(daysPerWeek) : 4;
       params.sessionDuration = isValidSessionDuration(sessionDuration) ? Number(sessionDuration) : 60;
 
-      // 注入渐进式数据到 plan 生成
-      checkQuota(req.userId, 'plan');
-      const plan = await generatePlan(params, analysisResult, progressionPrompt);
-      logUsage(req.userId, 'plan');
-
-      res.json({
-        ...plan,
-        progression: progressionSummary,
-        hasHistory: workoutHistory.length > 0,
-        historyCount: workoutHistory.length,
-      });
-    } catch (err) {
-      if (err.quotaExceeded) {
-        return res.status(429).json({ error: err.message, quotaExceeded: true });
+      let usageId;
+      try {
+        usageId = reserveQuota(req.userId, 'plan');
+      } catch (err) {
+        if (err.quotaExceeded) {
+          return res.status(429).json({ error: err.message, quotaExceeded: true });
+        }
+        throw err;
       }
+
+      try {
+        const plan = await generatePlan(params, analysisResult, progressionPrompt);
+        res.json({
+          ...plan,
+          progression: progressionSummary,
+          hasHistory: workoutHistory.length > 0,
+          historyCount: workoutHistory.length,
+        });
+      } catch (err) {
+        releaseQuota(usageId);
+        throw err;
+      }
+    } catch (err) {
       console.error('渐进式方案生成失败:', err.message);
       res.status(500).json({ error: '生成训练方案失败，请稍后重试' });
     }
   });
 
   // 获取训练建议（不生成方案，只看渐进式建议）
-  app.get('/api/plan/progression', authMiddleware, async (req, res) => {
+  app.get('/api/plan/progression', authMiddleware, (req, res) => {
     try {
-      const { experience } = req.query;
-      const { getWorkoutRecordsRaw } = await import('./data.js');
+      const experience = isValidExperience(req.query.experience) ? req.query.experience : 'beginner';
       const workoutHistory = getWorkoutRecordsRaw(req.userId, 20);
 
       const performance = extractExercisePerformance(workoutHistory);
@@ -403,14 +461,24 @@ export function createApp() {
         return res.status(400).json({ error: '图片格式不正确，请上传 JPG 或 PNG 格式' });
       }
 
-      checkQuota(req.userId, 'nutrition');
-      const result = await analyzeFood(image);
-      logUsage(req.userId, 'nutrition');
-      res.json(result);
-    } catch (err) {
-      if (err.quotaExceeded) {
-        return res.status(429).json({ error: err.message, quotaExceeded: true });
+      let usageId;
+      try {
+        usageId = reserveQuota(req.userId, 'nutrition');
+      } catch (err) {
+        if (err.quotaExceeded) {
+          return res.status(429).json({ error: err.message, quotaExceeded: true });
+        }
+        throw err;
       }
+
+      try {
+        const result = await analyzeFood(image);
+        res.json(result);
+      } catch (err) {
+        releaseQuota(usageId);
+        throw err;
+      }
+    } catch (err) {
       console.error('食物识别失败:', err.message);
       res.status(500).json({ error: '食物识别失败，请稍后重试' });
     }
@@ -431,21 +499,28 @@ export function createApp() {
         return res.status(400).json({ error: '聊天历史格式不正确' });
       }
 
-      // 保存用户消息到数据库
-      checkQuota(req.userId, 'chat');
+      // 保存用户消息
+      let usageId;
+      try {
+        usageId = reserveQuota(req.userId, 'chat');
+      } catch (err) {
+        if (err.quotaExceeded) {
+          return res.status(429).json({ error: err.message, quotaExceeded: true });
+        }
+        throw err;
+      }
+
       saveChatMessage(req.userId, 'user', message);
 
-      const reply = await sendMessage(message, history || []);
-
-      // 保存 AI 回复到数据库
-      saveChatMessage(req.userId, 'assistant', reply);
-      logUsage(req.userId, 'chat');
-
-      res.json({ reply });
-    } catch (err) {
-      if (err.quotaExceeded) {
-        return res.status(429).json({ error: err.message, quotaExceeded: true });
+      try {
+        const reply = await sendMessage(message, history || []);
+        saveChatMessage(req.userId, 'assistant', reply);
+        res.json({ reply });
+      } catch (err) {
+        releaseQuota(usageId);
+        throw err;
       }
+    } catch (err) {
       console.error('AI 对话失败:', err.message);
       res.status(500).json({ error: 'AI 对话失败，请稍后重试' });
     }
@@ -453,6 +528,14 @@ export function createApp() {
 
   // 流式响应端点
   app.post('/api/chat/stream', authMiddleware, aiLimiter, async (req, res) => {
+    let headersSent = false;
+    let usageId;
+    const abortController = new AbortController();
+
+    // 客户端断开时取消上游 AI 请求，避免连接泄漏
+    const onAbort = () => abortController.abort();
+    req.on('close', onAbort);
+
     try {
       const { message, history } = req.body;
 
@@ -460,63 +543,86 @@ export function createApp() {
         return res.status(400).json({ error: '消息内容不合法或过长' });
       }
 
-      // 保存用户消息
-      checkQuota(req.userId, 'chat');
+      // 预占配额
+      try {
+        usageId = reserveQuota(req.userId, 'chat');
+      } catch (err) {
+        if (err.quotaExceeded) {
+          return res.status(429).json({ error: err.message, quotaExceeded: true });
+        }
+        throw err;
+      }
+
       saveChatMessage(req.userId, 'user', message);
 
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
       res.setHeader('Connection', 'keep-alive');
+      headersSent = true;
 
-      const stream = await sendMessageStream(message, history || []);
+      const stream = await sendMessageStream(message, history || [], abortController.signal);
       let fullReply = '';
 
       if (stream) {
         const reader = stream.getReader();
         const decoder = new TextDecoder();
 
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
 
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n').filter(line => line.trim() !== '');
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n').filter(line => line.trim() !== '');
 
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.slice(6);
-              if (data === '[DONE]') {
-                res.write('data: [DONE]\n\n');
-              } else {
-                try {
-                  const parsed = JSON.parse(data);
-                  const content = parsed.choices?.[0]?.delta?.content;
-                  if (content) {
-                    fullReply += content;
-                    res.write(`data: ${JSON.stringify({ content })}\n\n`);
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                if (data === '[DONE]') {
+                  res.write('data: [DONE]\n\n');
+                } else {
+                  try {
+                    const parsed = JSON.parse(data);
+                    const content = parsed.choices?.[0]?.delta?.content;
+                    if (content) {
+                      fullReply += content;
+                      res.write(`data: ${JSON.stringify({ content })}\n\n`);
+                    }
+                  } catch (e) {
+                    // 忽略解析错误
                   }
-                } catch (e) {
-                  // 忽略解析错误
                 }
               }
             }
           }
+        } finally {
+          reader.releaseLock?.();
         }
       }
 
       // 保存完整的 AI 回复
       if (fullReply) {
         saveChatMessage(req.userId, 'assistant', fullReply);
-        logUsage(req.userId, 'chat');
       }
 
       res.end();
     } catch (err) {
-      if (err.quotaExceeded) {
-        return res.status(429).json({ error: err.message, quotaExceeded: true });
-      }
+      // AI 流式失败：补偿释放配额
+      if (usageId) releaseQuota(usageId);
       console.error('流式对话失败:', err.message);
-      res.status(500).json({ error: '对话失败' });
+      if (headersSent) {
+        // 响应头已发送，无法改 status，仅能写入错误事件后结束
+        try {
+          res.write(`data: ${JSON.stringify({ error: '对话失败' })}\n\n`);
+        } catch (_) { /* socket 已关闭 */ }
+        res.end();
+      } else {
+        res.status(500).json({ error: '对话失败' });
+      }
+    } finally {
+      req.off('close', onAbort);
+      // 兜底取消上游
+      abortController.abort();
     }
   });
 

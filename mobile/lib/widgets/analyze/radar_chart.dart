@@ -194,5 +194,11 @@ class _RadarChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  bool shouldRepaint(covariant _RadarChartPainter old) {
+    // 数据未变时不重绘，避免无谓的 CPU 开销
+    return old.data.headForward != data.headForward ||
+        old.data.roundShoulder != data.roundShoulder ||
+        old.data.pelvicTilt != data.pelvicTilt ||
+        old.data.kneeExtension != data.kneeExtension;
+  }
 }

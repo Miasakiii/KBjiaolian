@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { isAuthenticated } from '@/lib/auth';
+import { isAuthenticated, isGuest } from '@/lib/auth';
 import DashboardStats from '@/components/DashboardStats';
 import QuickActions from '@/components/QuickActions';
 import TodayTasks from '@/components/TodayTasks';
@@ -239,20 +239,45 @@ function LandingPage() {
 function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [greeting, setGreeting] = useState('');
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    const loadData = async () => {
-      const dashboardData = await getDashboardData();
-      setData(dashboardData);
-    };
-    loadData();
+    let cancelled = false;
+    (async () => {
+      try {
+        const dashboardData = await getDashboardData();
+        if (cancelled) return;
+        setData(dashboardData);
+      } catch (err) {
+        console.error('加载 dashboard 失败:', err);
+        if (!cancelled) setLoadError(true);
+      }
+    })();
 
     const hour = new Date().getHours();
     if (hour < 6) setGreeting('夜深了');
     else if (hour < 12) setGreeting('早上好');
     else if (hour < 18) setGreeting('下午好');
     else setGreeting('晚上好');
+
+    return () => { cancelled = true; };
   }, []);
+
+  if (loadError) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-700 mb-2">数据加载失败</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-gray-900 text-white rounded-lg text-sm"
+          >
+            重新加载
+          </button>
+        </div>
+      </main>
+    );
+  }
 
   if (!data) {
     return (
@@ -353,7 +378,7 @@ export default function HomePage() {
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
 
   useEffect(() => {
-    setLoggedIn(isAuthenticated());
+    setLoggedIn(isAuthenticated() || isGuest());
   }, []);
 
   if (loggedIn === null) return null;

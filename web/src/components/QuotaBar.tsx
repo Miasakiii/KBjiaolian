@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { getToken } from '@/lib/auth'
+import { getToken, authFetch } from '@/lib/auth'
 import { Camera, ClipboardList, Apple, MessageCircle, BarChart3 } from 'lucide-react'
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'
@@ -31,18 +31,19 @@ export default function QuotaBar({ action }: { action?: string }) {
   const [quota, setQuota] = useState<QuotaInfo | null>(null)
 
   useEffect(() => {
-    const token = getToken()
-    if (!token) return
-
-    fetch(`${API_BASE}/quota`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    if (!getToken()) return
+    let cancelled = false
+    authFetch(`${API_BASE}/quota`)
       .then(r => r.json())
-      .then(setQuota)
+      .then(data => {
+        if (cancelled) return
+        if (data && data.usage) setQuota(data)
+      })
       .catch(() => {})
+    return () => { cancelled = true }
   }, [])
 
-  if (!quota) return null
+  if (!quota || !quota.usage) return null
 
   // 如果指定了 action，只显示该 action 的配额
   if (action && quota.usage[action]) {

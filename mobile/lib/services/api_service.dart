@@ -5,8 +5,16 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  // 根据平台自动选择 API 地址
+  // 优先使用编译时通过 --dart-define=API_BASE_URL=... 注入的地址
+  // 开发默认仍指向本机后端方便调试；生产构建时务必通过 --dart-define 指定 HTTPS 地址
+  static const String _envBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: '',
+  );
+
   static String get baseUrl {
+    if (_envBaseUrl.isNotEmpty) return _envBaseUrl;
+    // 开发回退：根据平台选择本机地址
     if (Platform.isAndroid) {
       return 'http://10.0.2.2:3001/api';
     } else if (Platform.isIOS) {
@@ -15,6 +23,9 @@ class ApiService {
       return 'http://localhost:3001/api';
     }
   }
+
+  // 请求默认超时
+  static const Duration _defaultTimeout = Duration(seconds: 30);
 
   // Token 存储 key
   static const String _tokenKey = 'kb-coach-auth-token';
@@ -49,28 +60,53 @@ class ApiService {
     return headers;
   }
 
+  // 安全解析 JSON：网络异常/非 JSON/空响应/格式错误都转为友好异常
+  static Map<String, dynamic> _parseJsonObject(http.Response response) {
+    if (response.body.isEmpty) {
+      throw Exception('服务器返回空响应（${response.statusCode}）');
+    }
+    dynamic decoded;
+    try {
+      decoded = jsonDecode(response.body);
+    } catch (_) {
+      throw Exception('服务器返回了非 JSON 响应（${response.statusCode}）');
+    }
+    if (decoded is! Map<String, dynamic>) {
+      throw Exception('响应格式错误（${response.statusCode}）');
+    }
+    return decoded;
+  }
+
+  // 提取并抛出包含 error 字段的内容
+  static Never _throwFromResponse(Map<String, dynamic> data, int statusCode, String fallback) {
+    final err = data['error'];
+    throw Exception(err != null ? err.toString() : '$fallback（$statusCode）');
+  }
+
   // 注册
   static Future<Map<String, dynamic>> register({
     required String email,
     required String password,
     String? nickname,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-        if (nickname != null) 'nickname': nickname,
-      }),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/auth/register'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'email': email,
+            'password': password,
+            if (nickname != null) 'nickname': nickname,
+          }),
+        )
+        .timeout(_defaultTimeout);
 
-    final data = jsonDecode(response.body);
+    final data = _parseJsonObject(response);
     if (response.statusCode == 201) {
       await saveToken(data['token']);
       return data;
     } else {
-      throw Exception(data['error'] ?? '注册失败');
+      _throwFromResponse(data, response.statusCode, '注册失败');
     }
   }
 
@@ -79,21 +115,23 @@ class ApiService {
     required String email,
     required String password,
   }) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/auth/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-      }),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/auth/login'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'email': email,
+            'password': password,
+          }),
+        )
+        .timeout(_defaultTimeout);
 
-    final data = jsonDecode(response.body);
+    final data = _parseJsonObject(response);
     if (response.statusCode == 200) {
       await saveToken(data['token']);
       return data;
     } else {
-      throw Exception(data['error'] ?? '登录失败');
+      _throwFromResponse(data, response.statusCode, '登录失败');
     }
   }
 
@@ -111,18 +149,21 @@ class ApiService {
   // 获取用户信息
   static Future<Map<String, dynamic>> getProfile() async {
     final headers = await _getHeaders();
-    final response = await http.get(
-      Uri.parse('$baseUrl/auth/profile'),
-      headers: headers,
-    );
+    final response = await http
+        .get(
+          Uri.parse('$baseUrl/auth/profile'),
+          headers: headers,
+        )
+        .timeout(_defaultTimeout);
 
+    final data = _parseJsonObject(response);
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return data;
     } else if (response.statusCode == 401) {
       await clearToken();
       throw Exception('登录已过期');
     } else {
-      throw Exception('获取用户信息失败');
+      _throwFromResponse(data, response.statusCode, '获取用户信息失败');
     }
   }
 
@@ -132,14 +173,16 @@ class ApiService {
     required Map<String, dynamic> body,
   }) async {
     final headers = await _getHeaders();
-    final response = await http.post(
-      Uri.parse('$baseUrl$path'),
-      headers: headers,
-      body: jsonEncode(body),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl$path'),
+          headers: headers,
+          body: jsonEncode(body),
+        )
+        .timeout(_defaultTimeout);
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return jsonDecode(response.body);
+      return _parseJsonObject(response);
     } else if (response.statusCode == 401) {
       throw Exception('请先登录');
     } else {
@@ -151,17 +194,26 @@ class ApiService {
   // 通用认证 GET 请求（返回列表）
   static Future<List<dynamic>> authenticatedGetList(String path) async {
     final headers = await _getHeaders();
-    final response = await http.get(
-      Uri.parse('$baseUrl$path'),
-      headers: headers,
-    );
+    final response = await http
+        .get(
+          Uri.parse('$baseUrl$path'),
+          headers: headers,
+        )
+        .timeout(_defaultTimeout);
 
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data is Map && data.containsKey('records')) {
-        return data['records'] ?? [];
+      if (response.body.isEmpty) return [];
+      dynamic decoded;
+      try {
+        decoded = jsonDecode(response.body);
+      } catch (_) {
+        return [];
       }
-      if (data is List) return data;
+      if (decoded is Map && decoded.containsKey('records')) {
+        final records = decoded['records'];
+        return records is List ? records : <dynamic>[];
+      }
+      if (decoded is List) return decoded;
       return [];
     } else if (response.statusCode == 401) {
       throw Exception('请先登录');
@@ -171,24 +223,47 @@ class ApiService {
     }
   }
 
+  // 通用认证 DELETE 请求
+  static Future<bool> authenticatedDelete(String path) async {
+    final headers = await _getHeaders();
+    final response = await http
+        .delete(
+          Uri.parse('$baseUrl$path'),
+          headers: headers,
+        )
+        .timeout(_defaultTimeout);
+
+    if (response.statusCode == 200 || response.statusCode == 204) {
+      return true;
+    } else if (response.statusCode == 401) {
+      throw Exception('请先登录');
+    } else {
+      debugPrint('API 请求失败: ${response.statusCode} ${response.body}');
+      return false;
+    }
+  }
+
   // 体态分析
   static Future<Map<String, dynamic>> analyzePhoto(File imageFile) async {
     final bytes = await imageFile.readAsBytes();
     final base64Image = 'data:image/jpeg;base64,${base64Encode(bytes)}';
     final headers = await _getHeaders();
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/analyze'),
-      headers: headers,
-      body: jsonEncode({'image': base64Image}),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/analyze'),
+          headers: headers,
+          body: jsonEncode({'image': base64Image}),
+        )
+        .timeout(const Duration(seconds: 90));
 
+    final data = _parseJsonObject(response);
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return data;
     } else if (response.statusCode == 401) {
       throw Exception('请先登录');
     } else {
-      throw Exception('分析失败: ${response.body}');
+      _throwFromResponse(data, response.statusCode, '分析失败');
     }
   }
 
@@ -203,25 +278,28 @@ class ApiService {
   }) async {
     final headers = await _getHeaders();
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/plan/generate'),
-      headers: headers,
-      body: jsonEncode({
-        'goal': goal,
-        'experience': experience,
-        'equipment': equipment,
-        'daysPerWeek': daysPerWeek,
-        'sessionDuration': sessionDuration,
-        'analysisResult': analysisResult,
-      }),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/plan/generate'),
+          headers: headers,
+          body: jsonEncode({
+            'goal': goal,
+            'experience': experience,
+            'equipment': equipment,
+            'daysPerWeek': daysPerWeek,
+            'sessionDuration': sessionDuration,
+            'analysisResult': analysisResult,
+          }),
+        )
+        .timeout(const Duration(seconds: 90));
 
+    final data = _parseJsonObject(response);
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return data;
     } else if (response.statusCode == 401) {
       throw Exception('请先登录');
     } else {
-      throw Exception('生成方案失败: ${response.body}');
+      _throwFromResponse(data, response.statusCode, '生成方案失败');
     }
   }
 
@@ -231,18 +309,21 @@ class ApiService {
     final base64Image = 'data:image/jpeg;base64,${base64Encode(bytes)}';
     final headers = await _getHeaders();
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/nutrition/analyze'),
-      headers: headers,
-      body: jsonEncode({'image': base64Image}),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/nutrition/analyze'),
+          headers: headers,
+          body: jsonEncode({'image': base64Image}),
+        )
+        .timeout(const Duration(seconds: 90));
 
+    final data = _parseJsonObject(response);
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return data;
     } else if (response.statusCode == 401) {
       throw Exception('请先登录');
     } else {
-      throw Exception('识别失败: ${response.body}');
+      _throwFromResponse(data, response.statusCode, '识别失败');
     }
   }
 
@@ -250,29 +331,37 @@ class ApiService {
   static Future<String> sendMessage(String message, List<Map<String, String>> history) async {
     final headers = await _getHeaders();
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/chat'),
-      headers: headers,
-      body: jsonEncode({
-        'message': message,
-        'history': history,
-      }),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/chat'),
+          headers: headers,
+          body: jsonEncode({
+            'message': message,
+            'history': history,
+          }),
+        )
+        .timeout(_defaultTimeout);
 
+    final data = _parseJsonObject(response);
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data['reply'];
+      final reply = data['reply'];
+      if (reply is! String || reply.isEmpty) {
+        throw Exception('服务器返回内容为空');
+      }
+      return reply;
     } else if (response.statusCode == 401) {
       throw Exception('请先登录');
     } else {
-      throw Exception('对话失败: ${response.body}');
+      _throwFromResponse(data, response.statusCode, '对话失败');
     }
   }
 
   // 健康检查
   static Future<bool> healthCheck() async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/health'));
+      final response = await http
+          .get(Uri.parse('$baseUrl/health'))
+          .timeout(_defaultTimeout);
       return response.statusCode == 200;
     } catch (e) {
       return false;
@@ -290,25 +379,28 @@ class ApiService {
   }) async {
     final headers = await _getHeaders();
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/plan/progressive'),
-      headers: headers,
-      body: jsonEncode({
-        'goal': goal,
-        'experience': experience,
-        'equipment': equipment,
-        'daysPerWeek': daysPerWeek,
-        'sessionDuration': sessionDuration,
-        'analysisResult': analysisResult,
-      }),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/plan/progressive'),
+          headers: headers,
+          body: jsonEncode({
+            'goal': goal,
+            'experience': experience,
+            'equipment': equipment,
+            'daysPerWeek': daysPerWeek,
+            'sessionDuration': sessionDuration,
+            'analysisResult': analysisResult,
+          }),
+        )
+        .timeout(const Duration(seconds: 90));
 
+    final data = _parseJsonObject(response);
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return data;
     } else if (response.statusCode == 401) {
       throw Exception('请先登录');
     } else {
-      throw Exception('生成方案失败: ${response.body}');
+      _throwFromResponse(data, response.statusCode, '生成方案失败');
     }
   }
 
@@ -318,17 +410,22 @@ class ApiService {
   }) async {
     final headers = await _getHeaders();
 
-    final response = await http.get(
-      Uri.parse('$baseUrl/plan/progression?experience=$experience'),
-      headers: headers,
-    );
+    final response = await http
+        .get(
+          Uri.parse('$baseUrl/plan/progression').replace(
+            queryParameters: {'experience': experience},
+          ),
+          headers: headers,
+        )
+        .timeout(_defaultTimeout);
 
+    final data = _parseJsonObject(response);
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return data;
     } else if (response.statusCode == 401) {
       throw Exception('请先登录');
     } else {
-      throw Exception('获取建议失败: ${response.body}');
+      _throwFromResponse(data, response.statusCode, '获取建议失败');
     }
   }
 
@@ -339,21 +436,24 @@ class ApiService {
   }) async {
     final headers = await _getHeaders();
 
-    final response = await http.post(
-      Uri.parse('$baseUrl/analyze/compare'),
-      headers: headers,
-      body: jsonEncode({
-        'beforeId': beforeId,
-        'afterId': afterId,
-      }),
-    );
+    final response = await http
+        .post(
+          Uri.parse('$baseUrl/analyze/compare'),
+          headers: headers,
+          body: jsonEncode({
+            'beforeId': beforeId,
+            'afterId': afterId,
+          }),
+        )
+        .timeout(const Duration(seconds: 90));
 
+    final data = _parseJsonObject(response);
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return data;
     } else if (response.statusCode == 401) {
       throw Exception('请先登录');
     } else {
-      throw Exception('对比分析失败: ${response.body}');
+      _throwFromResponse(data, response.statusCode, '对比分析失败');
     }
   }
 }

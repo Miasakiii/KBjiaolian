@@ -19,13 +19,15 @@ function ScanLoader() {
   useEffect(() => {
     const duration = 3000;
     const startTime = Date.now();
+    let rafId: number;
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const p = Math.min(elapsed / duration, 1);
       setProgress(Math.round(p * 100));
-      if (p < 1) requestAnimationFrame(animate);
+      if (p < 1) rafId = requestAnimationFrame(animate);
     };
-    requestAnimationFrame(animate);
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
   }, []);
 
   return (

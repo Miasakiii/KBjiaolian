@@ -41,7 +41,15 @@ export default function WorkoutPage() {
       }))
     );
     setCurrentExerciseIndex(0);
-    setStartTime(Date.now());
+    const now = Date.now();
+    // 持久化 startTime 到 sessionStorage，避免刷新页面后变成 0 导致 duration 异常巨大
+    try {
+      sessionStorage.setItem('workout-start-time', String(now));
+      sessionStorage.setItem('workout-plan-id', plan.id);
+    } catch (e) {
+      console.warn('持久化训练开始时间失败:', e);
+    }
+    setStartTime(now);
     setIsStarted(true);
   }, []);
 
@@ -65,15 +73,20 @@ export default function WorkoutPage() {
 
   const handleFinishWorkout = () => {
     const endTime = Date.now();
-    const duration = Math.round((endTime - startTime) / 60000);
+    const safeStart = startTime || (() => {
+      // 兜底：从 sessionStorage 恢复，避免刷新页面导致 startTime=0
+      const stored = sessionStorage.getItem('workout-start-time');
+      return stored ? Number(stored) : endTime;
+    })();
+    const duration = Math.max(0, Math.round((endTime - safeStart) / 60000));
 
     const record: WorkoutRecord = {
-      id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+      id: Date.now().toString(36) + Math.random().toString(36).substring(2),
       planId: selectedPlan?.id || '',
       planName: selectedPlan?.name || '',
       dayNumber: selectedDay?.day || 0,
       dayName: selectedDay?.name || '',
-      startTime,
+      startTime: safeStart,
       endTime,
       duration,
       exercises,
@@ -83,6 +96,9 @@ export default function WorkoutPage() {
     };
 
     localStorage.setItem('pendingWorkout', JSON.stringify(record));
+    // 清理 sessionStorage 的训练开始时间
+    sessionStorage.removeItem('workout-start-time');
+    sessionStorage.removeItem('workout-plan-id');
     router.push('/workout/complete');
   };
 
@@ -159,7 +175,22 @@ export default function WorkoutPage() {
   }
 
   // 训练中
+  if (isStarted && exercises.length === 0) {
+    return (
+      <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-4 px-6 text-center">
+        <div className="text-gray-700 font-medium">该训练日没有动作数据</div>
+        <p className="text-sm text-gray-500">请重新生成训练方案后再开始训练</p>
+        <Link href="/plans" className="mt-2 px-4 py-2 bg-gray-900 text-white rounded-lg text-sm">
+          返回方案列表
+        </Link>
+      </main>
+    );
+  }
+
   const currentExercise = exercises[currentExerciseIndex];
+  if (!currentExercise) {
+    return null;
+  }
   const currentPlanExercise = selectedDay?.exercises[currentExerciseIndex];
 
   return (

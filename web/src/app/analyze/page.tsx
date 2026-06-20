@@ -46,7 +46,11 @@ export default function AnalyzePage() {
           if (base64) {
             await saveRecord(base64, data);
             setSaved(true);
-            localStorage.setItem('latestAnalysis', JSON.stringify(data));
+            try {
+              localStorage.setItem('latestAnalysis', JSON.stringify(data));
+            } catch (e) {
+              console.warn('缓存 latestAnalysis 失败:', e);
+            }
           }
         } catch (error) {
           console.error('分析错误:', error);

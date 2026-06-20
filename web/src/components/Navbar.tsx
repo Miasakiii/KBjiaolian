@@ -2,25 +2,25 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { getUser, logout, isAuthenticated, isGuest as checkIsGuest } from '@/lib/auth';
+import { logout } from '@/lib/auth';
+import { useAuth } from '@/lib/AuthContext';
 import { Dumbbell, User, LogOut } from 'lucide-react';
 
 export default function Navbar() {
-  const [user, setUser] = useState<{ nickname: string } | null>(null);
-  const [guest, setGuest] = useState(false);
+  const { user, isAuthenticated, isGuest, logout: ctxLogout } = useAuth();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    setUser(getUser());
-    setGuest(checkIsGuest());
   }, []);
 
   const handleLogout = () => {
+    ctxLogout();
+    // ctxLogout 只清理 Context/localStorage 状态，但 logout() 还会跳转 /login + 清 SW 缓存
     logout();
   };
 
-  const loggedIn = !!user || guest;
+  const loggedIn = isAuthenticated || isGuest;
 
   return (
     <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
@@ -69,7 +69,7 @@ export default function Navbar() {
                   <LogOut size={15} />
                 </button>
               </div>
-            ) : guest ? (
+            ) : isGuest ? (
               <div className="flex items-center gap-2">
                 <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">
                   游客

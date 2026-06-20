@@ -35,13 +35,13 @@ export default function ForgotPasswordPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const data = await res.json().catch(() => ({} as Record<string, unknown>));
+      if (!res.ok) throw new Error((data && typeof data === 'object' && 'error' in data ? String((data as Record<string, unknown>).error) : '') || '发送失败，请稍后重试');
 
       setStep('code');
       setCooldown(60);
       toast.success('验证码已发送');
-      if (data.devHint) toast.info(data.devHint, { duration: 8000 });
+      if (data.devHint && process.env.NODE_ENV !== 'production') toast.info(String(data.devHint), { duration: 8000 });
       setTimeout(() => codeRef.current?.focus(), 100);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '发送失败');
@@ -60,8 +60,8 @@ export default function ForgotPasswordPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, code, newPassword }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const data = await res.json().catch(() => ({} as Record<string, unknown>));
+      if (!res.ok) throw new Error((data && typeof data === 'object' && 'error' in data ? String((data as Record<string, unknown>).error) : '') || '重置失败，请稍后重试');
 
       setStep('done');
       toast.success('密码重置成功');

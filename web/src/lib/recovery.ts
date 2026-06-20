@@ -231,7 +231,6 @@ export function formatHours(hours: number | null): string {
   if (hours < 24) return `${hours}小时前`;
   const days = Math.floor(hours / 24);
   const remainingHours = hours % 24;
-  if (days === 0) return `${hours}小时前`;
   if (remainingHours === 0) return `${days}天前`;
   return `${days}天${remainingHours}小时前`;
 }

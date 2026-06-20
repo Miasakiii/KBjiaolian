@@ -15,15 +15,24 @@ export default function WorkoutCompletePage() {
 
   useEffect(() => {
     const stored = localStorage.getItem('pendingWorkout');
+    // 加上过期机制：1 小时前的 pendingWorkout 视为过期，避免历史脏数据
     if (stored) {
       try {
-        setRecord(JSON.parse(stored));
+        const parsed = JSON.parse(stored) as WorkoutRecord;
+        const ageMs = Date.now() - (parsed.createdAt ?? 0);
+        if (ageMs > 60 * 60 * 1000) {
+          localStorage.removeItem('pendingWorkout');
+          router.replace('/workout');
+          return;
+        }
+        setRecord(parsed);
       } catch {
         console.error('Failed to parse pending workout');
-        router.push('/workout');
+        localStorage.removeItem('pendingWorkout');
+        router.replace('/workout');
       }
     } else {
-      router.push('/workout');
+      router.replace('/workout');
     }
   }, [router]);
 

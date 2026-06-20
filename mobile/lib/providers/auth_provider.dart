@@ -11,8 +11,8 @@ class AuthProvider extends ChangeNotifier {
   bool get isAuthenticated => _isAuthenticated;
   bool get isLoading => _isLoading;
   Map<String, dynamic>? get user => _user;
-  String? get nickname => _user?['nickname'] ?? _user?['email'] ?? '用户';
-  String? get email => _user?['email'];
+  String get nickname => _user?['nickname'] as String? ?? _user?['email'] as String? ?? '用户';
+  String? get email => _user?['email'] as String?;
   String? get error => _error;
 
   AuthProvider() {
@@ -26,8 +26,17 @@ class AuthProvider extends ChangeNotifier {
     try {
       _isAuthenticated = await ApiService.isAuthenticated();
       if (_isAuthenticated) {
+        // 后端 /auth/profile 直接返回用户对象（不带 user 包装）
         final result = await ApiService.getProfile();
-        _user = result['user'];
+        final user = result['user'];
+        if (user is Map<String, dynamic>) {
+          _user = user;
+        } else if (result.isNotEmpty) {
+          _user = result;
+        } else {
+          // profile 为空时退化为最小信息
+          _user = <String, dynamic>{};
+        }
       }
     } catch (e) {
       _isAuthenticated = false;
@@ -44,6 +53,7 @@ class AuthProvider extends ChangeNotifier {
     required String password,
     String? nickname,
   }) async {
+    if (_isLoading) return false; // 防止重复请求
     _error = null;
     _isLoading = true;
     notifyListeners();
@@ -55,7 +65,10 @@ class AuthProvider extends ChangeNotifier {
         nickname: nickname,
       );
       _isAuthenticated = true;
-      _user = result['user'];
+      final user = result['user'];
+      _user = user is Map<String, dynamic>
+          ? Map<String, dynamic>.from(user)
+          : <String, dynamic>{'email': email};
       _isLoading = false;
       notifyListeners();
       return true;
@@ -71,6 +84,7 @@ class AuthProvider extends ChangeNotifier {
     required String email,
     required String password,
   }) async {
+    if (_isLoading) return false; // 防止重复请求
     _error = null;
     _isLoading = true;
     notifyListeners();
@@ -81,7 +95,10 @@ class AuthProvider extends ChangeNotifier {
         password: password,
       );
       _isAuthenticated = true;
-      _user = result['user'];
+      final user = result['user'];
+      _user = user is Map<String, dynamic>
+          ? Map<String, dynamic>.from(user)
+          : <String, dynamic>{'email': email};
       _isLoading = false;
       notifyListeners();
       return true;
@@ -94,10 +111,16 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await ApiService.logout();
-    _isAuthenticated = false;
-    _user = null;
-    notifyListeners();
+    try {
+      await ApiService.logout();
+    } catch (e) {
+      debugPrint('登出错误: $e');
+    } finally {
+      _isAuthenticated = false;
+      _user = null;
+      _error = null;
+      notifyListeners();
+    }
   }
 
   void clearError() {

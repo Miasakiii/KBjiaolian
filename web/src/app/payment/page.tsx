@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { getToken, isAuthenticated } from '@/lib/auth'
+import { getToken, isAuthenticated, authFetch } from '@/lib/auth'
 import { toast } from 'sonner'
 import { CreditCard, Smartphone, AlertTriangle, CheckCircle } from 'lucide-react'
 
@@ -32,43 +32,47 @@ function PaymentContent() {
       return
     }
 
-    const token = getToken()
-    if (!token) {
+    if (!isAuthenticated()) {
       router.replace('/login?redirect=/payment')
       return
     }
 
-    fetch(`${API_BASE}/orders/${orderId}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then(r => r.json())
+    let cancelled = false
+    authFetch(`${API_BASE}/orders/${orderId}`)
+      .then(r => r.json().catch(() => ({} as Record<string, unknown>)))
       .then(data => {
-        if (data.error) throw new Error(data.error)
-        setOrder(data)
-        if (data.status === 'paid') {
+        if (cancelled) return
+        if (!data || typeof data !== 'object') {
+          throw new Error('获取订单失败')
+        }
+        const errObj = data as Record<string, unknown>
+        if (errObj.error) throw new Error(String(errObj.error))
+        if ((data as { status?: string }).status === 'paid') {
           toast.success('订单已完成')
           router.replace('/profile')
+          return
         }
+        setOrder(data as unknown as OrderInfo)
       })
       .catch(err => {
-        toast.error(err.message || '获取订单失败')
+        if (cancelled) return
+        toast.error(err instanceof Error ? err.message : '获取订单失败')
         router.replace('/pricing')
       })
+    return () => { cancelled = true }
   }, [orderId, router])
 
   const handleMockPay = async () => {
     if (!orderId) return
-    const token = getToken()
-    if (!token) return
+    if (!isAuthenticated()) return
 
     setPaying(true)
     try {
-      const res = await fetch(`${API_BASE}/payment/mock-pay/${orderId}`, {
+      const res = await authFetch(`${API_BASE}/payment/mock-pay/${orderId}`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
+      const data = await res.json().catch(() => ({} as Record<string, unknown>))
+      if (!res.ok) throw new Error((data && typeof data === 'object' && 'error' in data ? String((data as Record<string, unknown>).error) : '') || '支付失败')
 
       toast.success('支付成功！Pro 功能已解锁')
       router.replace('/profile')

@@ -96,8 +96,12 @@ class ScoreCard extends StatelessWidget {
                     case 'moderate':
                       chipColor = Colors.orange;
                       break;
-                    default:
+                    case 'mild':
                       chipColor = Colors.yellow.shade700;
+                      break;
+                    default:
+                      // 未知 severity 用灰色，区别于 mild
+                      chipColor = Colors.grey;
                   }
 
                   return Chip(

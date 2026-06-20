@@ -38,6 +38,9 @@ export function useServiceWorker(): ServiceWorkerState {
       return;
     }
 
+    let intervalId: ReturnType<typeof setInterval> | null = null;
+    const onControllerChange = () => window.location.reload();
+
     // 注册 Service Worker
     navigator.serviceWorker
       .register('/sw.js')
@@ -68,7 +71,7 @@ export function useServiceWorker(): ServiceWorkerState {
         });
 
         // 每小时检查一次更新
-        setInterval(() => {
+        intervalId = setInterval(() => {
           registration.update();
         }, 60 * 60 * 1000);
       })
@@ -77,9 +80,12 @@ export function useServiceWorker(): ServiceWorkerState {
       });
 
     // 监听控制器变化（skipWaiting 后触发）
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
-    });
+    navigator.serviceWorker.addEventListener('controllerchange', onControllerChange);
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+      navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange);
+    };
   }, []);
 
   // 监听在线/离线状态

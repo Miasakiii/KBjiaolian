@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import { login, getRedirectPath, clearRedirectPath } from '@/lib/auth';
+import { login as loginRequest, getRedirectPath, clearRedirectPath } from '@/lib/auth';
 import { useAuth } from '@/lib/AuthContext';
 import { Dumbbell, Mail, Lock, User, ArrowLeft, Shield } from 'lucide-react';
 
@@ -12,7 +12,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { enterGuestMode } = useAuth();
+  const { enterGuestMode, login: ctxLogin } = useAuth();
 
   // 登录/注册切换
   const [mode, setMode] = useState<'login' | 'register'>('login');
@@ -46,9 +46,13 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (!email) { setError('请输入邮箱'); return; }
+    const EMAIL_RE = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+    if (!EMAIL_RE.test(email)) { setError('邮箱格式不正确'); return; }
     setLoading(true);
     try {
-      await login(email, password);
+      const { token, user } = await loginRequest(email, password);
+      ctxLogin(token, user); // 通过 AuthContext 更新状态
       toast.success('登录成功');
       redirectAfterLogin();
     } catch (err: unknown) {
@@ -61,6 +65,8 @@ export default function LoginPage() {
   // === 发送验证码 ===
   const handleSendCode = async () => {
     if (!regEmail) { setError('请输入邮箱'); return; }
+    const EMAIL_RE = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
+    if (!EMAIL_RE.test(regEmail)) { setError('邮箱格式不正确'); return; }
     setError('');
     setSending(true);
     try {
@@ -69,15 +75,15 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: regEmail, type: 'register' }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const data = await res.json().catch(() => ({} as Record<string, unknown>));
+      if (!res.ok) throw new Error((data && typeof data === 'object' && 'error' in data ? String((data as Record<string, unknown>).error) : '') || '发送失败，请稍后重试');
 
       setCodeSent(true);
       setRegStep('code');
       setCooldown(60);
       toast.success('验证码已发送到邮箱');
       // 开发模式提示
-      if (data.devHint) toast.info(data.devHint, { duration: 8000 });
+      if (data.devHint && process.env.NODE_ENV !== 'production') toast.info(String(data.devHint), { duration: 8000 });
       setTimeout(() => codeInputRef.current?.focus(), 100);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : '发送失败');
@@ -102,12 +108,16 @@ export default function LoginPage() {
           code: regCode,
         }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const data = await res.json().catch(() => ({} as Record<string, unknown>));
+      if (!res.ok) throw new Error((data && typeof data === 'object' && 'error' in data ? String((data as Record<string, unknown>).error) : '') || '注册失败，请稍后重试');
 
-      // 保存 token
-      localStorage.setItem('kb-coach-token', data.token);
-      localStorage.setItem('kb-coach-user', JSON.stringify(data.user));
+      // 通过 AuthContext 更新状态，避免登录态不同步
+      if (data && typeof data === 'object' && 'token' in data && 'user' in data) {
+        ctxLogin(
+          String((data as Record<string, unknown>).token),
+          (data as Record<string, unknown>).user as { id: string; email: string; nickname: string },
+        );
+      }
       toast.success('注册成功');
       redirectAfterLogin();
     } catch (err: unknown) {

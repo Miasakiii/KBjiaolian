@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { getToken, logout, isAuthenticated } from '@/lib/auth'
+import { getToken, logout, isAuthenticated, authFetch } from '@/lib/auth'
 import {
   Settings, BarChart3, Footprints, Download, LogOut,
   Crown, Package, Camera, ClipboardList, Apple, MessageCircle,
@@ -70,21 +70,25 @@ export default function ProfilePage() {
       return
     }
 
-    const token = getToken()
-    const headers = { Authorization: `Bearer ${token}` }
-
+    let cancelled = false
     Promise.all([
-      fetch(`${API_BASE}/auth/profile`, { headers }).then(r => r.json()),
-      fetch(`${API_BASE}/quota`, { headers }).then(r => r.json()),
-      fetch(`${API_BASE}/orders`, { headers }).then(r => r.json()),
+      authFetch(`${API_BASE}/auth/profile`).then(r => r.json()),
+      authFetch(`${API_BASE}/quota`).then(r => r.json()),
+      authFetch(`${API_BASE}/orders`).then(r => r.json()),
     ])
       .then(([profileData, quotaData, ordersData]) => {
-        setProfile(profileData)
-        setQuota(quotaData)
+        if (cancelled) return
+        if (profileData && !profileData.error) setProfile(profileData)
+        if (quotaData && quotaData.usage) setQuota(quotaData)
         setOrders(Array.isArray(ordersData) ? ordersData : [])
       })
-      .catch(() => {})
-      .finally(() => setLoading(false))
+      .catch((err) => {
+        if (cancelled) return
+        console.error('加载个人数据失败:', err)
+      })
+      .finally(() => { if (!cancelled) setLoading(false) })
+
+    return () => { cancelled = true }
   }, [router])
 
   const handleLogout = () => {
@@ -102,7 +106,7 @@ export default function ProfilePage() {
   if (!profile) return null
 
   const isPro = profile.plan !== 'free'
-  const initial = (profile.nickname || profile.email || '?')[0].toUpperCase()
+  const initial = (profile.nickname?.[0] || profile.email?.[0] || '?').toUpperCase()
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -175,7 +179,7 @@ export default function ProfilePage() {
         {/* 今日用量 */}
         <div className="bg-white rounded-xl p-4 border border-gray-200">
           <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">今日用量</span>
-          {quota ? (
+          {quota && quota.usage ? (
             <div className="grid grid-cols-2 gap-2 mt-3">
               {Object.entries(quota.usage).map(([key, val]) => {
                 const pct = val.limit > 0 ? (val.used / val.limit) * 100 : 0

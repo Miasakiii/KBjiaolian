@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/analysis_provider.dart';
+import '../providers/workout_provider.dart';
+import '../providers/nutrition_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -102,9 +104,11 @@ class HomeScreen extends StatelessWidget {
   }
 
   Widget _buildStats(BuildContext context) {
-    return Consumer<AnalysisProvider>(
-      builder: (context, analysisProvider, _) {
+    return Consumer3<AnalysisProvider, WorkoutProvider, NutritionProvider>(
+      builder: (context, analysisProvider, workoutProvider, nutritionProvider, _) {
         final latestScore = analysisProvider.latestScore;
+        final weekWorkouts = workoutProvider.thisWeekWorkouts;
+        final todayNutrition = nutritionProvider.todayNutrition;
 
         return Row(
           children: [
@@ -117,21 +121,21 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: _StatCard(
                 icon: '💪',
                 title: '本周训练',
-                value: '0次',
-                subtitle: '连续 0 天',
+                value: '$weekWorkouts次',
+                subtitle: '近 7 天',
               ),
             ),
             const SizedBox(width: 12),
-            const Expanded(
+            Expanded(
               child: _StatCard(
                 icon: '🍎',
                 title: '今日热量',
-                value: '0',
-                subtitle: '0% 目标',
+                value: '${todayNutrition['calories']}',
+                subtitle: '${todayNutrition['recordCount']} 条记录',
               ),
             ),
           ],
@@ -263,12 +267,16 @@ class HomeScreen extends StatelessWidget {
             _FeatureChip(
               icon: '📈',
               label: '进度趋势',
-              onTap: () {},
+              onTap: () {
+                _showTODOToast(context, '进度趋势功能开发中');
+              },
             ),
             _FeatureChip(
               icon: '📤',
               label: '数据导出',
-              onTap: () {},
+              onTap: () {
+                _showTODOToast(context, '数据导出功能开发中');
+              },
             ),
             _FeatureChip(
               icon: 'ℹ️',
@@ -278,6 +286,15 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  void _showTODOToast(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+      ),
     );
   }
 }
