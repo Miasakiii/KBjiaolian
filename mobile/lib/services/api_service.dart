@@ -16,11 +16,11 @@ class ApiService {
     if (_envBaseUrl.isNotEmpty) return _envBaseUrl;
     // 开发回退：根据平台选择本机地址
     if (Platform.isAndroid) {
-      return 'http://10.0.2.2:3001/api';
+      return 'http://10.0.2.2:3003/api';
     } else if (Platform.isIOS) {
-      return 'http://localhost:3001/api';
+      return 'http://localhost:3003/api';
     } else {
-      return 'http://localhost:3001/api';
+      return 'http://localhost:3003/api';
     }
   }
 
