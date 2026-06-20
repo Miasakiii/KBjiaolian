@@ -271,7 +271,27 @@ class _NutritionScreenState extends State<NutritionScreen> {
 
         final analysis = provider.currentAnalysis;
         if (analysis == null) {
-          return const SizedBox.shrink();
+          return Center(
+            child: Column(
+              children: [
+                Icon(Icons.restaurant, size: 64, color: Colors.grey.shade300),
+                const SizedBox(height: 16),
+                Text(
+                  '暂无饮食记录',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '拍照识别食物后可查看记录',
+                  style: TextStyle(color: Colors.grey.shade500),
+                ),
+              ],
+            ),
+          );
         }
 
         final foods = analysis['foods'] as List? ?? [];

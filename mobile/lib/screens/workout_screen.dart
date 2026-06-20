@@ -177,7 +177,44 @@ class _WorkoutHome extends StatelessWidget {
     final records = provider.records;
 
     if (records.isEmpty) {
-      return const SizedBox.shrink();
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '训练记录',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 24),
+          Center(
+            child: Column(
+              children: [
+                Icon(Icons.fitness_center, size: 64, color: Colors.grey.shade300),
+                const SizedBox(height: 16),
+                Text(
+                  '暂无训练记录',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '完成训练后可查看记录',
+                  style: TextStyle(color: Colors.grey.shade500),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () => context.go('/plan'),
+                  child: const Text('去训练'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
     }
 
     return Column(

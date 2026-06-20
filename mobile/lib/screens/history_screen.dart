@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/analysis_provider.dart';
@@ -12,6 +13,11 @@ class HistoryScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('分析历史'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.compare_arrows),
+            tooltip: '前后对比',
+            onPressed: () => context.go('/compare'),
+          ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
             onPressed: () {
@@ -48,19 +54,25 @@ class HistoryScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('📭', style: TextStyle(fontSize: 64, color: Colors.grey.shade300)),
+                  Icon(Icons.history, size: 64, color: Colors.grey.shade300),
                   const SizedBox(height: 16),
                   Text(
-                    '暂无历史记录',
+                    '暂无分析记录',
                     style: TextStyle(
                       fontSize: 18,
+                      fontWeight: FontWeight.w600,
                       color: Colors.grey.shade600,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '完成体态分析后，记录会自动保存',
+                    '完成体态分析后可查看历史',
                     style: TextStyle(color: Colors.grey.shade500),
+                  ),
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () => context.go('/analyze'),
+                    child: const Text('去分析'),
                   ),
                 ],
               ),
