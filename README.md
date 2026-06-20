@@ -107,7 +107,7 @@ KBjiaolian/
 │   └── README.md
 ├── mobile/                 # Flutter 移动端（详见 mobile/README.md）
 │   ├── lib/
-│   │   ├── screens/        # 10 个页面
+│   │   ├── screens/        # 15 个页面
 │   │   ├── providers/      # 6 个 ChangeNotifier
 │   │   ├── services/       # api/storage/cloud
 │   │   ├── models/
