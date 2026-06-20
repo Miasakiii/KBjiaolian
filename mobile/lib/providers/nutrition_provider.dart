@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 
+import '../models/nutrition_record.dart';
 import '../services/api_service.dart';
 import '../services/storage_service.dart';
 import '../services/cloud_storage_service.dart';
@@ -9,12 +10,12 @@ class NutritionProvider extends ChangeNotifier {
   Map<String, dynamic>? _currentAnalysis;
   bool _isAnalyzing = false;
   String? _error;
-  List<dynamic> _records = [];
+  List<NutritionRecord> _records = [];
 
   Map<String, dynamic>? get currentAnalysis => _currentAnalysis;
   bool get isAnalyzing => _isAnalyzing;
   String? get error => _error;
-  List<dynamic> get records => _records;
+  List<NutritionRecord> get records => _records;
 
   NutritionProvider() {
     _loadRecords();
@@ -22,14 +23,19 @@ class NutritionProvider extends ChangeNotifier {
 
   Future<void> _loadRecords() async {
     // 先加载本地数据
-    _records = StorageService.getNutritionRecords();
+    final rawRecords = StorageService.getNutritionRecords();
+    _records = rawRecords
+        .map((e) => NutritionRecord.fromJson(e as Map<String, dynamic>))
+        .toList();
 
     // 如果已登录，尝试从云端加载
     try {
       if (await ApiService.isAuthenticated()) {
         final cloudRecords = await CloudStorageService.getNutritionRecords();
         if (cloudRecords.isNotEmpty) {
-          _records = cloudRecords;
+          _records = cloudRecords
+              .map((e) => NutritionRecord.fromJson(e as Map<String, dynamic>))
+              .toList();
         }
       }
     } catch (e) {
@@ -61,7 +67,10 @@ class NutritionProvider extends ChangeNotifier {
       // 保存到云端
       await CloudStorageService.saveNutritionRecord(record);
 
-      _records = StorageService.getNutritionRecords();
+      final rawRecords = StorageService.getNutritionRecords();
+      _records = rawRecords
+          .map((e) => NutritionRecord.fromJson(e as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       _error = e.toString();
       debugPrint('食物识别失败: $e');
@@ -80,20 +89,16 @@ class NutritionProvider extends ChangeNotifier {
     int count = 0;
 
     for (final record in _records) {
-      if (record is! Map) continue;
-      final createdStr = record['createdAt']?.toString();
-      final date = createdStr == null ? null : DateTime.tryParse(createdStr);
+      final date = DateTime.tryParse(record.createdAt);
       if (date == null) continue;
       if (date.year != today.year || date.month != today.month || date.day != today.day) {
         continue;
       }
 
-      final analysis = record['analysis'];
-      if (analysis is! Map) continue;
-      totalCalories += _toInt(analysis['totalCalories']);
-      totalProtein += _toInt(analysis['totalProtein']);
-      totalCarbs += _toInt(analysis['totalCarbs']);
-      totalFat += _toInt(analysis['totalFat']);
+      totalCalories += record.totalCalories;
+      totalProtein += record.totalProtein;
+      totalCarbs += record.totalCarbs;
+      totalFat += record.totalFat;
       count++;
     }
 
@@ -104,14 +109,6 @@ class NutritionProvider extends ChangeNotifier {
       'fat': totalFat,
       'recordCount': count,
     };
-  }
-
-  // 安全转 int：兼容 num/double/String/null
-  static int _toInt(dynamic v) {
-    if (v is int) return v;
-    if (v is num) return v.round();
-    if (v is String) return int.tryParse(v) ?? 0;
-    return 0;
   }
 
   void clearError() {

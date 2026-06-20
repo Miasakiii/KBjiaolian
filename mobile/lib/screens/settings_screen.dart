@@ -303,9 +303,9 @@ class SettingsScreen extends StatelessWidget {
       final exportData = {
         'exportedAt': DateTime.now().toIso8601String(),
         'analysisRecords': analysis,
-        'plans': plans,
-        'workoutRecords': workouts,
-        'nutritionRecords': nutrition,
+        'plans': plans.map((p) => p.toJson()).toList(),
+        'workoutRecords': workouts.map((w) => w.toJson()).toList(),
+        'nutritionRecords': nutrition.map((n) => n.toJson()).toList(),
       };
 
       final jsonString = const JsonEncoder.withIndent('  ').convert(exportData);

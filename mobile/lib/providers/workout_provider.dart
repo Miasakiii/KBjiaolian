@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
 
+import '../models/training_plan.dart';
+import '../models/workout_record.dart';
 import '../services/api_service.dart';
 import '../services/storage_service.dart';
 import '../services/cloud_storage_service.dart';
 
 class WorkoutProvider extends ChangeNotifier {
-  List<dynamic> _records = [];
+  List<WorkoutRecord> _records = [];
   Map<String, dynamic>? _currentWorkout;
   bool _isWorkoutActive = false;
   DateTime? _startTime;
 
-  List<dynamic> get records => _records;
+  List<WorkoutRecord> get records => _records;
   Map<String, dynamic>? get currentWorkout => _currentWorkout;
   bool get isWorkoutActive => _isWorkoutActive;
   DateTime? get startTime => _startTime;
@@ -21,14 +23,19 @@ class WorkoutProvider extends ChangeNotifier {
 
   Future<void> _loadRecords() async {
     // 先加载本地数据
-    _records = StorageService.getWorkoutRecords();
+    final rawRecords = StorageService.getWorkoutRecords();
+    _records = rawRecords
+        .map((e) => WorkoutRecord.fromJson(e as Map<String, dynamic>))
+        .toList();
 
     // 如果已登录，尝试从云端加载
     try {
       if (await ApiService.isAuthenticated()) {
         final cloudRecords = await CloudStorageService.getWorkoutRecords();
         if (cloudRecords.isNotEmpty) {
-          _records = cloudRecords;
+          _records = cloudRecords
+              .map((e) => WorkoutRecord.fromJson(e as Map<String, dynamic>))
+              .toList();
         }
       }
     } catch (e) {
@@ -38,15 +45,15 @@ class WorkoutProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void startWorkout(Map<String, dynamic> plan, int dayIndex) {
-    final schedule = (plan['schedule'] as List?) ?? const [];
+  void startWorkout(TrainingPlan plan, int dayIndex) {
+    final schedule = plan.schedule;
     if (dayIndex < 0 || dayIndex >= schedule.length) return;
-    final day = schedule[dayIndex] as Map? ?? const {};
+    final day = schedule[dayIndex];
     final exercisesRaw = (day['exercises'] as List?) ?? const [];
 
     _currentWorkout = {
-      'planId': plan['id'],
-      'planName': plan['name'],
+      'planId': plan.id,
+      'planName': plan.name,
       'dayIndex': dayIndex,
       'day': day,
       'exercises': exercisesRaw.map((raw) {
@@ -109,7 +116,10 @@ class WorkoutProvider extends ChangeNotifier {
     // 保存到云端
     await CloudStorageService.saveWorkoutRecord(record);
 
-    _records = StorageService.getWorkoutRecords();
+    final rawRecords = StorageService.getWorkoutRecords();
+    _records = rawRecords
+        .map((e) => WorkoutRecord.fromJson(e as Map<String, dynamic>))
+        .toList();
 
     _currentWorkout = null;
     _isWorkoutActive = false;
@@ -128,11 +138,10 @@ class WorkoutProvider extends ChangeNotifier {
 
   int get thisWeekWorkouts {
     final now = DateTime.now();
-    // 以本周一 00:00 为起点（locale 无关），修正原逻辑把本周一 now 之前的记录排除掉的问题
     final startOfWeek = DateTime(now.year, now.month, now.day)
         .subtract(Duration(days: now.weekday - 1));
     return _records.where((r) {
-      final date = DateTime.tryParse(r['createdAt']?.toString() ?? '');
+      final date = DateTime.tryParse(r.createdAt);
       if (date == null) return false;
       return date.isAfter(startOfWeek);
     }).length;

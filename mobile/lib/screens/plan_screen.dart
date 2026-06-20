@@ -310,7 +310,7 @@ class _PlanScreenState extends State<PlanScreen> {
           );
         }
 
-        final schedule = plan['schedule'] as List? ?? [];
+        final schedule = plan.schedule;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -322,14 +322,14 @@ class _PlanScreenState extends State<PlanScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      plan['name'] ?? '训练方案',
+                      plan.name.isNotEmpty ? plan.name : '训练方案',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text('周期: ${plan['durationWeeks'] ?? 0} 周'),
-                    Text('每周: ${plan['daysPerWeek'] ?? 0} 天'),
+                    Text('周期: ${plan.durationWeeks} 周'),
+                    Text('每周: ${plan.daysPerWeek} 天'),
                   ],
                 ),
               ),

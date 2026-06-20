@@ -2,21 +2,21 @@ class WorkoutRecord {
   final String id;
   final String? planId;
   final String planName;
-  final int dayNumber;
+  final int dayIndex;
   final String dayName;
-  final int startTime;
-  final int endTime;
+  final String startTime;
+  final String endTime;
   final int duration;
   final List<Map<String, dynamic>> exercises;
   final int rating;
   final String notes;
-  final int createdAt;
+  final String createdAt;
 
   WorkoutRecord({
     required this.id,
     this.planId,
     required this.planName,
-    required this.dayNumber,
+    required this.dayIndex,
     required this.dayName,
     required this.startTime,
     required this.endTime,
@@ -29,13 +29,13 @@ class WorkoutRecord {
 
   factory WorkoutRecord.fromJson(Map<String, dynamic> json) {
     return WorkoutRecord(
-      id: json['id'] as String,
+      id: json['id'] as String? ?? '',
       planId: json['planId'] as String?,
       planName: json['planName'] as String? ?? '',
-      dayNumber: json['dayNumber'] as int? ?? 0,
+      dayIndex: json['dayIndex'] as int? ?? 0,
       dayName: json['dayName'] as String? ?? '',
-      startTime: json['startTime'] as int? ?? 0,
-      endTime: json['endTime'] as int? ?? 0,
+      startTime: json['startTime'] as String? ?? '',
+      endTime: json['endTime'] as String? ?? '',
       duration: json['duration'] as int? ?? 0,
       exercises: (json['exercises'] as List<dynamic>?)
               ?.map((e) => e as Map<String, dynamic>)
@@ -43,7 +43,7 @@ class WorkoutRecord {
           [],
       rating: json['rating'] as int? ?? 0,
       notes: json['notes'] as String? ?? '',
-      createdAt: json['createdAt'] as int? ?? 0,
+      createdAt: json['createdAt'] as String? ?? '',
     );
   }
 
@@ -52,7 +52,7 @@ class WorkoutRecord {
       'id': id,
       'planId': planId,
       'planName': planName,
-      'dayNumber': dayNumber,
+      'dayIndex': dayIndex,
       'dayName': dayName,
       'startTime': startTime,
       'endTime': endTime,

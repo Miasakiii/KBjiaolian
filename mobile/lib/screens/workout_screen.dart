@@ -132,7 +132,7 @@ class _WorkoutHome extends StatelessWidget {
           );
         }
 
-        final schedule = plan['schedule'] as List? ?? [];
+        final schedule = plan.schedule;
 
         return Card(
           child: Padding(
@@ -141,7 +141,7 @@ class _WorkoutHome extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  plan['name'] ?? '训练方案',
+                  plan.name.isNotEmpty ? plan.name : '训练方案',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -191,19 +191,19 @@ class _WorkoutHome extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         ...records.take(5).map((record) {
-          final date = DateTime.tryParse(record['createdAt']?.toString() ?? '') ?? DateTime.now();
+          final date = DateTime.tryParse(record.createdAt) ?? DateTime.now();
           return Card(
             child: ListTile(
               leading: CircleAvatar(
                 backgroundColor: Colors.green.shade100,
                 child: Text(
-                  '${record['rating']}⭐',
+                  '${record.rating}⭐',
                   style: const TextStyle(fontSize: 12),
                 ),
               ),
-              title: Text(record['dayName'] ?? ''),
+              title: Text(record.dayName),
               subtitle: Text(
-                '${date.month}/${date.day} · ${record['duration']} 分钟',
+                '${date.month}/${date.day} · ${record.duration} 分钟',
               ),
             ),
           );
