@@ -13,6 +13,7 @@ services:
     volumes:
       - ./backend/data:/app/data
       - ./backend/logs:/app/logs
+      - ./backend/certs:/app/certs:ro
     environment:
       - NODE_ENV=production
       - PORT=3003
@@ -20,6 +21,15 @@ services:
       - MIMO_API_KEY=${MIMO_API_KEY}
       - MIMO_API_URL=${MIMO_API_URL}
       - CORS_ORIGIN=${CORS_ORIGIN:-http://localhost:3000}
+      - WECHAT_APPID=${WECHAT_APPID}
+      - WECHAT_APPSECRET=${WECHAT_APPSECRET}
+      - WECHAT_OPENPLATFORM_APPID=${WECHAT_OPENPLATFORM_APPID}
+      - WECHATPAY_MCH_ID=${WECHATPAY_MCH_ID}
+      - WECHATPAY_SERIAL_NO=${WECHATPAY_SERIAL_NO}
+      - WECHATPAY_API_V3_KEY=${WECHATPAY_API_V3_KEY}
+      - WECHATPAY_PRIVATE_KEY_PATH=/app/certs/apiclient_key.pem
+      - WECHATPAY_NOTIFY_URL=${WECHATPAY_NOTIFY_URL}
+      - MOCK_WECHAT_PAY=${MOCK_WECHAT_PAY:-true}
     networks:
       - kb-coach-network
     healthcheck:
