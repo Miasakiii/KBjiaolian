@@ -1,6 +1,11 @@
 import crypto from 'crypto';
 import db from './database.js';
 import { PLANS, upgradePlan } from './subscription.js';
+import {
+  isWechatPayConfigured,
+  createJsapiOrder,
+  createAppOrder,
+} from './wechatpay.js';
 
 // === 订单管理 ===
 
@@ -136,22 +141,73 @@ export function closeExpiredOrders() {
 }
 
 /**
- * 生成微信支付 Native 预下单参数
- * 实际对接时替换为真正的微信支付 API 调用
+ * 获取订单支付参数（异步 — 真实微信支付或 mock）
+ *
+ * @param {object} order - 订单对象
+ * @param {string} platform - 支付平台: 'miniapp'（小程序）| 'app'（App）
+ * @param {string} [openid] - 用户 openid（JSAPI 支付必填）
+ * @returns {Promise<object>} 支付参数
  */
-export function generatePaymentParams(order) {
-  // TODO: 替换为真实的微信支付 API 调用
-  // 这里返回模拟数据，前端展示二维码用
-  return {
-    orderId: order.id,
-    amount: order.amount,
-    amountYuan: (order.amount / 100).toFixed(2),
-    planName: PLANS[order.plan]?.name || order.plan,
-    // 生产环境：调用微信支付 Native 下单 API，获取 code_url
-    codeUrl: `weixin://wxpay/bizpayurl?pr=${order.id.toLowerCase()}`,
-    // 模拟支付回调（仅开发环境返回，避免生产被白嫖）
-    ...(process.env.NODE_ENV !== 'production' && {
-      mockPayUrl: `/api/payment/mock-pay/${order.id}`,
-    }),
-  };
+export async function generatePaymentParams(order, platform = 'miniapp', openid) {
+  const planName = PLANS[order.plan]?.name || order.plan;
+  const description = `KB教练 ${planName}`;
+
+  // Mock 模式（开发环境）
+  if (!isWechatPayConfigured()) {
+    return {
+      orderId: order.id,
+      amount: order.amount,
+      amountYuan: (order.amount / 100).toFixed(2),
+      planName,
+      platform,
+      // 开发环境返回 mock 支付地址
+      ...(process.env.NODE_ENV !== 'production' && {
+        mockPayUrl: `/api/payment/mock-pay/${order.id}`,
+      })),
+    };
+  }
+
+  // 真实微信支付
+  try {
+    if (platform === 'miniapp') {
+      if (!openid) {
+        throw new Error('小程序支付需要 openid');
+      }
+      const paymentParams = await createJsapiOrder({
+        orderId: order.id,
+        amount: order.amount,
+        description,
+        openid,
+      });
+      return {
+        orderId: order.id,
+        amount: order.amount,
+        amountYuan: (order.amount / 100).toFixed(2),
+        planName,
+        platform: 'miniapp',
+        ...paymentParams,
+      };
+    }
+
+    if (platform === 'app') {
+      const paymentParams = await createAppOrder({
+        orderId: order.id,
+        amount: order.amount,
+        description,
+      });
+      return {
+        orderId: order.id,
+        amount: order.amount,
+        amountYuan: (order.amount / 100).toFixed(2),
+        planName,
+        platform: 'app',
+        ...paymentParams,
+      };
+    }
+
+    throw new Error(`不支持的支付平台: ${platform}`);
+  } catch (err) {
+    console.error('生成支付参数失败:', err.message);
+    throw err;
+  }
 }

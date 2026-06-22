@@ -32,6 +32,7 @@ import {
 } from './data.js';
 import { getQuotaStatus, checkQuota, logUsage, reserveQuota, releaseQuota, PLANS } from './subscription.js';
 import { createOrder, getOrder, getUserOrders, completeOrder, generatePaymentParams, closeExpiredOrders } from './orders.js';
+import { verifyCallbackSignature, decryptNotification } from './wechatpay.js';
 import {
   isValidBase64Image,
   isValidGoal,
@@ -142,7 +143,7 @@ export function createApp() {
     res.json(PLANS);
   });
 
-  // 创建订单
+  // 创建订单（仅创建，不生成支付参数）
   app.post('/api/orders', authMiddleware, (req, res) => {
     try {
       const { plan } = req.body;
@@ -151,7 +152,6 @@ export function createApp() {
       }
 
       const order = createOrder(req.userId, plan);
-      const paymentParams = generatePaymentParams(order);
 
       res.json({
         order: {
@@ -162,7 +162,6 @@ export function createApp() {
           planName: PLANS[order.plan]?.name,
           status: order.status,
         },
-        payment: paymentParams,
       });
     } catch (err) {
       console.error('创建订单失败:', err.message);
@@ -170,6 +169,33 @@ export function createApp() {
         return res.status(err.statusCode).json({ error: err.message });
       }
       res.status(500).json({ error: '创建订单失败' });
+    }
+  });
+
+  // 获取支付参数（创建订单后调用，需指定平台）
+  app.post('/api/orders/:id/pay', authMiddleware, async (req, res) => {
+    try {
+      const { platform, openid } = req.body;
+      const order = getOrder(req.params.id);
+
+      if (!order || order.user_id !== req.userId) {
+        return res.status(404).json({ error: '订单不存在' });
+      }
+      if (order.status !== 'pending') {
+        return res.status(400).json({ error: '订单已支付或已关闭' });
+      }
+      if (!platform || !['miniapp', 'app'].includes(platform)) {
+        return res.status(400).json({ error: '请指定支付平台: miniapp 或 app' });
+      }
+
+      const paymentParams = await generatePaymentParams(order, platform, openid);
+      res.json({ payment: paymentParams });
+    } catch (err) {
+      console.error('获取支付参数失败:', err.message);
+      if (err.statusCode) {
+        return res.status(err.statusCode).json({ error: err.message });
+      }
+      res.status(500).json({ error: '获取支付参数失败' });
     }
   });
 
@@ -251,9 +277,39 @@ export function createApp() {
   // 微信支付回调（生产环境）
   app.post('/api/payment/wechat/notify', express.raw({ type: 'application/json' }), (req, res) => {
     try {
-      // TODO: 验证微信支付签名，解析回调数据
-      // const { out_trade_no, transaction_id } = verifyWechatNotification(req.body);
-      // completeOrder(out_trade_no, transaction_id);
+      const bodyStr = req.body.toString('utf8');
+
+      // 验证签名
+      if (!verifyCallbackSignature(req.headers, bodyStr)) {
+        console.error('微信支付回调签名验证失败');
+        return res.status(401).json({ code: 'FAIL', message: '签名验证失败' });
+      }
+
+      // 解析通知体
+      const notification = JSON.parse(bodyStr);
+
+      if (notification.event_type === 'TRANSACTION.SUCCESS') {
+        // 解密支付结果
+        const result = decryptNotification(notification.resource);
+        const { out_trade_no, transaction_id, trade_state, amount } = result;
+
+        console.log(`微信支付通知: ${out_trade_no}, 交易号: ${transaction_id}, 状态: ${trade_state}`);
+
+        if (trade_state === 'SUCCESS') {
+          // 校验金额（防止篡改）
+          const order = getOrder(out_trade_no);
+          if (order && amount && amount.total !== order.amount) {
+            console.error(`微信支付金额不匹配: 订单 ${order.amount}, 回调 ${amount.total}`);
+            return res.status(400).json({ code: 'FAIL', message: '金额不匹配' });
+          }
+
+          // 完成订单（幂等）
+          completeOrder(out_trade_no, transaction_id);
+          console.log(`订单 ${out_trade_no} 支付成功，套餐已升级`);
+        }
+      }
+
+      // 必须返回 200 + SUCCESS，否则微信会重复通知
       res.json({ code: 'SUCCESS', message: '成功' });
     } catch (err) {
       console.error('微信支付回调处理失败:', err.message);

@@ -71,6 +71,7 @@ temp/
 backend/data/*.db
 backend/data/*.db-wal
 backend/data/*.db-shm
+backend/certs/
 nginx/ssl/
 nginx/logs/
 
