@@ -47,7 +47,8 @@ backend/
 │   ├── auth.js           # 注册/登录/验证码/重置密码/JWT 中间件
 │   ├── database.js       # better-sqlite3 初始化 + 表结构 + 迁移
 │   ├── data.js           # 数据持久化 CRUD（分析/方案/训练/饮食/聊天）
-│   ├── orders.js         # 订单创建/完成/关闭 + 微信支付参数
+│   ├── orders.js         # 订单创建/完成/关闭 + 支付参数生成
+│   ├── wechatpay.js      # 微信支付 API v3（签名/验签/统一下单/回调解密）
 │   ├── subscription.js   # 套餐配置 + 配额预占/释放 + 升级/降级
 │   ├── validation.js     # 输入校验 + extractJsonObject（平衡括号 JSON 提取）
 │   ├── progression.js    # 渐进式超负荷算法（历史训练数据分析）
@@ -90,9 +91,10 @@ backend/
 | POST | `/api/chat` | AI 对话 | 20/min + 配额 |
 | POST | `/api/chat/stream` | AI 流式对话 (SSE) | 20/min + 配额 |
 | POST | `/api/orders` | 创建订单 | 60/min |
+| POST | `/api/orders/:id/pay` | 获取支付参数（需 platform: miniapp/app） | 60/min |
 | GET | `/api/orders` `(/:id)` | 订单列表/详情 | 60/min |
 | POST | `/api/payment/mock-pay/:id` | **仅非生产** 模拟支付 | 60/min |
-| POST | `/api/payment/wechat/notify` | 微信支付回调 | - |
+| POST | `/api/payment/wechat/notify` | 微信支付回调（验签+解密） | - |
 | CRUD | `/api/data/analysis` `(/:id)` | 体态分析记录 | 60/min |
 | CRUD | `/api/data/plans` `(/:id)` | 训练方案（DELETE 无 :id 则清空全部） | 60/min |
 | CRUD | `/api/data/workouts` `(/:id)` | 训练记录 | 60/min |
@@ -159,7 +161,38 @@ try {
 - `upgradePlan`: 续费在剩余时长基础上叠加（不覆盖未到期天数）
 - `closeExpiredOrders`: 每 5 分钟定时清理超过 30 分钟未支付的订单（`setInterval().unref()`）
 - 模拟支付端点 `POST /api/payment/mock-pay/:id` 仅在 `NODE_ENV !== 'production'` 注册
-- 微信支付回调 `POST /api/payment/wechat/notify` 已预留，签名校验 TODO
+- 微信支付回调 `POST /api/payment/wechat/notify` 已实现签名校验 + AEAD_AES_256_GCM 解密 + 金额校验
+
+### 微信支付 API v3（`wechatpay.js`）
+
+支持小程序 JSAPI 支付和 App 支付：
+
+| 函数 | 说明 |
+|---|---|
+| `createJsapiOrder` | 统一下单（JSAPI），返回 `wx.requestPayment` 参数 |
+| `createAppOrder` | 统一下单（APP），返回微信 SDK 参数 |
+| `verifyCallbackSignature` | 验证回调签名（RSA-SHA256） |
+| `decryptNotification` | 解密回调通知（AEAD_AES_256_GCM） |
+| `queryOrder` | 查询订单状态 |
+| `closeOrder` | 关闭订单 |
+
+**支付流程：**
+```
+1. 前端 POST /api/orders → 创建订单
+2. 前端 POST /api/orders/:id/pay {platform, openid} → 获取支付参数
+3. 小程序 wx.requestPayment / App 微信 SDK
+4. 微信通知 POST /api/payment/wechat/notify → 验签+解密+升级套餐
+```
+
+**环境变量：**
+```bash
+WECHATPAY_MCH_ID=商户号
+WECHATPAY_SERIAL_NO=证书序列号
+WECHATPAY_API_V3_KEY=APIv3密钥
+WECHATPAY_PRIVATE_KEY_PATH=./certs/apiclient_key.pem
+WECHATPAY_NOTIFY_URL=https://your-domain/api/payment/wechat/notify
+MOCK_WECHAT_PAY=true  # 开发模式跳过真实API
+```
 
 ## AI 模块
 
