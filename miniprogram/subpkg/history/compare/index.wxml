@@ -1,0 +1,55 @@
+<!--subpkg/history/compare/index.wxml - 前后对比页-->
+<view class="page-container">
+  <view class="section-title">选择两次分析记录</view>
+  <text class="hint-text">选择两次体态分析，AI 将生成变化报告</text>
+
+  <!-- 已选记录展示 -->
+  <view class="selected-wrap" wx:if="{{selected.length > 0}}">
+    <view class="selected-card card" wx:for="{{selected}}" wx:key="id">
+      <text class="sc-date">{{item.dateStr}}</text>
+      <text class="sc-score">综合 {{item.overallScore}} 分</text>
+      <view class="sc-remove" bindtap="onRemove" data-idx="{{index}}">✕</view>
+    </view>
+  </view>
+
+  <!-- 记录列表（选择模式）-->
+  <view class="record-list">
+    <view
+      class="record-card card {{item.selected ? 'record-card-active' : ''}}"
+      wx:for="{{list}}"
+      wx:key="id"
+      bindtap="onToggleSelect"
+      data-id="{{item.id}}"
+    >
+      <view class="rc-header flex-between">
+        <text class="rc-date">{{item.dateStr}}</text>
+        <text class="rc-score">{{item.overallScore}}分</text>
+      </view>
+      <view class="rc-badge" wx:if="{{item.selected}}">已选</view>
+    </view>
+  </view>
+
+  <!-- 对比结果 -->
+  <view wx:if="{{compareResult}}" class="compare-result card">
+    <text class="cr-title">变化报告</text>
+    <view class="cr-section">
+      <text class="cr-label">综合评分变化</text>
+      <text class="cr-value {{compareResult.scoreChange >= 0 ? 'text-brand' : 'text-red'}}">
+        {{compareResult.scoreChange >= 0 ? '+' : ''}}{{compareResult.scoreChange}} 分
+      </text>
+    </view>
+    <view class="cr-dim-list">
+      <view class="cr-dim" wx:for="{{compareResult.dims}}" wx:key="name">
+        <text class="cd-name">{{item.name}}</text>
+        <text class="cd-change {{item.change >= 0 ? 'text-brand' : 'text-red'}}">
+          {{item.change >= 0 ? '+' : ''}}{{item.change}}
+        </text>
+      </view>
+    </view>
+    <text class="cr-summary">{{compareResult.summary}}</text>
+  </view>
+
+  <button class="btn-primary compare-btn" bindtap="onCompare" loading="{{loading}}" disabled="{{selected.length < 2}}">
+    {{selected.length < 2 ? '请选择 2 条记录' : '生成对比报告'}}
+  </button>
+</view>

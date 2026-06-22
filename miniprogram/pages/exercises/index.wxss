@@ -1,0 +1,60 @@
+/* pages/exercises/index.wxss - 动作库页样式 */
+.page-container { min-height: 100vh; background: #f8fafc; }
+
+/* 搜索栏 */
+.search-bar { padding: 20rpx 24rpx 12rpx; }
+.search-input-wrap {
+  display: flex; align-items: center; gap: 12rpx;
+  background: #f1f5f9; border-radius: 12rpx; padding: 16rpx 20rpx;
+}
+.search-icon { font-size: 28rpx; color: #9ca3af; }
+.search-input { flex: 1; font-size: 28rpx; }
+
+/* 肌群筛选 */
+.filter-scroll { white-space: nowrap; padding: 8rpx 0; }
+.filter-list { display: inline-flex; gap: 12rpx; padding: 0 24rpx; }
+.filter-tag {
+  display: inline-block; padding: 12rpx 24rpx; border-radius: 8rpx;
+  background: #f1f5f9; color: #374151; font-size: 24rpx; flex-shrink: 0;
+}
+.filter-tag-active { background: #dcfce7; color: #16a34a; font-weight: 500; }
+
+/* 动作列表 */
+.exercise-list { padding: 16rpx 24rpx 40rpx; }
+.exercise-card {
+  display: flex; align-items: center; gap: 20rpx;
+  padding: 24rpx 20rpx; margin-bottom: 16rpx;
+}
+.ec-left { flex-shrink: 0; }
+.ec-icon-wrap {
+  width: 88rpx; height: 88rpx; border-radius: 16rpx;
+  background: #dcfce7; display: flex; align-items: center; justify-content: center;
+}
+.ec-icon { font-size: 40rpx; }
+.ec-info { flex: 1; min-width: 0; }
+.ec-name { font-size: 28rpx; font-weight: 500; color: #1c1c1e; display: block; }
+.ec-group { font-size: 22rpx; color: #6b7280; margin-top: 4rpx; display: block; }
+.ec-desc { font-size: 22rpx; color: #9ca3af; margin-top: 6rpx; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ec-arrow { font-size: 22rpx; color: #d1d5db; flex-shrink: 0; }
+
+/* 详情弹窗 */
+.detail-mask {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4); z-index: 100;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.detail-sheet {
+  width: 100%; max-height: 80vh; background: #ffffff;
+  border-radius: 24rpx 24rpx 0 0; padding: 32rpx 32rpx 48rpx;
+  overflow-y: auto;
+}
+.ds-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28rpx; }
+.ds-name { font-size: 34rpx; font-weight: 700; }
+.ds-close { font-size: 36rpx; color: #9ca3af; padding: 8rpx; }
+.ds-body { }
+.ds-row { display: flex; justify-content: space-between; padding: 12rpx 0; border-bottom: 1rpx solid #f1f5f9; }
+.ds-label { font-size: 26rpx; color: #6b7280; }
+.ds-value { font-size: 26rpx; font-weight: 500; color: #1c1c1e; }
+.ds-section { font-size: 28rpx; font-weight: 600; margin: 24rpx 0 12rpx; }
+.ds-tips { }
+.ds-tip { font-size: 26rpx; color: #374151; line-height: 1.8; display: block; }

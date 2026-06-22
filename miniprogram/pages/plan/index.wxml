@@ -1,0 +1,99 @@
+<!--pages/plan/index.wxml - 训练方案页-->
+<view class="page-container">
+  <view class="login-prompt" wx:if="{{!isLoggedIn}}">
+    <text class="lp-icon">🔒</text>
+    <text class="lp-text">登录后可使用训练方案</text>
+    <button class="btn-primary lp-btn" bindtap="onTapLogin">去登录</button>
+  </view>
+
+  <block wx:else>
+    <!-- 方案生成表单（未生成时显示） -->
+    <view wx:if="{{!planData}}">
+      <view class="plan-form card">
+        <text class="pf-title">生成你的训练方案</text>
+        <text class="pf-desc">AI 根据你的目标定制 7 天计划</text>
+
+        <!-- 目标选择 -->
+        <view class="pf-section">
+          <text class="pf-label">训练目标</text>
+          <view class="pf-options">
+            <view
+              class="pf-option {{goal === item.key ? 'pf-option-active' : ''}}"
+              wx:for="{{goalOptions}}"
+              wx:key="key"
+              bindtap="onSelectGoal"
+              data-key="{{item.key}}"
+            >{{item.label}}</view>
+          </view>
+        </view>
+
+        <!-- 训练部位 -->
+        <view class="pf-section">
+          <text class="pf-label">重点部位（可选）</text>
+          <view class="pf-tags">
+            <view
+              class="pf-tag {{selectedParts.indexOf(item) >= 0 ? 'pf-tag-active' : ''}}"
+              wx:for="{{partOptions}}"
+              wx:key="*this"
+              bindtap="onTogglePart"
+              data-part="{{item}}"
+            >{{item}}</view>
+          </view>
+        </view>
+
+        <!-- 经验水平 -->
+        <view class="pf-section">
+          <text class="pf-label">你的水平</text>
+          <view class="pf-options">
+            <view
+              class="pf-option {{level === item.key ? 'pf-option-active' : ''}}"
+              wx:for="{{levelOptions}}"
+              wx:key="key"
+              bindtap="onSelectLevel"
+              data-key="{{item.key}}"
+            >{{item.label}}</view>
+          </view>
+        </view>
+
+        <button class="btn-primary" bindtap="onGenerate" loading="{{generating}}">
+          {{generating ? '生成中...' : '生成训练方案'}}
+        </button>
+      </view>
+    </view>
+
+    <!-- 方案展示（生成后显示） -->
+    <view wx:if="{{planData}}">
+      <view class="plan-header card">
+        <text class="ph-title">{{planData.title}}</text>
+        <text class="ph-desc">{{planData.desc}}</text>
+        <view class="ph-meta">
+          <text class="ph-meta-item">📅 {{planData.duration}}天</text>
+          <text class="ph-meta-item">🏋️ {{planData.frequency}}/周</text>
+        </view>
+      </view>
+
+      <!-- 每日方案列表 -->
+      <view class="section-title">每日计划</view>
+      <view class="day-list">
+        <view class="day-card card" wx:for="{{planData.days}}" wx:key="day">
+          <view class="dc-header flex-between" bindtap="onToggleDay" data-idx="{{index}}">
+            <text class="dc-day">第{{item.day}}天 · {{item.focus}}</text>
+            <text class="dc-arrow">{{expandedDay === index ? '▲' : '▼'}}</text>
+          </view>
+          <view class="dc-exercises" wx:if="{{expandedDay === index}}">
+            <view class="exercise-item" wx:for="{{item.exercises}}" wx:key="name">
+              <text class="ei-name">{{item.name}}</text>
+              <text class="ei-meta">{{item.sets}}组 × {{item.reps}}次</text>
+              <text class="ei-note">{{item.note}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <view class="plan-actions">
+        <button class="btn-primary" bindtap="onSavePlan">保存方案</button>
+        <button class="btn-outline" bindtap="onRegenerate">重新生成</button>
+      </view>
+    </view>
+  </block>
+</view>

@@ -316,8 +316,9 @@ class SettingsScreen extends StatelessWidget {
       final file = File('${dir.path}/$fileName');
       await file.writeAsString(jsonString);
 
-      await SharePlus.instance.share(
-        ShareParams(files: [XFile(file.path)], text: 'KB教练数据导出'),
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'KB教练数据导出',
       );
     } catch (e) {
       messenger.showSnackBar(

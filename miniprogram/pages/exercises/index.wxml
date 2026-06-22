@@ -1,0 +1,87 @@
+<!--pages/exercises/index.wxml - 动作库页-->
+<view class="page-container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <view class="search-input-wrap">
+      <text class="search-icon">🔍</text>
+      <input
+        class="search-input"
+        value="{{keyword}}"
+        bindinput="onSearchInput"
+        placeholder="搜索动作..."
+        confirm-type="search"
+        bindconfirm="onSearch"
+      />
+    </view>
+  </view>
+
+  <!-- 肌群筛选 -->
+  <scroll-view class="filter-scroll" scroll-x>
+    <view class="filter-list">
+      <view
+        class="filter-tag {{activeGroup === item ? 'filter-tag-active' : ''}}"
+        wx:for="{{muscleGroups}}"
+        wx:key="*this"
+        bindtap="onSelectGroup"
+        data-group="{{item}}"
+      >{{item}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 动作列表 -->
+  <view class="exercise-list" wx:if="{{filteredList.length > 0}}">
+    <view
+      class="exercise-card card"
+      wx:for="{{filteredList}}"
+      wx:key="name"
+      bindtap="onTapExercise"
+      data-name="{{item.name}}"
+    >
+      <view class="ec-left">
+        <view class="ec-icon-wrap">
+          <text class="ec-icon">{{item.icon}}</text>
+        </view>
+      </view>
+      <view class="ec-info">
+        <text class="ec-name">{{item.name}}</text>
+        <text class="ec-group">{{item.group}} · {{item.equipment}}</text>
+        <text class="ec-desc">{{item.desc}}</text>
+      </view>
+      <text class="ec-arrow">▶</text>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:else>
+    <text class="empty-icon">📖</text>
+    <text class="empty-text">没有找到相关动作</text>
+  </view>
+
+  <!-- 动作详情弹窗 -->
+  <view class="detail-mask" wx:if="{{showDetail}}" bindtap="onCloseDetail">
+    <view class="detail-sheet" catchtap="">
+      <view class="ds-header">
+        <text class="ds-name">{{detailData.name}}</text>
+        <view class="ds-close" bindtap="onCloseDetail">✕</view>
+      </view>
+      <view class="ds-body">
+        <view class="ds-row">
+          <text class="ds-label">目标肌群</text>
+          <text class="ds-value">{{detailData.group}}</text>
+        </view>
+        <view class="ds-row">
+          <text class="ds-label">所需器械</text>
+          <text class="ds-value">{{detailData.equipment}}</text>
+        </view>
+        <view class="ds-row">
+          <text class="ds-label">难度</text>
+          <text class="ds-value">{{detailData.difficulty}}</text>
+        </view>
+        <view class="ds-section">动作要点</view>
+        <view class="ds-tips">
+          <text class="ds-tip" wx:for="{{detailData.tips}}" wx:key="*this">• {{item}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

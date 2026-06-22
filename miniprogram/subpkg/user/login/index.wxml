@@ -1,0 +1,21 @@
+<!--subpkg/user/login/index.wxml - 登录页-->
+<view class="page-container">
+  <view class="login-hero">
+    <text class="lh-icon">🏋️</text>
+    <text class="lh-title">KB教练</text>
+    <text class="lh-subtitle">AI 驱动的体态评估专家</text>
+  </view>
+  <view class="login-actions">
+    <button class="btn-primary login-btn" bindtap="onWxLogin">微信一键登录</button>
+    <view class="login-divider">
+      <view class="ld-line"></view>
+      <text class="ld-text">或</text>
+      <view class="ld-line"></view>
+    </view>
+    <view class="email-form">
+      <input class="input-wrap" placeholder="邮箱地址" value="{{email}}" bindinput="onEmailInput" />
+      <input class="input-wrap" placeholder="密码" password value="{{password}}" bindinput="onPwdInput" />
+      <button class="btn-outline" bindtap="onEmailLogin">邮箱登录</button>
+    </view>
+  </view>
+</view>

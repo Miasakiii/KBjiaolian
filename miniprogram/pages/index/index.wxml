@@ -1,0 +1,82 @@
+<!--pages/index/index.wxml - 首页/仪表盘-->
+<view class="page-container">
+  <!-- 未登录态：宣传 Banner -->
+  <block wx:if="{{!isLoggedIn}}">
+    <view class="hero-banner">
+      <view class="hero-content">
+        <text class="hero-title">拍一张照，Know Your Body</text>
+        <text class="hero-subtitle">AI 驱动的体态评估与康复矫正专家</text>
+        <button class="btn-primary hero-btn" bindtap="onTapLogin">微信一键登录</button>
+      </view>
+    </view>
+    <view class="features-grid">
+      <view class="feature-card" wx:for="{{features}}" wx:key="key">
+        <text class="feature-icon">{{item.icon}}</text>
+        <text class="feature-name">{{item.name}}</text>
+        <text class="feature-desc">{{item.desc}}</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- 已登录态：仪表盘 -->
+  <block wx:else>
+    <!-- 欢迎语 -->
+    <view class="welcome-bar">
+      <text class="welcome-text">你好，{{user.nickname || '健身伙伴'}}</text>
+      <view class="plan-badge badge">{{user.plan === 'pro' ? 'Pro' : 'Free'}}</view>
+    </view>
+
+    <!-- 今日配额卡片 -->
+    <view class="quota-card card">
+      <view class="quota-header flex-between">
+        <text class="quota-title">今日剩余配额</text>
+        <text class="quota-upgrade" wx:if="{{user.plan !== 'pro'}}" bindtap="onTapUpgrade">升级 Pro →</text>
+      </view>
+      <view class="quota-grid">
+        <view class="quota-item" wx:for="{{quotaList}}" wx:key="key">
+          <text class="quota-count">{{item.remaining}}</text>
+          <text class="quota-label">{{item.label}}</text>
+          <view class="quota-bar-bg">
+            <view class="quota-bar-fill" style="width: {{item.percent}}%"></view>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 快捷操作 -->
+    <view class="quick-actions">
+      <view class="quick-action" bindtap="onTapAnalyze">
+        <view class="qa-icon qa-analyze">📸</view>
+        <text class="qa-text">体态分析</text>
+      </view>
+      <view class="quick-action" bindtap="onTapPlan">
+        <view class="qa-icon qa-plan">🏋️</view>
+        <text class="qa-text">训练方案</text>
+      </view>
+      <view class="quick-action" bindtap="onTapChat">
+        <view class="qa-icon qa-chat">💬</view>
+        <text class="qa-text">AI 对话</text>
+      </view>
+      <view class="quick-action" bindtap="onTapExercises">
+        <view class="qa-icon qa-exercises">📖</view>
+        <text class="qa-text">动作库</text>
+      </view>
+    </view>
+
+    <!-- 今日摘要（后续接入数据） -->
+    <view class="section-title">今日摘要</view>
+    <view class="summary-card card" wx:if="{{todaySummary}}">
+      <view class="summary-item" wx:for="{{todaySummary}}" wx:key="key">
+        <text class="summary-icon">{{item.icon}}</text>
+        <view class="summary-info">
+          <text class="summary-label">{{item.label}}</text>
+          <text class="summary-value">{{item.value}}</text>
+        </view>
+      </view>
+    </view>
+    <view class="empty-state" wx:else>
+      <text class="empty-icon">📋</text>
+      <text class="empty-text">今天还没有记录，快去分析体态吧！</text>
+    </view>
+  </block>
+</view>

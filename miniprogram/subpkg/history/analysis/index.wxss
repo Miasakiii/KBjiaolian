@@ -1,0 +1,13 @@
+/* subpkg/history/analysis/index.wxss */
+.page-container { min-height: 100vh; background: #f8fafc; }
+.record-list { padding: 0 24rpx; }
+.record-card { margin: 0 0 16rpx !important; }
+.rc-header { margin-bottom: 12rpx; }
+.rc-date { font-size: 26rpx; color: #6b7280; }
+.rc-score { font-size: 32rpx; font-weight: 700; }
+.rc-dimensions { display: flex; flex-wrap: wrap; gap: 8rpx; margin-bottom: 12rpx; }
+.rc-dim { font-size: 22rpx; background: #f1f5f9; color: #374151; padding: 6rpx 14rpx; border-radius: 6rpx; }
+.rc-actions { display: flex; justify-content: flex-end; }
+.rc-link { font-size: 24rpx; color: #22c55e; font-weight: 500; }
+
+.empty-btn { width: 40% !important; margin-top: 24rpx; }
