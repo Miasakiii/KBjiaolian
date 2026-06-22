@@ -1,0 +1,31 @@
+<!--subpkg/history/analysis/index.wxml - 分析历史列表-->
+<view class="page-container">
+  <view class="section-title">体态分析记录</view>
+
+  <view class="record-list" wx:if="{{list.length > 0}}">
+    <view
+      class="record-card card"
+      wx:for="{{list}}"
+      wx:key="id"
+      bindtap="onTapRecord"
+      data-id="{{item.id}}"
+    >
+      <view class="rc-header flex-between">
+        <text class="rc-date">{{item.dateStr}}</text>
+        <text class="rc-score {{item.overallScore >= 80 ? 'text-brand' : item.overallScore >= 60 ? 'text-orange' : 'text-red'}}">{{item.overallScore}}分</text>
+      </view>
+      <view class="rc-dimensions">
+        <text class="rc-dim" wx:for="{{item.keyDims}}" wx:key="*this">{{item}}</text>
+      </view>
+      <view class="rc-actions">
+        <text class="rc-link" bindtap="onTapCompare" data-id="{{item.id}}" catchtap="onTapCompare">对比</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:else>
+    <text class="empty-icon">📊</text>
+    <text class="empty-text">还没有分析记录</text>
+    <button class="btn-outline empty-btn" bindtap="onGoAnalyze">去分析</button>
+  </view>
+</view>

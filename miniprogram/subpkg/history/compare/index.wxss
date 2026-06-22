@@ -1,0 +1,32 @@
+/* subpkg/history/compare/index.wxss */
+.page-container { min-height: 100vh; background: #f8fafc; padding-bottom: 40rpx; }
+.hint-text { font-size: 24rpx; color: #6b7280; padding: 0 24rpx 16rpx; display: block; }
+
+.selected-wrap { padding: 0 24rpx; }
+.selected-card { display: flex; align-items: center; gap: 20rpx; margin-bottom: 12rpx !important; position: relative; }
+.sc-date { font-size: 26rpx; color: #374151; }
+.sc-score { font-size: 28rpx; font-weight: 600; color: #22c55e; }
+.sc-remove { position: absolute; right: 20rpx; top: 20rpx; font-size: 28rpx; color: #9ca3af; padding: 8rpx; }
+
+.record-list { padding: 0 24rpx; }
+.record-card { margin: 0 0 12rpx !important; position: relative; }
+.record-card-active { border: 2rpx solid #22c55e; }
+.rc-header { margin-bottom: 4rpx; }
+.rc-date { font-size: 26rpx; color: #6b7280; }
+.rc-score { font-size: 30rpx; font-weight: 600; color: #1c1c1e; }
+.rc-badge { position: absolute; top: 16rpx; right: 20rpx; font-size: 20rpx; color: #22c55e; font-weight: 500; }
+
+/* 对比结果 */
+.compare-result { margin: 24rpx; }
+.cr-title { font-size: 32rpx; font-weight: 600; display: block; margin-bottom: 20rpx; }
+.cr-section { display: flex; justify-content: space-between; padding: 12rpx 0; border-bottom: 1rpx solid #f1f5f9; }
+.cr-label { font-size: 26rpx; color: #6b7280; }
+.cr-value { font-size: 30rpx; font-weight: 600; }
+.cr-dim-list { padding: 16rpx 0; }
+.cr-dim { display: flex; justify-content: space-between; padding: 8rpx 0; }
+.cd-name { font-size: 26rpx; color: #374151; }
+.cd-change { font-size: 26rpx; font-weight: 500; }
+.cr-summary { font-size: 26rpx; color: #374151; line-height: 1.8; display: block; margin-top: 16rpx; padding: 16rpx; background: #f0fdf4; border-radius: 8rpx; }
+
+.compare-btn { margin: 32rpx 24rpx 0; }
+.compare-btn[disabled] { background: #d1d5db !important; color: #9ca3af !important; }

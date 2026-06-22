@@ -173,6 +173,7 @@ function safeAddColumn(table, column, type) {
 
 safeAddColumn('users', 'plan', "TEXT NOT NULL DEFAULT 'free'");
 safeAddColumn('users', 'plan_expires_at', 'INTEGER');
+safeAddColumn('users', 'open_id', 'TEXT');
 
 console.log('数据库初始化完成');
 

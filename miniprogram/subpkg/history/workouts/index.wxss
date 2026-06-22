@@ -1,0 +1,14 @@
+/* subpkg/history/workouts/index.wxss */
+.page-container { min-height: 100vh; background: #f8fafc; }
+.record-list { padding: 0 24rpx; }
+.workout-card { margin: 0 0 16rpx !important; }
+.wc-header { margin-bottom: 12rpx; }
+.wc-date { font-size: 26rpx; color: #6b7280; }
+.wc-duration { font-size: 24rpx; color: #22c55e; font-weight: 500; }
+.wc-exercises { display: flex; flex-wrap: wrap; gap: 8rpx; margin-bottom: 12rpx; }
+.wc-ex { font-size: 22rpx; background: #f1f5f9; color: #374151; padding: 6rpx 14rpx; border-radius: 6rpx; }
+.wc-footer { border-top: 1rpx solid #f1f5f9; padding-top: 12rpx; }
+.wc-cal { font-size: 24rpx; color: #6b7280; }
+.wc-arrow { font-size: 24rpx; color: #22c55e; }
+
+.empty-btn { width: 50% !important; margin-top: 24rpx; }

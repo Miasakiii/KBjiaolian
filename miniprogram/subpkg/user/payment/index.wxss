@@ -1,0 +1,29 @@
+/* subpkg/user/payment/index.wxss */
+.page-container { min-height: 100vh; background: #f8fafc; display: flex; flex-direction: column; }
+.pay-card { margin: 24rpx; text-align: center; padding: 40rpx 32rpx; }
+.pc-title { font-size: 26rpx; color: #6b7280; display: block; }
+.pc-plan-name { font-size: 36rpx; font-weight: 700; display: block; margin: 12rpx 0; }
+.pc-price-wrap { display: flex; align-items: baseline; justify-content: center; }
+.pc-price { font-size: 60rpx; font-weight: 700; color: #22c55e; }
+.pc-period { font-size: 26rpx; color: #6b7280; margin-left: 4rpx; }
+
+.pay-method { margin: 0 24rpx 20rpx; }
+.pm-title { font-size: 28rpx; font-weight: 500; display: block; margin-bottom: 16rpx; }
+.pm-option { display: flex; align-items: center; gap: 16rpx; padding: 20rpx 0; }
+.pm-icon { font-size: 36rpx; }
+.pm-name { flex: 1; font-size: 28rpx; }
+.pm-check { color: #22c55e; font-size: 32rpx; font-weight: 700; }
+.pm-active { border: 2rpx solid #22c55e; border-radius: 12rpx; padding: 20rpx 24rpx !important; }
+
+.pay-notice { padding: 0 32rpx; }
+.pn-text { font-size: 22rpx; color: #9ca3af; }
+
+.pay-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20rpx 24rpx; background: #fff; margin-top: auto;
+  border-top: 1rpx solid #e5e7eb;
+}
+.pf-total { display: flex; align-items: baseline; }
+.pf-label { font-size: 28rpx; color: #374151; }
+.pf-amount { font-size: 36rpx; font-weight: 700; color: #ef4444; margin-left: 4rpx; }
+.pf-btn { width: 320rpx !important; font-size: 30rpx !important; }

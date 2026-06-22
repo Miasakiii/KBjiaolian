@@ -80,6 +80,8 @@ coverage/
 
 # === Claude Code ===
 .claude/
+.codegraph/
+.workbuddy/
 
 # === 部署文档（个人使用，不推送）===
 docs/CLOUD_DEPLOY.md

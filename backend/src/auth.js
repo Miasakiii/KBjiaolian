@@ -50,7 +50,10 @@ function generateCode() {
 const stmts = {
   findUserByEmail: db.prepare('SELECT * FROM users WHERE email = ?'),
   findUserById: db.prepare('SELECT * FROM users WHERE id = ?'),
+  findUserByOpenId: db.prepare('SELECT * FROM users WHERE open_id = ?'),
   createUser: db.prepare('INSERT INTO users (id, email, password, nickname) VALUES (?, ?, ?, ?)'),
+  createWechatUser: db.prepare('INSERT INTO users (id, open_id, nickname, plan, email, password) VALUES (?, ?, ?, ?, ?, ?)'),
+  updateUserOpenId: db.prepare('UPDATE users SET open_id = ?, updated_at = ? WHERE id = ?'),
   updatePassword: db.prepare('UPDATE users SET password = ?, updated_at = ? WHERE id = ?'),
   createResetToken: db.prepare('INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)'),
   findResetToken: db.prepare('SELECT * FROM password_resets WHERE token = ? AND used = 0 AND expires_at > ?'),
@@ -259,6 +262,89 @@ export async function login(req, res) {
   }
 }
 
+// === 微信小程序登录（wx.login → code2Session → 换 token）===
+const WECHAT_APPID = process.env.WECHAT_APPID;
+const WECHAT_APPSECRET = process.env.WECHAT_APPSECRET;
+
+export async function wechatLogin(req, res) {
+  try {
+    const { code } = req.body;
+
+    if (!code) {
+      return res.status(400).json({ error: '缺少登录凭证 code' });
+    }
+
+    // ===== 本地开发 Mock 模式 =====
+    // 在 .env 中配置 MOCK_WECHAT_LOGIN=true 即可跳过真实微信 API 调用
+    const isMock = process.env.MOCK_WECHAT_LOGIN === 'true';
+    console.log('[wechatLogin] isMock:', isMock, 'MOCK_WECHAT_LOGIN:', process.env.MOCK_WECHAT_LOGIN);
+    let openid;
+
+    if (isMock) {
+      console.log('[wechatLogin] Mock 模式：使用 code 作为 mock openid');
+      openid = `mock_${code}`;
+    } else {
+      if (!WECHAT_APPID || !WECHAT_APPSECRET) {
+        console.error('WECHAT_APPID 或 WECHAT_APPSECRET 环境变量未配置');
+        return res.status(500).json({ error: '服务器配置错误，请联系管理员' });
+      }
+
+      // 调用微信 code2Session 接口
+      const wechatUrl = `https://api.weixin.qq.com/sns/jscode2session?appid=${WECHAT_APPID}&secret=${WECHAT_APPSECRET}&js_code=${code}&grant_type=authorization_code`;
+
+      let wechatRes;
+      try {
+        wechatRes = await fetch(wechatUrl);
+      } catch (err) {
+        console.error('调用微信 code2Session 失败:', err.message);
+        return res.status(502).json({ error: '无法连接微信登录服务，请稍后重试' });
+      }
+
+      const wechatData = await wechatRes.json();
+
+      if (wechatData.errcode) {
+        console.error('微信 code2Session 错误:', wechatData.errcode, wechatData.errmsg);
+        return res.status(400).json({ error: `微信登录失败: ${wechatData.errmsg}` });
+      }
+
+      openid = wechatData.openid;
+    }
+
+    if (!openid) {
+      return res.status(400).json({ error: '获取微信用户身份失败' });
+    }
+
+    // 查找是否已有关联用户
+    let user = stmts.findUserByOpenId.get(openid);
+
+    if (!user) {
+      // 新用户：创建账号
+      const userId = generateUserId();
+      const randomSuffix = crypto.randomInt(1000, 9999).toString();
+      const nickname = isMock ? `测试用户${randomSuffix}` : `KB用户${randomSuffix}`;
+
+      stmts.createWechatUser.run(userId, openid, nickname, 'free', `wechat_${userId}@local.dev`, '__WECHAT_NO_PW__');
+      user = stmts.findUserByOpenId.get(openid);
+    }
+
+    // 生成 JWT
+    const token = generateToken(user.id);
+
+    // 返回格式需与小程序 utils/auth.js 的解析逻辑匹配
+    res.json({
+      access_token: token,
+      user: {
+        id: user.id,
+        nickname: user.nickname,
+        plan: user.plan || 'free',
+      },
+    });
+  } catch (err) {
+    console.error('微信登录失败:', err.message);
+    res.status(500).json({ error: '登录失败，请稍后重试' });
+  }
+}
+
 // === 获取当前用户信息 ===
 export function getProfile(req, res) {
   try {
@@ -385,7 +471,9 @@ export async function resetPassword(req, res) {
 
 // === JWT 认证中间件 ===
 export function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization;
+  const authHeader = req.get('Authorization') || req.headers['authorization'] || req.headers['Authorizaton'];
+  console.log('[authMiddleware] Authorization header present:', !!authHeader);
+  console.log('[authMiddleware] ALL headers:', JSON.stringify(req.headers).substring(0, 200));
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: '请先登录' });
@@ -397,10 +485,11 @@ export function authMiddleware(req, res, next) {
     const decoded = jwt.verify(token, JWT_SECRET);
     req.userId = decoded.userId;
     next();
-  } catch (err) {
-    if (err.name === 'TokenExpiredError') {
-      return res.status(401).json({ error: '登录已过期，请重新登录' });
+    } catch (err) {
+      console.error('[authMiddleware] JWT 校验失败:', err.name, err.message);
+      if (err.name === 'TokenExpiredError') {
+        return res.status(401).json({ error: '登录已过期，请重新登录' });
+      }
+      return res.status(401).json({ error: '无效的认证信息' });
     }
-    return res.status(401).json({ error: '无效的认证信息' });
-  }
 }

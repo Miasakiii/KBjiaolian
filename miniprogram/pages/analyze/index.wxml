@@ -1,0 +1,82 @@
+<!--pages/analyze/index.wxml - 体态分析页-->
+<view class="page-container">
+  <!-- 未登录提示 -->
+  <view class="login-prompt" wx:if="{{!isLoggedIn}}">
+    <text class="lp-icon">🔒</text>
+    <text class="lp-text">登录后可使用体态分析</text>
+    <button class="btn-primary lp-btn" bindtap="onTapLogin">去登录</button>
+  </view>
+
+  <!-- 已登录：主流程 -->
+  <block wx:else>
+    <!-- Step 1：拍照/上传 -->
+    <view wx:if="{{step === 'idle'}}">
+      <view class="analyze-hero card">
+        <text class="ah-title">AI 体态评估</text>
+        <text class="ah-desc">拍摄正面/侧面全身照，AI 将分析 8 大体态维度</text>
+        <view class="ah-tips">
+          <text class="ah-tip">📷 穿着贴身衣物效果更佳</text>
+          <text class="ah-tip">💡 确保光线充足、全身可见</text>
+          <text class="ah-tip">📐 手机竖屏拍摄</text>
+        </view>
+        <view class="ah-actions">
+          <button class="btn-primary" bindtap="onChooseCamera">拍照</button>
+          <button class="btn-outline" bindtap="onChooseAlbum">从相册选择</button>
+        </view>
+      </view>
+    </view>
+
+    <!-- Step 2：上传中 -->
+    <view class="loading-wrap" wx:if="{{step === 'uploading'}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">正在上传图片...</text>
+    </view>
+
+    <!-- Step 3：分析中 -->
+    <view class="loading-wrap" wx:if="{{step === 'analyzing'}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">AI 正在分析体态...</text>
+      <text class="loading-sub">通常需要 5-15 秒</text>
+    </view>
+
+    <!-- Step 4：结果展示 -->
+    <view wx:if="{{step === 'result'}}">
+      <!-- 原图预览 -->
+      <view class="result-image-wrap">
+        <image class="result-image" src="{{resultImageUrl}}" mode="widthFix" />
+      </view>
+
+      <!-- 综合评分 -->
+      <view class="score-overview card">
+        <text class="so-title">综合评分</text>
+        <view class="so-score-wrap">
+          <text class="so-score">{{result.overallScore}}</text>
+          <text class="so-unit">分</text>
+        </view>
+        <text class="so-level">{{result.level}}</text>
+      </view>
+
+      <!-- 8 维度评分卡 -->
+      <view class="section-title">8 大体态维度</view>
+      <view class="dimension-list">
+        <view class="dimension-card card" wx:for="{{result.dimensions}}" wx:key="key">
+          <view class="dc-header flex-between">
+            <text class="dc-name">{{item.name}}</text>
+            <text class="dc-score {{item.score >= 80 ? 'text-brand' : item.score >= 60 ? 'text-orange' : 'text-red'}}">{{item.score}}分</text>
+          </view>
+          <view class="dc-bar-bg">
+            <view class="dc-bar-fill" style="width: {{item.score}}%; background: {{item.score >= 80 ? '#22c55e' : item.score >= 60 ? '#f97316' : '#ef4444'}}"></view>
+          </view>
+          <text class="dc-suggestion">{{item.suggestion}}</text>
+        </view>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="result-actions">
+        <button class="btn-primary" bindtap="onTapSave">保存记录</button>
+        <button class="btn-outline" bindtap="onTapRetake">重新拍照</button>
+        <button class="btn-outline" bindtap="onTapCompare" wx:if="{{hasHistory}}">前后对比</button>
+      </view>
+    </view>
+  </block>
+</view>

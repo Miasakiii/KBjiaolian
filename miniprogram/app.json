@@ -1,0 +1,81 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/analyze/index",
+    "pages/plan/index",
+    "pages/chat/index",
+    "pages/exercises/index"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#22c55e",
+    "navigationBarTitleText": "KB教练",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f8fafc"
+  },
+  "tabBar": {
+    "color": "#b0b0b0",
+    "selectedColor": "#22c55e",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/icons/home.png",
+        "selectedIconPath": "assets/icons/home-active.png"
+      },
+      {
+        "pagePath": "pages/analyze/index",
+        "text": "分析",
+        "iconPath": "assets/icons/analyze.png",
+        "selectedIconPath": "assets/icons/analyze-active.png"
+      },
+      {
+        "pagePath": "pages/plan/index",
+        "text": "训练",
+        "iconPath": "assets/icons/plan.png",
+        "selectedIconPath": "assets/icons/plan-active.png"
+      },
+      {
+        "pagePath": "pages/chat/index",
+        "text": "对话",
+        "iconPath": "assets/icons/chat.png",
+        "selectedIconPath": "assets/icons/chat-active.png"
+      },
+      {
+        "pagePath": "pages/exercises/index",
+        "text": "动作库",
+        "iconPath": "assets/icons/exercises.png",
+        "selectedIconPath": "assets/icons/exercises-active.png"
+      }
+    ]
+  },
+  "subpackages": [
+    {
+      "root": "subpkg/user",
+      "pages": [
+        "login/index",
+        "profile/index",
+        "pricing/index",
+        "payment/index"
+      ]
+    },
+    {
+      "root": "subpkg/history",
+      "pages": [
+        "analysis/index",
+        "compare/index",
+        "workouts/index"
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/index/index": {
+      "packages": ["subpkg/user"]
+    }
+  },
+    "sitemapLocation": "sitemap.json",
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents"
+}

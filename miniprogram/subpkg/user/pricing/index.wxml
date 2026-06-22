@@ -1,0 +1,42 @@
+<!--subpkg/user/pricing/index.wxml - 套餐定价页-->
+<view class="page-container">
+  <view class="pricing-header">
+    <text class="ph-title">选择你的套餐</text>
+    <text class="ph-desc">解锁完整 AI 体能评估与训练方案</text>
+  </view>
+
+  <view class="plan-cards">
+    <!-- Free 套餐 -->
+    <view class="plan-card card {{selectedPlan === 'free' ? 'plan-card-active' : ''}}" bindtap="onSelectPlan" data-plan="free">
+      <view class="pc-badge" wx:if="{{user.plan === 'free'}}">当前方案</view>
+      <text class="pc-name">Free</text>
+      <text class="pc-price">¥0<text class="pc-unit">/月</text></text>
+      <view class="pc-features">
+        <text class="pc-feat">· 体态分析 3 次/日</text>
+        <text class="pc-feat">· 训练方案 3 次/日</text>
+        <text class="pc-feat">· AI 对话 10 次/日</text>
+        <text class="pc-feat pc-feat-disabled">· 前后对比</text>
+        <text class="pc-feat pc-feat-disabled">· 恢复追踪</text>
+      </view>
+    </view>
+
+    <!-- Pro 套餐 -->
+    <view class="plan-card card plan-card-pro {{selectedPlan === 'pro' ? 'plan-card-active' : ''}}" bindtap="onSelectPlan" data-plan="pro">
+      <view class="pc-badge pc-badge-hot">推荐</view>
+      <text class="pc-name">Pro</text>
+      <text class="pc-price">¥29<text class="pc-unit">/月</text></text>
+      <text class="pc-price-year">或 ¥199/年（省 ¥149）</text>
+      <view class="pc-features">
+        <text class="pc-feat">· 体态分析 无限次</text>
+        <text class="pc-feat">· 训练方案 无限次</text>
+        <text class="pc-feat">· AI 对话 无限次</text>
+        <text class="pc-feat">· 前后对比</text>
+        <text class="pc-feat">· 恢复追踪 + 热力图</text>
+      </view>
+    </view>
+  </view>
+
+  <button class="btn-primary pricing-btn" bindtap="onConfirmPlan" loading="{{paying}}">
+    {{selectedPlan === 'pro' ? '立即开通 Pro' : '当前已是 Free'}}
+  </button>
+</view>

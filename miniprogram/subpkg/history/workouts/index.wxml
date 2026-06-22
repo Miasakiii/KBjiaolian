@@ -1,0 +1,32 @@
+<!--subpkg/history/workouts/index.wxml - 训练历史页-->
+<view class="page-container">
+  <view class="section-title">训练记录</view>
+
+  <view class="record-list" wx:if="{{list.length > 0}}">
+    <view
+      class="workout-card card"
+      wx:for="{{list}}"
+      wx:key="id"
+      bindtap="onTapWorkout"
+      data-id="{{item.id}}"
+    >
+      <view class="wc-header flex-between">
+        <text class="wc-date">{{item.dateStr}}</text>
+        <text class="wc-duration">{{item.duration}}分钟</text>
+      </view>
+      <view class="wc-exercises">
+        <text class="wc-ex" wx:for="{{item.exercises}}" wx:key="name">{{item.name}}</text>
+      </view>
+      <view class="wc-footer flex-between">
+        <text class="wc-cal">{{item.calories}} kcal</text>
+        <text class="wc-arrow">查看详情 ▶</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:else>
+    <text class="empty-icon">🏋️</text>
+    <text class="empty-text">还没有训练记录</text>
+    <button class="btn-outline empty-btn" bindtap="onGoPlan">去制定训练方案</button>
+  </view>
+</view>
