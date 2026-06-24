@@ -24,7 +24,9 @@
   </view>
 
   <view class="empty-state" wx:else>
-    <text class="empty-icon">📊</text>
+    <view class="empty-icon">
+      <text style="font-size: 40rpx; color: #22c55e;">○</text>
+    </view>
     <text class="empty-text">还没有分析记录</text>
     <button class="btn-outline empty-btn" bindtap="onGoAnalyze">去分析</button>
   </view>

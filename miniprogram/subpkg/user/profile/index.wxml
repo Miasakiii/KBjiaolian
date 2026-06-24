@@ -10,27 +10,35 @@
 
   <view class="menu-list card">
     <view class="menu-item" bindtap="onTapPricing">
-      <text class="mi-icon">💳</text>
+      <view class="mi-icon-wrap mi-icon-green">
+        <text class="mi-icon-char">P</text>
+      </view>
       <text class="mi-label">升级套餐</text>
-      <text class="mi-arrow">▶</text>
+      <text class="mi-arrow-char">›</text>
     </view>
     <view class="menu-item" bindtap="onTapHistory">
-      <text class="mi-icon">📊</text>
+      <view class="mi-icon-wrap mi-icon-green">
+        <text class="mi-icon-char">H</text>
+      </view>
       <text class="mi-label">历史记录</text>
-      <text class="mi-arrow">▶</text>
+      <text class="mi-arrow-char">›</text>
     </view>
     <view class="menu-item" bindtap="onTapAbout">
-      <text class="mi-icon">ℹ️</text>
+      <view class="mi-icon-wrap mi-icon-green">
+        <text class="mi-icon-char">i</text>
+      </view>
       <text class="mi-label">关于 KB 教练</text>
-      <text class="mi-arrow">▶</text>
+      <text class="mi-arrow-char">›</text>
     </view>
   </view>
 
   <view class="menu-list card">
     <view class="menu-item" bindtap="onTapLogout">
-      <text class="mi-icon">🚪</text>
+      <view class="mi-icon-wrap mi-icon-red">
+        <text class="mi-icon-char">×</text>
+      </view>
       <text class="mi-label text-red">退出登录</text>
-      <text class="mi-arrow">▶</text>
+      <text class="mi-arrow-char">›</text>
     </view>
   </view>
 </view>

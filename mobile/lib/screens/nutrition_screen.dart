@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -200,7 +200,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
               children: [
                 Row(
                   children: [
-                    const Text('🍎', style: TextStyle(fontSize: 20)),
+                    const Icon(Icons.restaurant, size: 20, color: Color(0xFF22c55e)),
                     const SizedBox(width: 8),
                     Text(
                       '今日营养',
@@ -312,7 +312,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
                 ...foods.whereType<Map>().map((food) {
                   final calories = food['calories'];
                   return ListTile(
-                    leading: const Text('🍽️', style: TextStyle(fontSize: 24)),
+                    leading: const Icon(Icons.restaurant_menu, size: 24, color: Color(0xFF22c55e)),
                     title: Text(food['name']?.toString() ?? ''),
                     subtitle: Text(food['portion']?.toString() ?? ''),
                     trailing: Text(

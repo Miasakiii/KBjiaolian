@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -108,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   child: const Center(
-                    child: Text('💪', style: TextStyle(fontSize: 40)),
+                    child: Icon(Icons.fitness_center, size: 40, color: Colors.white),
                   ),
                 ),
               ),

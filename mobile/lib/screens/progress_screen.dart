@@ -1,4 +1,4 @@
-import 'dart:math';
+﻿import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -136,7 +136,7 @@ class ProgressScreen extends StatelessWidget {
       children: [
         Expanded(
           child: _StatCard(
-            icon: '⬆️',
+            icon: Icons.trending_up,
             label: '最高分',
             value: '$maxScore',
             color: const Color(0xFF16a34a),
@@ -145,7 +145,7 @@ class ProgressScreen extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _StatCard(
-            icon: '⬇️',
+            icon: Icons.trending_down,
             label: '最低分',
             value: '$minScore',
             color: Colors.orange,
@@ -154,7 +154,7 @@ class ProgressScreen extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _StatCard(
-            icon: '📊',
+            icon: Icons.insights,
             label: '平均分',
             value: avgScore.toStringAsFixed(1),
             color: Colors.blue,
@@ -166,7 +166,7 @@ class ProgressScreen extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String label;
   final String value;
   final Color color;
@@ -185,7 +185,7 @@ class _StatCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         child: Column(
           children: [
-            Text(icon, style: const TextStyle(fontSize: 20)),
+            Icon(icon, size: 20, color: color),
             const SizedBox(height: 8),
             Text(
               value,

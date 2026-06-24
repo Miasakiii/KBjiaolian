@@ -1,4 +1,4 @@
-import 'dart:io';
+﻿import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -196,7 +196,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
               padding: const EdgeInsets.all(32),
               child: Column(
                 children: [
-                  Text('📊', style: TextStyle(fontSize: 48, color: Colors.green.shade200)),
+                  Icon(Icons.insights, size: 48, color: Colors.green.shade200),
                   const SizedBox(height: 16),
                   Text(
                     '等待上传照片',

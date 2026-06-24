@@ -3,7 +3,9 @@
   <!-- 搜索栏 -->
   <view class="search-bar">
     <view class="search-input-wrap">
-      <text class="search-icon">🔍</text>
+      <view class="search-icon-wrap">
+        <text class="search-icon-char">○</text>
+      </view>
       <input
         class="search-input"
         value="{{keyword}}"
@@ -39,7 +41,7 @@
     >
       <view class="ec-left">
         <view class="ec-icon-wrap">
-          <text class="ec-icon">{{item.icon}}</text>
+          <text class="ec-icon-text">{{item.iconText || item.name[0]}}</text>
         </view>
       </view>
       <view class="ec-info">
@@ -47,13 +49,17 @@
         <text class="ec-group">{{item.group}} · {{item.equipment}}</text>
         <text class="ec-desc">{{item.desc}}</text>
       </view>
-      <text class="ec-arrow">▶</text>
+      <view class="ec-arrow">
+        <text class="ec-arrow-char">›</text>
+      </view>
     </view>
   </view>
 
   <!-- 空状态 -->
   <view class="empty-state" wx:else>
-    <text class="empty-icon">📖</text>
+    <view class="empty-icon">
+      <text style="font-size: 40rpx; color: #22c55e;">○</text>
+    </view>
     <text class="empty-text">没有找到相关动作</text>
   </view>
 
@@ -62,7 +68,9 @@
     <view class="detail-sheet" catchtap="">
       <view class="ds-header">
         <text class="ds-name">{{detailData.name}}</text>
-        <view class="ds-close" bindtap="onCloseDetail">✕</view>
+        <view class="ds-close" bindtap="onCloseDetail">
+          <text class="ds-close-char">×</text>
+        </view>
       </view>
       <view class="ds-body">
         <view class="ds-row">
@@ -79,7 +87,10 @@
         </view>
         <view class="ds-section">动作要点</view>
         <view class="ds-tips">
-          <text class="ds-tip" wx:for="{{detailData.tips}}" wx:key="*this">• {{item}}</text>
+          <view class="ds-tip-item" wx:for="{{detailData.tips}}" wx:key="*this">
+            <view class="ds-tip-dot"></view>
+            <text class="ds-tip">{{item}}</text>
+          </view>
         </view>
       </view>
     </view>

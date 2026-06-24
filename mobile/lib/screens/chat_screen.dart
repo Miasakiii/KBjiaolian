@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/chat_provider.dart';
@@ -59,7 +59,7 @@ class _ChatScreenState extends State<ChatScreen> {
       appBar: AppBar(
         title: const Row(
           children: [
-            Text('🤖', style: TextStyle(fontSize: 24)),
+            Icon(Icons.smart_toy, size: 24, color: Colors.white),
             SizedBox(width: 8),
             Text('AI 教练'),
           ],
@@ -235,7 +235,7 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('🤖', style: TextStyle(fontSize: 16)),
+            const Icon(Icons.smart_toy, size: 16, color: Colors.white),
             const SizedBox(width: 8),
             SizedBox(
               width: 20,
@@ -292,7 +292,7 @@ class _MessageBubble extends StatelessWidget {
             if (!isUser) ...[
               Row(
                 children: [
-                  const Text('🤖', style: TextStyle(fontSize: 16)),
+                  const Icon(Icons.smart_toy, size: 16, color: Colors.white),
                   const SizedBox(width: 8),
                   Text(
                     'KB教练',

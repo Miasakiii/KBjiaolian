@@ -1,7 +1,9 @@
 <!--pages/chat/index.wxml - AI 对话页-->
 <view class="page-container">
   <view class="login-prompt" wx:if="{{!isLoggedIn}}">
-    <text class="lp-icon">🔒</text>
+    <view class="login-icon-wrap">
+      <text class="login-icon-char">!</text>
+    </view>
     <text class="lp-text">登录后可使用 AI 对话</text>
     <button class="btn-primary lp-btn" bindtap="onTapLogin">去登录</button>
   </view>
@@ -16,7 +18,9 @@
     >
       <!-- 空状态 -->
       <view class="empty-state" wx:if="{{messages.length === 0}}">
-        <text class="empty-icon">💬</text>
+        <view class="empty-avatar">
+          <text class="empty-avatar-text">AI</text>
+        </view>
         <text class="empty-text">你好！我是 KB 教练 AI 助手</text>
         <text class="empty-hint">可以问我任何健身、康复、营养问题</text>
       </view>
@@ -28,18 +32,24 @@
         wx:key="id"
         id="msg-{{item.id}}"
       >
-        <view class="msg-avatar" wx:if="{{item.role === 'ai'}}">🤖</view>
+        <view class="msg-avatar msg-avatar-ai" wx:if="{{item.role === 'ai'}}">
+          <text class="msg-avatar-text">AI</text>
+        </view>
         <view class="msg-bubble">
           <rich-text class="msg-text" nodes="{{item.contentHtml || item.content}}" wx:if="{{item.role === 'ai'}}"></rich-text>
           <text class="msg-text" user-select wx:else>{{item.content}}</text>
           <view class="msg-time">{{item.time}}</view>
         </view>
-        <view class="msg-avatar" wx:if="{{item.role === 'user'}}">👤</view>
+        <view class="msg-avatar msg-avatar-user" wx:if="{{item.role === 'user'}}">
+          <text class="msg-avatar-text">我</text>
+        </view>
       </view>
 
       <!-- 打字中动画 -->
       <view class="msg-item msg-ai" wx:if="{{loading}}">
-        <view class="msg-avatar">🤖</view>
+        <view class="msg-avatar msg-avatar-ai">
+          <text class="msg-avatar-text">AI</text>
+        </view>
         <view class="msg-bubble msg-typing">
           <view class="typing-dot"></view>
           <view class="typing-dot"></view>

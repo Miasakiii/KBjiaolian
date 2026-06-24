@@ -1,11 +1,40 @@
 /* app.wxss - KB教练小程序全局样式 */
-/* 品牌色：#22c55e  浅绿：#dcfce7  深绿：#16a34a */
+/* 设计系统：绿白清新简约风 */
+/* 主色：#22c55e  浅绿：#dcfce7  深绿：#16a34a */
+/* 中性色：#111827 #4b5563 #9ca3af #e5e7eb #f3f4f6 */
 
 page {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* ====== 设计 Tokens（CSS 变量） ====== */
+  --color-brand: #22c55e;
+  --color-brand-dark: #16a34a;
+  --color-brand-deep: #059669;
+  --color-brand-light: #dcfce7;
+  --color-brand-ultra-light: #f0fdf4;
+
+  --color-bg-page: #f8fafb;
+  --color-bg-card: #ffffff;
+  --color-bg-input: #f8fafb;
+  --color-bg-disabled: #f3f4f6;
+
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-muted: #9ca3af;
+  --color-text-placeholder: #d1d5db;
+
+  --color-border: #f0f0f0;
+  --color-border-light: #f3f4f6;
+
+  --color-red: #ef4444;
+  --color-orange: #f97316;
+
+  --shadow-card: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
+  --shadow-brand: 0 4rpx 16rpx rgba(34, 197, 94, 0.2);
+  --shadow-icon: 0 4rpx 14rpx rgba(34, 197, 94, 0.3);
+
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
   font-size: 28rpx;
-  color: #1c1c1e;
-  background-color: #f8fafc;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-page);
   line-height: 1.6;
   box-sizing: border-box;
 }
@@ -15,18 +44,20 @@ view, text, image {
 }
 
 /* ====== 色彩工具类 ====== */
-.text-brand { color: #22c55e; }
-.text-brand-dark { color: #16a34a; }
-.text-gray { color: #6b7280; }
-.text-gray-dark { color: #374151; }
+.text-brand { color: var(--color-brand); }
+.text-brand-dark { color: var(--color-brand-dark); }
+.text-primary { color: var(--color-text-primary); }
+.text-secondary { color: var(--color-text-secondary); }
+.text-muted { color: var(--color-text-muted); }
 .text-white { color: #ffffff; }
-.text-red { color: #ef4444; }
-.text-orange { color: #f97316; }
+.text-red { color: var(--color-red); }
+.text-orange { color: var(--color-orange); }
 
-.bg-brand { background-color: #22c55e; }
-.bg-brand-light { background-color: #dcfce7; }
-.bg-white { background-color: #ffffff; }
-.bg-gray-light { background-color: #f1f5f9; }
+.bg-brand { background-color: var(--color-brand); }
+.bg-brand-light { background-color: var(--color-brand-light); }
+.bg-brand-ultra-light { background-color: var(--color-brand-ultra-light); }
+.bg-white { background-color: var(--color-bg-card); }
+.bg-page { background-color: var(--color-bg-page); }
 
 /* ====== 布局工具类 ====== */
 .flex-row { display: flex; flex-direction: row; }
@@ -48,49 +79,60 @@ view, text, image {
 .mb-md { margin-bottom: 24rpx; }
 .mx-auto { margin-left: auto; margin-right: auto; }
 
-/* ====== 卡片 ====== */
+/* ====== 卡片（轻阴影 + 细边框） ====== */
 .card {
-  background: #ffffff;
-  border-radius: 16rpx;
-  padding: 24rpx;
+  background: var(--color-bg-card);
+  border-radius: 20rpx;
+  padding: 28rpx;
   margin: 0 24rpx 20rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+  border: 1rpx solid var(--color-border);
+  box-shadow: var(--shadow-card);
+}
+
+/* ====== 交互按压反馈 ====== */
+.tap-scale {
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.tap-scale:active {
+  transform: scale(0.96);
+  opacity: 0.85;
 }
 
 /* ====== 按钮 ====== */
 .btn-primary {
-  background: #22c55e;
+  background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-dark) 100%);
   color: #ffffff;
   border: none;
-  border-radius: 12rpx;
-  padding: 20rpx 0;
+  border-radius: 16rpx;
+  padding: 22rpx 0;
   font-size: 30rpx;
-  font-weight: 500;
+  font-weight: 600;
   text-align: center;
   width: 100%;
   line-height: 1.4;
+  box-shadow: var(--shadow-brand);
 }
-.btn-primary:active { background: #16a34a; }
+.btn-primary:active { opacity: 0.9; }
 
 .btn-outline {
-  background: transparent;
-  color: #22c55e;
-  border: 2rpx solid #22c55e;
-  border-radius: 12rpx;
-  padding: 18rpx 0;
+  background: var(--color-bg-card);
+  color: var(--color-brand-dark);
+  border: 2rpx solid var(--color-brand-light);
+  border-radius: 16rpx;
+  padding: 20rpx 0;
   font-size: 30rpx;
   font-weight: 500;
   text-align: center;
   width: 100%;
   line-height: 1.4;
 }
-.btn-outline:active { background: #dcfce7; }
+.btn-outline:active { background: var(--color-brand-ultra-light); }
 
 .btn-disabled {
-  background: #d1d5db;
-  color: #9ca3af;
-  border-radius: 12rpx;
-  padding: 20rpx 0;
+  background: var(--color-bg-disabled);
+  color: var(--color-text-muted);
+  border-radius: 16rpx;
+  padding: 22rpx 0;
   font-size: 30rpx;
   text-align: center;
   width: 100%;
@@ -100,53 +142,100 @@ view, text, image {
 /* ====== 标题 ====== */
 .section-title {
   font-size: 32rpx;
-  font-weight: 600;
-  color: #1c1c1e;
-  padding: 24rpx 24rpx 12rpx;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  padding: 28rpx 24rpx 16rpx;
+  letter-spacing: 1rpx;
 }
+
+/* ====== 页面入场动画 ====== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeInUp 0.5s ease-out both;
+}
+.animate-delay-1 { animation-delay: 0.06s; }
+.animate-delay-2 { animation-delay: 0.12s; }
+.animate-delay-3 { animation-delay: 0.18s; }
+.animate-delay-4 { animation-delay: 0.24s; }
 
 /* ====== 分割线 ====== */
 .divider {
   height: 1rpx;
-  background: #e5e7eb;
+  background: var(--color-border);
   margin: 16rpx 0;
 }
 
 /* ====== 徽章 ====== */
 .badge {
   display: inline-block;
-  background: #dcfce7;
-  color: #16a34a;
+  background: var(--color-brand-light);
+  color: var(--color-brand-dark);
   font-size: 22rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 6rpx;
-  font-weight: 500;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  font-weight: 600;
 }
 
 .badge-pro {
-  background: #fef3c7;
-  color: #d97706;
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+  color: #15803d;
 }
 
 /* ====== 输入框 ====== */
 .input-wrap {
-  background: #f1f5f9;
-  border-radius: 12rpx;
-  padding: 20rpx 24rpx;
+  background: var(--color-bg-input);
+  border-radius: 16rpx;
+  padding: 22rpx 24rpx;
   font-size: 28rpx;
-  border: 2rpx solid transparent;
+  border: 2rpx solid var(--color-border);
 }
 .input-wrap:focus-within {
-  border-color: #22c55e;
-  background: #ffffff;
+  border-color: var(--color-brand);
+  background: var(--color-bg-card);
+}
+
+/* ====== 图标容器（替代 emoji） ====== */
+.icon-circle {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.icon-circle-sm {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.icon-circle-green {
+  background: linear-gradient(135deg, var(--color-brand), var(--color-brand-dark));
+  box-shadow: var(--shadow-icon);
+}
+.icon-circle-light { background: var(--color-brand-light); }
+
+/* ====== 强调卡片（渐变底色，用于核心入口） ====== */
+.card-highlight {
+  background: linear-gradient(145deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1rpx solid rgba(34, 197, 94, 0.15);
+  box-shadow: 0 4rpx 24rpx rgba(34, 197, 94, 0.08);
 }
 
 /* ====== 加载动画 ====== */
 .loading-wrap {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60rpx 0;
+  padding: 80rpx 0;
 }
 
 /* ====== 空状态 ====== */
@@ -155,11 +244,22 @@ view, text, image {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80rpx 40rpx;
-  color: #9ca3af;
+  padding: 100rpx 40rpx;
+  color: var(--color-text-muted);
 }
-.empty-state .empty-icon { font-size: 80rpx; margin-bottom: 20rpx; }
-.empty-state .empty-text { font-size: 28rpx; }
+.empty-state .empty-icon {
+  width: 120rpx;
+  height: 120rpx;
+  background: var(--color-brand-ultra-light);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+  color: var(--color-brand);
+  margin-bottom: 24rpx;
+}
+.empty-state .empty-text { font-size: 28rpx; color: var(--color-text-muted); }
 
 /* ====== 安全区域（适配全面屏） ====== */
 .safe-bottom {

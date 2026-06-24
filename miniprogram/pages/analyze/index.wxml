@@ -2,7 +2,9 @@
 <view class="page-container">
   <!-- 未登录提示 -->
   <view class="login-prompt" wx:if="{{!isLoggedIn}}">
-    <text class="lp-icon">🔒</text>
+    <view class="login-icon-wrap">
+      <text class="login-icon-char">!</text>
+    </view>
     <text class="lp-text">登录后可使用体态分析</text>
     <button class="btn-primary lp-btn" bindtap="onTapLogin">去登录</button>
   </view>
@@ -15,9 +17,18 @@
         <text class="ah-title">AI 体态评估</text>
         <text class="ah-desc">拍摄正面/侧面全身照，AI 将分析 8 大体态维度</text>
         <view class="ah-tips">
-          <text class="ah-tip">📷 穿着贴身衣物效果更佳</text>
-          <text class="ah-tip">💡 确保光线充足、全身可见</text>
-          <text class="ah-tip">📐 手机竖屏拍摄</text>
+          <view class="ah-tip-item">
+            <view class="ah-tip-dot"></view>
+            <text class="ah-tip">穿着贴身衣物效果更佳</text>
+          </view>
+          <view class="ah-tip-item">
+            <view class="ah-tip-dot"></view>
+            <text class="ah-tip">确保光线充足、全身可见</text>
+          </view>
+          <view class="ah-tip-item">
+            <view class="ah-tip-dot"></view>
+            <text class="ah-tip">手机竖屏拍摄</text>
+          </view>
         </view>
         <view class="ah-actions">
           <button class="btn-primary" bindtap="onChooseCamera">拍照</button>
