@@ -1,7 +1,9 @@
 <!--subpkg/user/login/index.wxml - 登录页-->
 <view class="page-container">
   <view class="login-hero">
-    <text class="lh-icon">🏋️</text>
+    <view class="lh-icon-wrap">
+      <text class="lh-icon-text">KB</text>
+    </view>
     <text class="lh-title">KB教练</text>
     <text class="lh-subtitle">AI 驱动的体态评估专家</text>
   </view>

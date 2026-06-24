@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/plan_provider.dart';
@@ -298,7 +298,7 @@ class _PlanScreenState extends State<PlanScreen> {
               padding: const EdgeInsets.all(32),
               child: Column(
                 children: [
-                  Text('📋', style: TextStyle(fontSize: 48, color: Colors.green.shade200)),
+                  Icon(Icons.assignment, size: 48, color: Colors.green.shade200),
                   const SizedBox(height: 16),
                   Text(
                     '设置偏好后生成训练方案',

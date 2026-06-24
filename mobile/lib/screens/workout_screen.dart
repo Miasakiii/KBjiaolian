@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -116,7 +116,7 @@ class _WorkoutHome extends StatelessWidget {
               padding: const EdgeInsets.all(32),
               child: Column(
                 children: [
-                  Text('🏋️', style: TextStyle(fontSize: 48, color: Colors.green.shade200)),
+                  Icon(Icons.fitness_center, size: 48, color: Colors.green.shade200),
                   const SizedBox(height: 16),
                   const Text('请先生成训练方案'),
                   const SizedBox(height: 16),

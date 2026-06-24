@@ -1,41 +1,48 @@
 /* pages/exercises/index.wxss - 动作库页样式 */
-.page-container { min-height: 100vh; background: #f8fafc; }
+.page-container { min-height: 100vh; background: #f8fafb; }
 
 /* 搜索栏 */
 .search-bar { padding: 20rpx 24rpx 12rpx; }
 .search-input-wrap {
   display: flex; align-items: center; gap: 12rpx;
-  background: #f1f5f9; border-radius: 12rpx; padding: 16rpx 20rpx;
+  background: #ffffff; border-radius: 16rpx; padding: 18rpx 24rpx;
+  border: 1rpx solid #f0f0f0;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.03);
 }
-.search-icon { font-size: 28rpx; color: #9ca3af; }
-.search-input { flex: 1; font-size: 28rpx; }
+.search-icon-wrap { width: 32rpx; height: 32rpx; display: flex; align-items: center; justify-content: center; }
+.search-icon-char { font-size: 24rpx; color: #d1d5db; }
+.search-input { flex: 1; font-size: 28rpx; color: #111827; }
 
 /* 肌群筛选 */
 .filter-scroll { white-space: nowrap; padding: 8rpx 0; }
 .filter-list { display: inline-flex; gap: 12rpx; padding: 0 24rpx; }
 .filter-tag {
-  display: inline-block; padding: 12rpx 24rpx; border-radius: 8rpx;
-  background: #f1f5f9; color: #374151; font-size: 24rpx; flex-shrink: 0;
+  display: inline-block; padding: 14rpx 28rpx; border-radius: 12rpx;
+  background: #ffffff; color: #4b5563; font-size: 24rpx; flex-shrink: 0;
+  border: 1rpx solid #f0f0f0;
 }
-.filter-tag-active { background: #dcfce7; color: #16a34a; font-weight: 500; }
+.filter-tag-active { background: #dcfce7; color: #16a34a; border-color: #22c55e; font-weight: 600; }
 
 /* 动作列表 */
 .exercise-list { padding: 16rpx 24rpx 40rpx; }
 .exercise-card {
   display: flex; align-items: center; gap: 20rpx;
-  padding: 24rpx 20rpx; margin-bottom: 16rpx;
+  padding: 28rpx 24rpx; margin-bottom: 16rpx;
 }
 .ec-left { flex-shrink: 0; }
 .ec-icon-wrap {
-  width: 88rpx; height: 88rpx; border-radius: 16rpx;
-  background: #dcfce7; display: flex; align-items: center; justify-content: center;
+  width: 88rpx; height: 88rpx; border-radius: 50%;
+  background: linear-gradient(145deg, #dcfce7, #f0fdf4);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2rpx 10rpx rgba(34, 197, 94, 0.12);
 }
-.ec-icon { font-size: 40rpx; }
+.ec-icon-text { font-size: 32rpx; font-weight: 700; color: #16a34a; }
 .ec-info { flex: 1; min-width: 0; }
-.ec-name { font-size: 28rpx; font-weight: 500; color: #1c1c1e; display: block; }
-.ec-group { font-size: 22rpx; color: #6b7280; margin-top: 4rpx; display: block; }
-.ec-desc { font-size: 22rpx; color: #9ca3af; margin-top: 6rpx; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.ec-arrow { font-size: 22rpx; color: #d1d5db; flex-shrink: 0; }
+.ec-name { font-size: 28rpx; font-weight: 600; color: #111827; display: block; }
+.ec-group { font-size: 22rpx; color: #9ca3af; margin-top: 6rpx; display: block; }
+.ec-desc { font-size: 22rpx; color: #d1d5db; margin-top: 6rpx; display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.ec-arrow { flex-shrink: 0; }
+.ec-arrow-char { font-size: 32rpx; color: #d1d5db; font-weight: 300; }
 
 /* 详情弹窗 */
 .detail-mask {
@@ -45,16 +52,19 @@
 }
 .detail-sheet {
   width: 100%; max-height: 80vh; background: #ffffff;
-  border-radius: 24rpx 24rpx 0 0; padding: 32rpx 32rpx 48rpx;
+  border-radius: 28rpx 28rpx 0 0; padding: 36rpx 36rpx 52rpx;
   overflow-y: auto;
 }
-.ds-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28rpx; }
-.ds-name { font-size: 34rpx; font-weight: 700; }
-.ds-close { font-size: 36rpx; color: #9ca3af; padding: 8rpx; }
+.ds-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32rpx; }
+.ds-name { font-size: 34rpx; font-weight: 700; color: #111827; }
+.ds-close { width: 56rpx; height: 56rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f8fafb; }
+.ds-close-char { font-size: 36rpx; color: #9ca3af; font-weight: 300; }
 .ds-body { }
-.ds-row { display: flex; justify-content: space-between; padding: 12rpx 0; border-bottom: 1rpx solid #f1f5f9; }
-.ds-label { font-size: 26rpx; color: #6b7280; }
-.ds-value { font-size: 26rpx; font-weight: 500; color: #1c1c1e; }
-.ds-section { font-size: 28rpx; font-weight: 600; margin: 24rpx 0 12rpx; }
+.ds-row { display: flex; justify-content: space-between; padding: 14rpx 0; border-bottom: 1rpx solid #f3f4f6; }
+.ds-label { font-size: 26rpx; color: #9ca3af; }
+.ds-value { font-size: 26rpx; font-weight: 600; color: #111827; }
+.ds-section { font-size: 28rpx; font-weight: 700; color: #111827; margin: 28rpx 0 16rpx; }
 .ds-tips { }
-.ds-tip { font-size: 26rpx; color: #374151; line-height: 1.8; display: block; }
+.ds-tip-item { display: flex; align-items: flex-start; gap: 12rpx; margin-bottom: 12rpx; }
+.ds-tip-dot { width: 8rpx; height: 8rpx; border-radius: 50%; background: #dcfce7; margin-top: 14rpx; flex-shrink: 0; }
+.ds-tip { font-size: 26rpx; color: #4b5563; line-height: 1.8; }

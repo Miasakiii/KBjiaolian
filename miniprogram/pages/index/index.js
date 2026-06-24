@@ -9,11 +9,19 @@ Page({
     user: null,
     // 功能介绍（未登录态）
     features: [
-      { key: 'analyze', icon: '📸', name: '体态分析', desc: 'AI 8维度评估' },
-      { key: 'plan', icon: '🏋️', name: '训练方案', desc: '个性化计划' },
-      { key: 'chat', icon: '💬', name: 'AI 对话', desc: '健身问答' },
-      { key: 'nutrition', icon: '🥗', name: '营养识别', desc: '拍照识食物' },
+      { key: 'analyze', icon: '/assets/icons/icon-analyze.svg', iconW: '/assets/icons/icon-analyze-w.svg', name: '体态分析', desc: 'AI 8维度评估' },
+      { key: 'plan', icon: '/assets/icons/icon-plan.svg', iconW: '/assets/icons/icon-plan-w.svg', name: '训练方案', desc: '个性化计划' },
+      { key: 'chat', icon: '/assets/icons/icon-chat.svg', iconW: '/assets/icons/icon-chat-w.svg', name: 'AI 对话', desc: '健身问答' },
+      { key: 'nutrition', icon: '/assets/icons/icon-nutrition.svg', iconW: '/assets/icons/icon-nutrition-w.svg', name: '营养识别', desc: '拍照识食物' },
     ],
+    // 快捷操作图标
+    quickActions: [
+      { key: 'analyze', icon: '/assets/icons/icon-analyze-w.svg', text: '体态分析' },
+      { key: 'plan', icon: '/assets/icons/icon-plan-w.svg', text: '训练方案' },
+      { key: 'chat', icon: '/assets/icons/icon-chat-w.svg', text: 'AI 对话' },
+      { key: 'exercises', icon: '/assets/icons/icon-exercises-w.svg', text: '动作库' },
+    ],
+    today: '',
     // 配额数据
     quotaList: [
       { key: 'analyze', label: '体态分析', remaining: 0, total: 3, percent: 0 },
@@ -25,6 +33,11 @@ Page({
   },
 
   onLoad() {
+    // 设置今日日期
+    const now = new Date();
+    const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+    const today = `${now.getMonth() + 1}月${now.getDate()}日 周${weekDays[now.getDay()]}`;
+    this.setData({ today });
     this.checkLoginState();
   },
 

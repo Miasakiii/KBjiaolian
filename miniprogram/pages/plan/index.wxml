@@ -1,7 +1,9 @@
 <!--pages/plan/index.wxml - 训练方案页-->
 <view class="page-container">
   <view class="login-prompt" wx:if="{{!isLoggedIn}}">
-    <text class="lp-icon">🔒</text>
+    <view class="login-icon-wrap">
+      <text class="login-icon-char">!</text>
+    </view>
     <text class="lp-text">登录后可使用训练方案</text>
     <button class="btn-primary lp-btn" bindtap="onTapLogin">去登录</button>
   </view>
@@ -67,8 +69,14 @@
         <text class="ph-title">{{planData.title}}</text>
         <text class="ph-desc">{{planData.desc}}</text>
         <view class="ph-meta">
-          <text class="ph-meta-item">📅 {{planData.duration}}天</text>
-          <text class="ph-meta-item">🏋️ {{planData.frequency}}/周</text>
+          <view class="ph-meta-item">
+            <view class="ph-meta-dot"></view>
+            <text>{{planData.duration}}天</text>
+          </view>
+          <view class="ph-meta-item">
+            <view class="ph-meta-dot"></view>
+            <text>{{planData.frequency}}/周</text>
+          </view>
         </view>
       </view>
 
@@ -82,9 +90,12 @@
           </view>
           <view class="dc-exercises" wx:if="{{expandedDay === index}}">
             <view class="exercise-item" wx:for="{{item.exercises}}" wx:key="name">
-              <text class="ei-name">{{item.name}}</text>
-              <text class="ei-meta">{{item.sets}}组 × {{item.reps}}次</text>
-              <text class="ei-note">{{item.note}}</text>
+              <view class="ei-dot"></view>
+              <view class="ei-content">
+                <text class="ei-name">{{item.name}}</text>
+                <text class="ei-meta">{{item.sets}}组 × {{item.reps}}次</text>
+                <text class="ei-note" wx:if="{{item.note}}">{{item.note}}</text>
+              </view>
             </view>
           </view>
         </view>

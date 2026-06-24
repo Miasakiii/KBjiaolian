@@ -12,7 +12,9 @@
   <view class="pay-method card">
     <text class="pm-title">支付方式</text>
     <view class="pm-option pm-active">
-      <text class="pm-icon">💬</text>
+      <view class="pm-icon-wrap">
+        <text class="pm-icon-char">微</text>
+      </view>
       <text class="pm-name">微信支付</text>
       <view class="pm-check">✓</view>
     </view>

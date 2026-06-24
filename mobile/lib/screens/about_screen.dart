@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -31,10 +31,7 @@ class AboutScreen extends StatelessWidget {
                 ],
               ),
               child: const Center(
-                child: Text(
-                  '💪',
-                  style: TextStyle(fontSize: 48),
-                ),
+                child: Icon(Icons.fitness_center, size: 48, color: Colors.white),
               ),
             ),
             const SizedBox(height: 24),
@@ -109,22 +106,22 @@ class AboutScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     const _FeatureItem(
-                      icon: '📸',
+                      icon: Icons.camera_alt,
                       title: 'AI 体态分析',
                       description: '拍照即可获得专业体态评估',
                     ),
                     const _FeatureItem(
-                      icon: '🏋️',
+                      icon: Icons.fitness_center,
                       title: '个性化训练方案',
                       description: '根据体态分析生成针对性计划',
                     ),
                     const _FeatureItem(
-                      icon: '🍎',
+                      icon: Icons.restaurant,
                       title: '饮食识别',
                       description: '拍照识别食物，自动计算营养',
                     ),
                     const _FeatureItem(
-                      icon: '🤖',
+                      icon: Icons.smart_toy,
                       title: 'AI 教练',
                       description: '随时咨询健身、营养问题',
                     ),
@@ -175,7 +172,7 @@ class AboutScreen extends StatelessWidget {
 }
 
 class _FeatureItem extends StatelessWidget {
-  final String icon;
+  final IconData icon;
   final String title;
   final String description;
 
@@ -192,7 +189,7 @@ class _FeatureItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(icon, style: const TextStyle(fontSize: 24)),
+          Icon(icon, size: 24, color: const Color(0xFF22c55e)),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
