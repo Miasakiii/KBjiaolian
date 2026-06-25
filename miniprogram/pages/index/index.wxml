@@ -13,7 +13,7 @@
       </view>
     </view>
     <view class="features-grid">
-      <view class="feature-card tap-scale animate-fade-in animate-delay-{{index + 1}}" wx:for="{{features}}" wx:key="key">
+      <view class="feature-card tap-scale animate-fade-in animate-delay-{{index + 1}}" wx:for="{{features}}" wx:key="key" bindtap="onTapLogin">
         <view class="feature-icon-wrap">
           <image class="feature-icon-img" src="{{item.icon}}" mode="aspectFit" />
         </view>
@@ -25,62 +25,47 @@
 
   <!-- 已登录态：仪表盘 -->
   <block wx:else>
-    <!-- 欢迎语 -->
+    <!-- 欢迎栏 -->
     <view class="welcome-bar animate-fade-in">
       <view>
-        <text class="welcome-text">你好，{{user.nickname || '健身伙伴'}}</text>
+        <text class="welcome-text">下午好，{{user.nickname || '健身伙伴'}}</text>
         <text class="welcome-date">{{today}}</text>
       </view>
       <view class="plan-badge badge">{{user.plan === 'pro' ? 'Pro' : 'Free'}}</view>
     </view>
 
-    <!-- 今日配额卡片 -->
-    <view class="quota-card card animate-fade-in animate-delay-1">
-      <view class="quota-header flex-between">
-        <text class="quota-title">今日剩余配额</text>
-        <text class="quota-upgrade" wx:if="{{user.plan !== 'pro'}}" bindtap="onTapUpgrade">升级 Pro</text>
-      </view>
-      <view class="quota-grid">
-        <view class="quota-item" wx:for="{{quotaList}}" wx:key="key">
-          <text class="quota-count">{{item.remaining}}</text>
-          <text class="quota-label">{{item.label}}</text>
-          <view class="quota-bar-bg">
-            <view class="quota-bar-fill" style="width: {{item.percent}}%"></view>
-          </view>
-        </view>
-      </view>
+    <!-- 评分 hero（有评分时显示） -->
+    <view class="hero-score-wrap animate-fade-in animate-delay-1" wx:if="{{latestScore}}">
+      <kb-score variant="plain" value="{{latestScore}}" label="综合体态评分" delta="{{latestDelta}}" />
+    </view>
+
+    <!-- 配额 -->
+    <view class="section-title">今日配额</view>
+    <view class="card-flat quota-card animate-fade-in animate-delay-2">
+      <kb-quota items="{{quotaList}}" />
+      <text class="quota-upgrade" wx:if="{{user.plan !== 'pro'}}" bindtap="onTapUpgrade">升级 Pro →</text>
     </view>
 
     <!-- 快捷操作 -->
-    <view class="quick-actions-wrap animate-fade-in animate-delay-2">
-      <view class="quick-actions">
-        <view class="quick-action" wx:for="{{quickActions}}" wx:key="key" bindtap="{{item.key === 'analyze' ? 'onTapAnalyze' : item.key === 'plan' ? 'onTapPlan' : item.key === 'chat' ? 'onTapChat' : 'onTapExercises'}}">
-          <view class="icon-circle icon-circle-green qa-icon">
-            <image class="qa-icon-img" src="{{item.icon}}" mode="aspectFit" />
-          </view>
-          <text class="qa-text">{{item.text}}</text>
+    <view class="section-title">快捷操作</view>
+    <view class="quick-grid animate-fade-in animate-delay-3">
+      <view class="quick-tile tap-scale" wx:for="{{quickActions}}" wx:key="key" bindtap="onTapQuick" data-key="{{item.key}}">
+        <view class="quick-icon-circle">
+          <image class="quick-icon-img" src="{{item.icon}}" mode="aspectFit" />
         </view>
+        <text class="quick-text">{{item.text}}</text>
       </view>
     </view>
 
     <!-- 今日摘要 -->
-    <view class="section-title animate-fade-in animate-delay-3">今日摘要</view>
-    <view class="summary-card card animate-fade-in animate-delay-4" wx:if="{{todaySummary}}">
+    <view class="section-title">今日摘要</view>
+    <view class="card-flat summary-card animate-fade-in animate-delay-4" wx:if="{{todaySummary.length}}">
       <view class="summary-item" wx:for="{{todaySummary}}" wx:key="key">
-        <view class="icon-circle-sm icon-circle-light summary-icon-wrap">
-          <text class="summary-icon-text">{{item.iconText}}</text>
-        </view>
-        <view class="summary-info">
-          <text class="summary-label">{{item.label}}</text>
-          <text class="summary-value">{{item.value}}</text>
-        </view>
+        <image class="summary-icon" src="{{item.icon}}" mode="aspectFit" />
+        <text class="summary-label">{{item.label}}</text>
+        <text class="summary-value">{{item.value}}</text>
       </view>
     </view>
-    <view class="empty-state" wx:else>
-      <view class="empty-icon">
-        <text style="font-size: 40rpx; color: #22c55e;">○</text>
-      </view>
-      <text class="empty-text">今天还没有记录，快去分析体态吧！</text>
-    </view>
+    <kb-empty wx:else icon="/assets/icons/tab-analyze.svg" text="今天还没有记录，快去分析体态吧" cta="去分析" bind:cta="onTapAnalyze" />
   </block>
 </view>
