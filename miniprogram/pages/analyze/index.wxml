@@ -2,9 +2,7 @@
 <view class="page-container">
   <!-- 未登录提示 -->
   <view class="login-prompt" wx:if="{{!isLoggedIn}}">
-    <view class="login-icon-wrap">
-      <text class="login-icon-char">!</text>
-    </view>
+    <image class="lp-icon" src="/assets/icons/tab-analyze.svg" mode="aspectFit" />
     <text class="lp-text">登录后可使用体态分析</text>
     <button class="btn-primary lp-btn" bindtap="onTapLogin">去登录</button>
   </view>
@@ -57,28 +55,26 @@
         <image class="result-image" src="{{resultImageUrl}}" mode="widthFix" />
       </view>
 
-      <!-- 综合评分 -->
-      <view class="score-overview card">
-        <text class="so-title">综合评分</text>
-        <view class="so-score-wrap">
-          <text class="so-score">{{result.overallScore}}</text>
-          <text class="so-unit">分</text>
-        </view>
-        <text class="so-level">{{result.level}}</text>
+      <!-- 评分 ring -->
+      <view class="result-score-row animate-fade-in">
+        <kb-score variant="ring" value="{{result.overallScore}}" label="综合评分" level="{{result.level}}" delta="{{result.scoreDelta}}" />
       </view>
 
-      <!-- 8 维度评分卡 -->
+      <!-- 雷达图 -->
       <view class="section-title">8 大体态维度</view>
-      <view class="dimension-list">
-        <view class="dimension-card card" wx:for="{{result.dimensions}}" wx:key="key">
-          <view class="dc-header flex-between">
-            <text class="dc-name">{{item.name}}</text>
-            <text class="dc-score {{item.score >= 80 ? 'text-brand' : item.score >= 60 ? 'text-orange' : 'text-red'}}">{{item.score}}分</text>
+      <view class="radar-wrap animate-fade-in animate-delay-1">
+        <kb-radar mode="result" size="{{260}}" data="{{result.radar}}" />
+      </view>
+
+      <!-- 需关注 -->
+      <view class="section-title">需关注</view>
+      <view class="card-flat concern-card animate-fade-in animate-delay-2">
+        <view class="concern-row" wx:for="{{result.dimensions}}" wx:key="key" wx:if="{{item.score < 80}}">
+          <image class="concern-icon" src="/assets/icons/st-warn-orange.svg" mode="aspectFit" />
+          <view class="concern-info">
+            <text class="concern-name">{{item.name}} {{item.score}}分</text>
+            <text class="concern-suggestion">{{item.suggestion}}</text>
           </view>
-          <view class="dc-bar-bg">
-            <view class="dc-bar-fill" style="width: {{item.score}}%; background: {{item.score >= 80 ? '#22c55e' : item.score >= 60 ? '#f97316' : '#ef4444'}}"></view>
-          </view>
-          <text class="dc-suggestion">{{item.suggestion}}</text>
         </view>
       </view>
 
@@ -86,7 +82,7 @@
       <view class="result-actions">
         <button class="btn-primary" bindtap="onTapSave">保存记录</button>
         <button class="btn-outline" bindtap="onTapRetake">重新拍照</button>
-        <button class="btn-outline" bindtap="onTapCompare" wx:if="{{hasHistory}}">前后对比</button>
+        <button class="btn-outline" wx:if="{{hasHistory}}" bindtap="onTapCompare">前后对比</button>
       </view>
     </view>
   </block>

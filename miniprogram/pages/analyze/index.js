@@ -124,6 +124,13 @@ Page({
 
   // 展示结果
   showResult(resultData) {
+    // 若后端未返回 radar 对象，从 dimensions 数组按固定顺序构造
+    if (!resultData.radar && resultData.dimensions) {
+      const keys = ['headForward','roundShoulder','pelvicTilt','kneeExtension','spinalCurvature','shoulderHeight','legAlignment','coreStability'];
+      const radar = {};
+      (resultData.dimensions || []).forEach((d, i) => { radar[keys[i]] = d.score; });
+      resultData.radar = radar;
+    }
     this.setData({
       step: 'result',
       result: resultData,
