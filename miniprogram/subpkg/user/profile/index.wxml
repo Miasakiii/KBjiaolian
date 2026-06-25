@@ -3,42 +3,34 @@
   <view class="profile-header">
     <image class="ph-avatar" src="{{user.avatar || '/assets/icons/profile.png'}}" />
     <text class="ph-name">{{user.nickname || '微信用户'}}</text>
-    <view class="ph-plan-badge badge {{user.plan === 'pro' ? 'badge-pro' : ''}}">
+    <view class="ph-plan-badge {{user.plan === 'pro' ? 'ph-badge-pro' : 'ph-badge-free'}}">
       {{user.plan === 'pro' ? 'Pro 会员' : 'Free'}}
     </view>
   </view>
 
-  <view class="menu-list card">
+  <view class="menu-list card-flat">
     <view class="menu-item" bindtap="onTapPricing">
-      <view class="mi-icon-wrap mi-icon-green">
-        <text class="mi-icon-char">P</text>
-      </view>
+      <view class="mi-icon-wrap"><image src="/assets/icons/tab-exercises.svg" mode="aspectFit" class="mi-icon-img" /></view>
       <text class="mi-label">升级套餐</text>
-      <text class="mi-arrow-char">›</text>
+      <image src="/assets/icons/st-up.svg" mode="aspectFit" class="mi-arrow" />
     </view>
     <view class="menu-item" bindtap="onTapHistory">
-      <view class="mi-icon-wrap mi-icon-green">
-        <text class="mi-icon-char">H</text>
-      </view>
+      <view class="mi-icon-wrap"><image src="/assets/icons/tab-analyze.svg" mode="aspectFit" class="mi-icon-img" /></view>
       <text class="mi-label">历史记录</text>
-      <text class="mi-arrow-char">›</text>
+      <image src="/assets/icons/st-up.svg" mode="aspectFit" class="mi-arrow" />
     </view>
     <view class="menu-item" bindtap="onTapAbout">
-      <view class="mi-icon-wrap mi-icon-green">
-        <text class="mi-icon-char">i</text>
-      </view>
+      <view class="mi-icon-wrap"><image src="/assets/icons/st-info.svg" mode="aspectFit" class="mi-icon-img" /></view>
       <text class="mi-label">关于 KB 教练</text>
-      <text class="mi-arrow-char">›</text>
+      <image src="/assets/icons/st-up.svg" mode="aspectFit" class="mi-arrow" />
     </view>
   </view>
 
-  <view class="menu-list card">
+  <view class="menu-list card-flat">
     <view class="menu-item" bindtap="onTapLogout">
-      <view class="mi-icon-wrap mi-icon-red">
-        <image src="/assets/icons/st-close-red.svg" mode="aspectFit" class="mi-icon-char mi-icon-img" />
-      </view>
-      <text class="mi-label text-red">退出登录</text>
-      <text class="mi-arrow-char">›</text>
+      <view class="mi-icon-wrap mi-icon-red"><image src="/assets/icons/st-close-red.svg" mode="aspectFit" class="mi-icon-img" /></view>
+      <text class="mi-label text-logout">退出登录</text>
+      <image src="/assets/icons/st-up.svg" mode="aspectFit" class="mi-arrow" />
     </view>
   </view>
 </view>
