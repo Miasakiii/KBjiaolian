@@ -59,6 +59,7 @@
 .ds-name { font-size: 34rpx; font-weight: 700; color: #111827; }
 .ds-close { width: 56rpx; height: 56rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f8fafb; }
 .ds-close-char { font-size: 36rpx; color: #9ca3af; font-weight: 300; }
+.ds-close-icon { width: 32rpx; height: 32rpx; opacity: 0.6; }
 .ds-body { }
 .ds-row { display: flex; justify-content: space-between; padding: 14rpx 0; border-bottom: 1rpx solid #f3f4f6; }
 .ds-label { font-size: 26rpx; color: #9ca3af; }

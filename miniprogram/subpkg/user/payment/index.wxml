@@ -16,7 +16,7 @@
         <text class="pm-icon-char">微</text>
       </view>
       <text class="pm-name">微信支付</text>
-      <view class="pm-check">✓</view>
+      <view class="pm-check"><image src="/assets/icons/st-ok.svg" mode="aspectFit" class="pm-check-icon" /></view>
     </view>
   </view>
 

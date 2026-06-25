@@ -69,7 +69,7 @@
       <view class="ds-header">
         <text class="ds-name">{{detailData.name}}</text>
         <view class="ds-close" bindtap="onCloseDetail">
-          <text class="ds-close-char">×</text>
+          <image src="/assets/icons/st-close.svg" mode="aspectFit" class="ds-close-icon" />
         </view>
       </view>
       <view class="ds-body">

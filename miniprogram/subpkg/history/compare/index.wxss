@@ -7,7 +7,8 @@
 .selected-card { display: flex; align-items: center; gap: var(--sp-2); position: relative; }
 .sc-date { font-size: var(--fs-body); color: var(--text-1); font-weight: 600; flex: 1; }
 .sc-score { font-size: var(--fs-caption); color: var(--brand); font-weight: 600; }
-.sc-remove { font-size: var(--fs-caption); color: var(--text-3); padding: var(--sp-1); }
+.sc-remove { font-size: var(--fs-caption); color: var(--text-3); padding: var(--sp-1); display: flex; align-items: center; }
+.sc-remove-icon { width: 28rpx; height: 28rpx; opacity: 0.6; }
 
 /* 记录列表 */
 .record-list { display: flex; flex-direction: column; gap: var(--sp-2); }

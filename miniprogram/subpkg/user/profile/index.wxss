@@ -22,6 +22,7 @@
 .mi-icon-green { background: #ccfbf1; }
 .mi-icon-red { background: #fef2f2; }
 .mi-icon-char { font-size: 24rpx; font-weight: 700; }
+.mi-icon-img { width: 28rpx; height: 28rpx; }
 .mi-icon-green .mi-icon-char { color: #0d5a54; }
 .mi-icon-red .mi-icon-char { color: #ef4444; }
 .mi-label { flex: 1; font-size: 28rpx; font-weight: 500; color: #111827; }

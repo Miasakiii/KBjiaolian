@@ -8,7 +8,7 @@
     <view class="selected-card card-flat" wx:for="{{selected}}" wx:key="id">
       <text class="sc-date">{{item.dateStr}}</text>
       <text class="sc-score">综合 {{item.overallScore}} 分</text>
-      <view class="sc-remove" bindtap="onRemove" data-idx="{{index}}">✕</view>
+      <view class="sc-remove" bindtap="onRemove" data-idx="{{index}}"><image src="/assets/icons/st-close.svg" mode="aspectFit" class="sc-remove-icon" /></view>
     </view>
   </view>
 

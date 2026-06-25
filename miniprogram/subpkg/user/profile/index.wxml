@@ -35,7 +35,7 @@
   <view class="menu-list card">
     <view class="menu-item" bindtap="onTapLogout">
       <view class="mi-icon-wrap mi-icon-red">
-        <text class="mi-icon-char">×</text>
+        <image src="/assets/icons/st-close-red.svg" mode="aspectFit" class="mi-icon-char mi-icon-img" />
       </view>
       <text class="mi-label text-red">退出登录</text>
       <text class="mi-arrow-char">›</text>
