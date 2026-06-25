@@ -6,8 +6,8 @@ import os
 ICONS_DIR = os.path.dirname(os.path.abspath(__file__))
 SIZE = 81  # WeChat tab bar recommended size
 STROKE_W = 1.8
-COLOR_NORMAL = "#b0b0b0"
-COLOR_ACTIVE = "#22c55e"
+COLOR_NORMAL = "#94a3b8"
+COLOR_ACTIVE = "#0f766e"
 
 # SVG templates for each icon (24x24 viewBox, Lucide-style linear)
 ICONS = {

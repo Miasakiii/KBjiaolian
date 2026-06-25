@@ -69,7 +69,7 @@
       <!-- 需关注 -->
       <view class="section-title">需关注</view>
       <view class="card-flat concern-card animate-fade-in animate-delay-2">
-        <view class="concern-row" wx:for="{{result.dimensions}}" wx:key="key" wx:if="{{item.score < 80}}">
+        <view class="concern-row" wx:for="{{result.dimensions}}" wx:key="name" wx:if="{{item.score < 80}}">
           <image class="concern-icon" src="/assets/icons/st-warn-orange.svg" mode="aspectFit" />
           <view class="concern-info">
             <text class="concern-name">{{item.name}} {{item.score}}分</text>

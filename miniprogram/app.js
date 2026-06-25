@@ -14,8 +14,8 @@ App({
     apiBase: 'http://localhost:3003/api',
 
     // 品牌色（与 Web 端保持一致）
-    themeColor: '#22c55e',
-    themeColorLight: '#dcfce7',
+    themeColor: '#0f766e',
+    themeColorLight: '#ccfbf1',
   },
 
   onLaunch(options) {

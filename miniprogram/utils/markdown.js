@@ -24,7 +24,7 @@ function mdToHtml(md) {
     s = s.replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:600;color:#111827;">$1</strong>');
     s = s.replace(/\*(.+?)\*/g, '<em style="font-style:italic;">$1</em>');
     s = s.replace(/~~(.+?)~~/g, '<del style="text-decoration:line-through;color:#9ca3af;">$1</del>');
-    s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a style="color:#22c55e;text-decoration:underline;" href="$2">$1</a>');
+    s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a style="color:#0f766e;text-decoration:underline;" href="$2">$1</a>');
     return s;
   };
 
@@ -60,7 +60,7 @@ function mdToHtml(md) {
       flushList();
       const txt = inline(line.slice(2));
       if (!inBq) {
-        out.push(`<blockquote style="border-left:6rpx solid #22c55e;background:#f0fdf4;padding:12rpx 20rpx;margin:12rpx 0;color:#374151;font-size:26rpx;line-height:1.6;border-radius:0 8rpx 8rpx 0;">${txt}`);
+        out.push(`<blockquote style="border-left:6rpx solid #0f766e;background:#f6f8f7;padding:12rpx 20rpx;margin:12rpx 0;color:#374151;font-size:26rpx;line-height:1.6;border-radius:0 8rpx 8rpx 0;">${txt}`);
         inBq = true;
       } else {
         out.push(`<br/>${txt}`);

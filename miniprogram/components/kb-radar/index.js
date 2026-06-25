@@ -11,29 +11,41 @@ Component({
   data: { canvasId: 'kbRadar' + Math.random().toString(36).slice(2, 8) },
   observers: {
     'data, prevData, mode': function () {
-      this.draw();
+      // canvas 在 wx:if 内时，attached/observer 可能早于布局完成；用 nextTick 重试
+      if (this.data._attached) this._renderWithRetry();
     },
   },
   lifetimes: {
-    attached() { this.draw(); },
+    attached() { this.data._attached = true; },
+    ready() { this._renderWithRetry(); },
+    detached() { this.data._attached = false; },
   },
   methods: {
-    vals(obj) {
-      return KEYS.map(k => Number(obj && obj[k] || 0));
-    },
-    draw() {
+    _renderWithRetry(retries) {
+      const n = retries == null ? 0 : retries;
       const query = this.createSelectorQuery();
       query.select('#' + this.data.canvasId).fields({ node: true, size: true }).exec((res) => {
-        if (!res || !res[0] || !res[0].node) return;
-        const canvas = res[0].node;
-        const ctx = canvas.getContext('2d');
-        const dpr = (wx.getWindowInfo && wx.getWindowInfo().pixelRatio) || 2;
-        const size = this.data.size;
-        canvas.width = size * dpr;
-        canvas.height = size * dpr;
-        ctx.scale(dpr, dpr);
-        this.render(ctx, size);
+        if (!res || !res[0] || !res[0].node) {
+          // canvas 尚未布局（多见于 wx:if 刚展开），重试 3 次
+          if (n < 3 && this.data._attached) {
+            setTimeout(() => this._renderWithRetry(n + 1), 60);
+          }
+          return;
+        }
+        this._paint(res[0].node, res[0]);
       });
+    },
+    _paint(canvas, fields) {
+      const ctx = canvas.getContext('2d');
+      const dpr = (wx.getWindowInfo && wx.getWindowInfo().pixelRatio) || 2;
+      const size = this.data.size;
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+      ctx.scale(dpr, dpr);
+      this.render(ctx, size);
+    },
+    vals(obj) {
+      return KEYS.map(k => Number(obj && obj[k] || 0));
     },
     render(ctx, size) {
       const cx = size / 2, cy = size / 2;
