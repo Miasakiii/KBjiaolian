@@ -90,6 +90,18 @@ Page({
           recordB: this.data.selected[1].id,
         },
       });
+      // 标准化对比结果：构造雷达对象 + 维度图标 key
+      const iconMap = { '头前伸':'headforward','圆肩':'roundshoulder','骨盆前倾':'pelvictilt','膝超伸':'kneeextension','脊柱侧弯':'spinal','高低肩':'shoulderheight','XO型腿':'leg','核心稳定':'core' };
+      if (res.dims) {
+        res.dims = res.dims.map(d => ({ ...d, iconKey: iconMap[d.name] || 'core' }));
+        // 若后端未返回 radarA/radarB，从 dims 的 before/after 构造
+        if (!res.radarA || !res.radarB) {
+          const keys = ['headForward','roundShoulder','pelvicTilt','kneeExtension','spinalCurvature','shoulderHeight','legAlignment','coreStability'];
+          const toRadar = (field) => { const o = {}; res.dims.forEach((d, i) => { o[keys[i]] = d[field] ?? 0; }); return o; };
+          if (!res.radarA) res.radarA = toRadar('before');
+          if (!res.radarB) res.radarB = toRadar('after');
+        }
+      }
       this.setData({ compareResult: res, loading: false });
     } catch (err) {
       this.setData({ loading: false });

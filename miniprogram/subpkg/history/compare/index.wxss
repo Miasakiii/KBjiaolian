@@ -1,32 +1,33 @@
-/* subpkg/history/compare/index.wxss */
-.page-container { min-height: 100vh; background: #f8fafc; padding-bottom: 40rpx; }
-.hint-text { font-size: 24rpx; color: #6b7280; padding: 0 24rpx 16rpx; display: block; }
+/* subpkg/history/compare/index.wxss - 前后对比页 */
+.page-container { min-height: 100vh; background: var(--bg); padding: 0 var(--sp-4) env(safe-area-inset-bottom); }
+.hint-text { font-size: var(--fs-caption); color: var(--text-3); padding: 0 0 var(--sp-3); display: block; }
 
-.selected-wrap { padding: 0 24rpx; }
-.selected-card { display: flex; align-items: center; gap: 20rpx; margin-bottom: 12rpx !important; position: relative; }
-.sc-date { font-size: 26rpx; color: #374151; }
-.sc-score { font-size: 28rpx; font-weight: 600; color: #22c55e; }
-.sc-remove { position: absolute; right: 20rpx; top: 20rpx; font-size: 28rpx; color: #9ca3af; padding: 8rpx; }
+/* 已选记录 */
+.selected-wrap { display: flex; flex-direction: column; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.selected-card { display: flex; align-items: center; gap: var(--sp-2); position: relative; }
+.sc-date { font-size: var(--fs-body); color: var(--text-1); font-weight: 600; flex: 1; }
+.sc-score { font-size: var(--fs-caption); color: var(--brand); font-weight: 600; }
+.sc-remove { font-size: var(--fs-caption); color: var(--text-3); padding: var(--sp-1); }
 
-.record-list { padding: 0 24rpx; }
-.record-card { margin: 0 0 12rpx !important; position: relative; }
-.record-card-active { border: 2rpx solid #22c55e; }
-.rc-header { margin-bottom: 4rpx; }
-.rc-date { font-size: 26rpx; color: #6b7280; }
-.rc-score { font-size: 30rpx; font-weight: 600; color: #1c1c1e; }
-.rc-badge { position: absolute; top: 16rpx; right: 20rpx; font-size: 20rpx; color: #22c55e; font-weight: 500; }
+/* 记录列表 */
+.record-list { display: flex; flex-direction: column; gap: var(--sp-2); }
+.record-card { position: relative; }
+.record-card-active { border-color: var(--brand); background: var(--brand-soft); }
+.rc-header { display: flex; justify-content: space-between; align-items: center; }
+.rc-date { font-size: var(--fs-body); color: var(--text-1); }
+.rc-score { font-size: var(--fs-caption); color: var(--brand); font-weight: 600; }
+.rc-badge { position: absolute; top: var(--sp-2); right: var(--sp-2); font-size: var(--fs-label); color: var(--brand); background: var(--surface); padding: 2rpx 12rpx; border-radius: 20rpx; font-weight: 600; }
 
 /* 对比结果 */
-.compare-result { margin: 24rpx; }
-.cr-title { font-size: 32rpx; font-weight: 600; display: block; margin-bottom: 20rpx; }
-.cr-section { display: flex; justify-content: space-between; padding: 12rpx 0; border-bottom: 1rpx solid #f1f5f9; }
-.cr-label { font-size: 26rpx; color: #6b7280; }
-.cr-value { font-size: 30rpx; font-weight: 600; }
-.cr-dim-list { padding: 16rpx 0; }
-.cr-dim { display: flex; justify-content: space-between; padding: 8rpx 0; }
-.cd-name { font-size: 26rpx; color: #374151; }
-.cd-change { font-size: 26rpx; font-weight: 500; }
-.cr-summary { font-size: 26rpx; color: #374151; line-height: 1.8; display: block; margin-top: 16rpx; padding: 16rpx; background: #f0fdf4; border-radius: 8rpx; }
-
-.compare-btn { margin: 32rpx 24rpx 0; }
-.compare-btn[disabled] { background: #d1d5db !important; color: #9ca3af !important; }
+.score-change-card { text-align: center; }
+.score-change-value { font-size: var(--fs-display); font-weight: 600; display: block; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.score-change-from { font-size: var(--fs-caption); color: var(--text-3); margin-top: var(--sp-1); display: block; }
+.radar-wrap { display: flex; justify-content: center; padding: var(--sp-3) 0; }
+.dim-change-row { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) 0; border-bottom: 1rpx solid var(--line-soft); }
+.dim-change-row:last-child { border-bottom: none; }
+.dim-change-icon { width: 32rpx; height: 32rpx; }
+.dim-change-name { flex: 1; font-size: var(--fs-body); color: var(--text-2); }
+.dim-change-from { font-size: var(--fs-caption); color: var(--text-3); font-variant-numeric: tabular-nums; }
+.dim-change-delta { font-size: var(--fs-caption); font-weight: 600; font-variant-numeric: tabular-nums; }
+.compare-summary { font-size: var(--fs-caption); color: var(--text-2); line-height: 1.6; margin: var(--sp-3) 0; display: block; }
+.compare-btn { margin: var(--sp-4) 0; }
