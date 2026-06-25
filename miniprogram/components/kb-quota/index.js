@@ -11,6 +11,16 @@ Component({
   },
   observers: {
     'items': function (items) {
+      this._compute(items);
+    },
+  },
+  lifetimes: {
+    attached() {
+      this._compute(this.data.items);
+    },
+  },
+  methods: {
+    _compute(items) {
       const computed = (items || []).map(it => {
         const total = it.total || 0;
         const remaining = it.remaining || 0;
@@ -19,11 +29,6 @@ Component({
         return { ...it, percent, over };
       });
       this.setData({ computed });
-    },
-  },
-  lifetimes: {
-    attached() {
-      this.observers.items.call(this, this.data.items);
     },
   },
 });

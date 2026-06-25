@@ -12,14 +12,19 @@ Component({
   },
   observers: {
     'delta': function (d) {
+      this._computeDelta(d);
+    },
+  },
+  lifetimes: {
+    attached() { this._computeDelta(this.data.delta); },
+  },
+  methods: {
+    _computeDelta(d) {
       if (!d) { this.setData({ deltaStr: '' }); return; }
       this.setData({
         deltaStr: (d > 0 ? '↑ +' : '↓ ') + Math.abs(d) + ' 较上次',
         deltaUp: d > 0,
       });
     },
-  },
-  lifetimes: {
-    attached() { this.observers.delta.call(this, this.data.delta); },
   },
 });
