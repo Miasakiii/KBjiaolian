@@ -14,6 +14,7 @@ Page({
       { key: 'endurance', label: '耐力' },
     ],
     selectedParts: [],
+    selectedPartMap: {},
     partOptions: ['胸部', '背部', '肩部', '手臂', '核心', '腿部', '全身'],
     level: 'intermediate',
     levelOptions: [
@@ -42,9 +43,11 @@ Page({
   onTogglePart(e) {
     const part = e.currentTarget.dataset.part;
     const arr = [...this.data.selectedParts];
+    const map = { ...this.data.selectedPartMap };
     const idx = arr.indexOf(part);
-    if (idx >= 0) arr.splice(idx, 1); else if (arr.length < 3) arr.push(part);
-    this.setData({ selectedParts: arr });
+    if (idx >= 0) { arr.splice(idx, 1); delete map[part]; }
+    else if (arr.length < 3) { arr.push(part); map[part] = true; }
+    this.setData({ selectedParts: arr, selectedPartMap: map });
   },
 
   // 生成方案
