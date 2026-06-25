@@ -1,24 +1,21 @@
 /* subpkg/user/pricing/index.wxss */
-.page-container { min-height: 100vh; background: #f8fafc; padding-bottom: 40rpx; }
-.pricing-header { padding: 40rpx 32rpx 20rpx; text-align: center; }
-.ph-title { font-size: 36rpx; font-weight: 700; display: block; }
-.ph-desc { font-size: 26rpx; color: #6b7280; display: block; margin-top: 8rpx; }
+.page-container { min-height: 100vh; background: var(--bg); padding: 0 var(--sp-4) env(safe-area-inset-bottom); }
+.pricing-header { padding: var(--sp-5) 0 var(--sp-3); text-align: center; }
+.ph-title { font-size: var(--fs-title); font-weight: 600; color: var(--text-1); display: block; }
+.ph-desc { font-size: var(--fs-caption); color: var(--text-3); display: block; margin-top: var(--sp-1); }
 
-.plan-cards { padding: 0 24rpx; }
+.plan-cards { display: flex; flex-direction: column; gap: var(--sp-3); }
 .plan-card { position: relative; border: 2rpx solid transparent; transition: border-color 0.2s; }
-.plan-card-active { border-color: #0f766e; }
-.plan-card-pro { border-color: #0d5a54; }
-.pc-badge {
-  position: absolute; top: 0; right: 0; background: #0f766e; color: #fff;
-  font-size: 20rpx; padding: 4rpx 16rpx; border-radius: 0 16rpx 0 12rpx;
-}
-.pc-badge-hot { background: #0d5a54; }
-.pc-name { font-size: 32rpx; font-weight: 600; display: block; margin-bottom: 8rpx; }
-.pc-price { font-size: 56rpx; font-weight: 700; color: #0f766e; }
-.pc-unit { font-size: 26rpx; font-weight: 400; }
-.pc-price-year { font-size: 22rpx; color: #6b7280; display: block; margin: 4rpx 0 16rpx; }
-.pc-features { display: flex; flex-direction: column; gap: 10rpx; }
-.pc-feat { font-size: 26rpx; color: #374151; }
-.pc-feat-disabled { color: #9ca3af; text-decoration: line-through; }
-
-.pricing-btn { margin: 32rpx 24rpx 0; font-size: 32rpx !important; border-radius: 40rpx !important; }
+.plan-card-active { border-color: var(--brand); }
+.plan-card-pro { background: var(--brand-soft); }
+.pc-badge { position: absolute; top: 0; right: 0; background: var(--brand-600); color: #fff; font-size: var(--fs-label); padding: 4rpx 16rpx; border-radius: 0 var(--radius) 0 var(--radius-sm); font-weight: 600; }
+.pc-badge-hot { background: var(--brand); }
+.pc-name { font-size: var(--fs-h2); font-weight: 600; color: var(--text-1); display: block; margin-bottom: var(--sp-1); }
+.pc-price-row { display: flex; align-items: baseline; gap: 4rpx; }
+.pc-price { font-size: 56rpx; font-weight: 600; color: var(--brand); font-variant-numeric: tabular-nums; }
+.pc-unit { font-size: var(--fs-caption); color: var(--text-3); }
+.pc-features { display: flex; flex-direction: column; gap: var(--sp-1); margin-top: var(--sp-2); }
+.pc-feat-item { display: flex; align-items: center; gap: var(--sp-1); }
+.pc-feat-icon { width: 28rpx; height: 28rpx; flex-shrink: 0; }
+.pc-feat { font-size: var(--fs-caption); color: var(--text-2); }
+.pricing-btn { margin: var(--sp-5) 0; }

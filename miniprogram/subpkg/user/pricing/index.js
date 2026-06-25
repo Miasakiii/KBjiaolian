@@ -8,6 +8,7 @@ Page({
     selectedPlan: 'pro_monthly',
     paying: false,
     user: {},
+    planList: [],
     plans: {
       free: {
         name: '免费版',
@@ -55,7 +56,14 @@ Page({
 
   onLoad() {
     const user = wx.getStorageSync('user') || {};
-    this.setData({ user });
+    // plans 对象转数组供 wxml 遍历
+    const planList = Object.entries(this.data.plans).map(([key, val]) => ({
+      key,
+      ...val,
+      features: (val.features || []).map(text => ({ text })),
+      isCurrent: user.plan === key,
+    }));
+    this.setData({ user, planList });
   },
 
   // 选择套餐

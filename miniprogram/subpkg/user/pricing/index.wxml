@@ -6,37 +6,29 @@
   </view>
 
   <view class="plan-cards">
-    <!-- Free 套餐 -->
-    <view class="plan-card card {{selectedPlan === 'free' ? 'plan-card-active' : ''}}" bindtap="onSelectPlan" data-plan="free">
-      <view class="pc-badge" wx:if="{{user.plan === 'free'}}">当前方案</view>
-      <text class="pc-name">Free</text>
-      <text class="pc-price">¥0<text class="pc-unit">/月</text></text>
-      <view class="pc-features">
-        <text class="pc-feat">· 体态分析 3 次/日</text>
-        <text class="pc-feat">· 训练方案 3 次/日</text>
-        <text class="pc-feat">· AI 对话 10 次/日</text>
-        <text class="pc-feat pc-feat-disabled">· 前后对比</text>
-        <text class="pc-feat pc-feat-disabled">· 恢复追踪</text>
+    <view
+      class="plan-card card-flat {{selectedPlan === item.key ? 'plan-card-active' : ''}} {{item.key !== 'free' ? 'plan-card-pro' : ''}}"
+      wx:for="{{planList}}"
+      wx:key="key"
+      bindtap="onSelectPlan"
+      data-plan="{{item.key}}"
+    >
+      <view class="pc-badge {{item.isCurrent ? '' : 'pc-badge-hot'}}" wx:if="{{item.badge || item.isCurrent}}">{{item.isCurrent ? '当前方案' : item.badge}}</view>
+      <text class="pc-name">{{item.name}}</text>
+      <view class="pc-price-row">
+        <text class="pc-price">¥{{item.price}}</text>
+        <text class="pc-unit" wx:if="{{item.period}}">{{item.period}}</text>
       </view>
-    </view>
-
-    <!-- Pro 套餐 -->
-    <view class="plan-card card plan-card-pro {{selectedPlan === 'pro' ? 'plan-card-active' : ''}}" bindtap="onSelectPlan" data-plan="pro">
-      <view class="pc-badge pc-badge-hot">推荐</view>
-      <text class="pc-name">Pro</text>
-      <text class="pc-price">¥29<text class="pc-unit">/月</text></text>
-      <text class="pc-price-year">或 ¥199/年（省 ¥149）</text>
       <view class="pc-features">
-        <text class="pc-feat">· 体态分析 无限次</text>
-        <text class="pc-feat">· 训练方案 无限次</text>
-        <text class="pc-feat">· AI 对话 无限次</text>
-        <text class="pc-feat">· 前后对比</text>
-        <text class="pc-feat">· 恢复追踪 + 热力图</text>
+        <view class="pc-feat-item" wx:for="{{item.features}}" wx:key="text" wx:for-item="feat">
+          <image src="/assets/icons/st-ok.svg" mode="aspectFit" class="pc-feat-icon" />
+          <text class="pc-feat">{{feat.text}}</text>
+        </view>
       </view>
     </view>
   </view>
 
   <button class="btn-primary pricing-btn" bindtap="onConfirmPlan" loading="{{paying}}">
-    {{selectedPlan === 'pro' ? '立即开通 Pro' : '当前已是 Free'}}
+    {{selectedPlan === 'free' ? '当前已是 Free' : '立即开通'}}
   </button>
 </view>
