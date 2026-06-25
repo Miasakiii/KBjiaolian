@@ -1,64 +1,48 @@
-/* pages/plan/index.wxss - 训练方案页样式 */
-.page-container { min-height: 100vh; background: #f8fafb; padding-bottom: 40rpx; }
-.login-prompt { display: flex; flex-direction: column; align-items: center; padding: 140rpx 40rpx; }
-.login-icon-wrap {
-  width: 100rpx; height: 100rpx; border-radius: 50%;
-  background: #f6f8f7; display: flex; align-items: center; justify-content: center;
-  margin-bottom: 28rpx;
-}
-.login-icon-char { font-size: 40rpx; font-weight: 700; color: #0f766e; }
-.lp-text { font-size: 28rpx; color: #9ca3af; margin-bottom: 36rpx; }
-.lp-btn { width: 60% !important; }
+/* pages/plan/index.wxss - 训练方案页 */
+.page-container { min-height: 100vh; background: var(--bg); padding: 0 var(--sp-4) env(safe-area-inset-bottom); }
+
+/* 登录提示 */
+.login-prompt { display: flex; flex-direction: column; align-items: center; padding: 120rpx 40rpx; }
+.login-icon-wrap { margin-bottom: var(--sp-3); }
+.login-icon-img { width: 96rpx; height: 96rpx; opacity: 0.4; }
+.lp-text { font-size: var(--fs-body); color: var(--text-3); margin-bottom: var(--sp-4); }
+.lp-btn { width: 60%; }
 
 /* 表单 */
-.plan-form {
-  margin: 24rpx; padding: 36rpx 32rpx;
-  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-}
-.pf-title { font-size: 34rpx; font-weight: 700; display: block; margin-bottom: 8rpx; color: #111827; }
-.pf-desc { font-size: 26rpx; color: #9ca3af; display: block; margin-bottom: 36rpx; }
-.pf-section { margin-bottom: 32rpx; }
-.pf-label { font-size: 28rpx; font-weight: 600; display: block; margin-bottom: 14rpx; color: #111827; }
-.pf-options { display: flex; flex-wrap: wrap; gap: 12rpx; }
-.pf-option {
-  padding: 16rpx 32rpx; border-radius: 12rpx; font-size: 26rpx;
-  background: #f8fafb; color: #4b5563; border: 1rpx solid #f0f0f0;
-}
-.pf-option-active { background: #ccfbf1; color: #0d5a54; border-color: #0f766e; font-weight: 600; }
-.pf-tags { display: flex; flex-wrap: wrap; gap: 12rpx; }
-.pf-tag {
-  padding: 14rpx 28rpx; border-radius: 12rpx; font-size: 24rpx;
-  background: #f8fafb; color: #4b5563; border: 1rpx solid #f0f0f0;
-}
-.pf-tag-active { background: #ccfbf1; color: #0d5a54; border-color: #0f766e; font-weight: 600; }
+.plan-form { margin: var(--sp-3) 0; }
+.pf-title { font-size: var(--fs-title); font-weight: 600; color: var(--text-1); display: block; }
+.pf-desc { font-size: var(--fs-caption); color: var(--text-3); margin: var(--sp-1) 0 var(--sp-3); display: block; }
+.pf-section { margin: var(--sp-3) 0; }
+.pf-label { font-size: var(--fs-label); color: var(--text-3); letter-spacing: 2rpx; display: block; margin-bottom: var(--sp-2); }
+.pf-options { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.pf-option { padding: 12rpx 28rpx; border-radius: var(--radius-sm); font-size: var(--fs-caption); color: var(--text-2); background: var(--surface-2); border: 1rpx solid var(--line-soft); }
+.pf-option-active { background: var(--brand-soft); color: var(--brand); border-color: var(--brand-soft); font-weight: 600; }
+.pf-tags { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.pf-tag { padding: 10rpx 24rpx; border-radius: 20rpx; font-size: var(--fs-label); color: var(--text-2); background: var(--surface-2); border: 1rpx solid var(--line-soft); }
+.pf-tag-active { background: var(--brand); color: #fff; border-color: var(--brand); font-weight: 600; }
 
 /* 方案展示 */
-.plan-header {
-  margin: 24rpx; padding: 36rpx 32rpx;
-  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.04);
-}
-.ph-title { font-size: 34rpx; font-weight: 700; display: block; margin-bottom: 8rpx; color: #111827; }
-.ph-desc { font-size: 26rpx; color: #9ca3af; display: block; margin-bottom: 20rpx; }
-.ph-meta { display: flex; gap: 28rpx; }
-.ph-meta-item { display: flex; align-items: center; gap: 8rpx; font-size: 24rpx; color: #9ca3af; }
-.ph-meta-dot { width: 8rpx; height: 8rpx; border-radius: 50%; background: #0f766e; }
+.plan-header { margin: var(--sp-3) 0; }
+.ph-title { font-size: var(--fs-h2); font-weight: 600; color: var(--text-1); display: block; }
+.ph-desc { font-size: var(--fs-caption); color: var(--text-2); margin: var(--sp-1) 0 var(--sp-2); display: block; }
+.ph-meta { display: flex; gap: var(--sp-3); }
+.ph-meta-item { display: flex; align-items: center; gap: 8rpx; font-size: var(--fs-caption); color: var(--text-3); }
+.ph-meta-dot { width: 8rpx; height: 8rpx; border-radius: 50%; background: var(--brand); }
 
-/* 每日方案 */
-.day-list { padding: 0 24rpx; }
-.day-card { margin: 0 0 16rpx !important; }
-.dc-header { padding: 4rpx 0; }
-.dc-day { font-size: 28rpx; font-weight: 600; color: #111827; }
-.dc-arrow { font-size: 22rpx; color: #d1d5db; }
-.dc-exercises { padding-top: 16rpx; border-top: 1rpx solid #f3f4f6; margin-top: 12rpx; }
-.exercise-item {
-  display: flex; align-items: flex-start; gap: 16rpx;
-  padding: 14rpx 0; border-bottom: 1rpx solid #fafafa;
-}
-.exercise-item:last-child { border-bottom: none; }
-.ei-dot { width: 10rpx; height: 10rpx; border-radius: 50%; background: #ccfbf1; margin-top: 14rpx; flex-shrink: 0; }
+/* 每日 */
+.day-list { display: flex; flex-direction: column; gap: var(--sp-2); }
+.day-card { }
+.dc-header { display: flex; justify-content: space-between; align-items: center; }
+.dc-day { font-size: var(--fs-body); font-weight: 600; color: var(--text-1); flex: 1; }
+.dc-arrow { width: 28rpx; height: 28rpx; opacity: 0.5; transition: transform 0.2s; }
+.dc-arrow-right { transform: rotate(90deg); }
+.dc-arrow-down { transform: rotate(180deg); }
+.dc-exercises { padding-top: var(--sp-2); }
+.exercise-item { display: flex; align-items: flex-start; gap: var(--sp-2); padding: var(--sp-2) 0; border-top: 1rpx solid var(--line-soft); }
+.ei-dot { width: 8rpx; height: 8rpx; border-radius: 50%; background: var(--brand); margin-top: 14rpx; flex-shrink: 0; }
 .ei-content { flex: 1; }
-.ei-name { font-size: 28rpx; font-weight: 600; color: #111827; display: block; }
-.ei-meta { font-size: 24rpx; color: #9ca3af; display: block; margin-top: 4rpx; }
-.ei-note { font-size: 22rpx; color: #d1d5db; display: block; margin-top: 4rpx; }
+.ei-name { font-size: var(--fs-body); font-weight: 600; color: var(--text-1); display: block; }
+.ei-meta { font-size: var(--fs-caption); color: var(--text-3); display: block; margin-top: 2rpx; }
+.ei-note { font-size: var(--fs-label); color: var(--brand); display: block; margin-top: 2rpx; }
 
-.plan-actions { display: flex; flex-direction: column; gap: 16rpx; padding: 24rpx 24rpx 40rpx; }
+.plan-actions { display: flex; flex-direction: column; gap: var(--sp-2); margin: var(--sp-5) 0; }
