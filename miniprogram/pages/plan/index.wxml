@@ -34,7 +34,7 @@
           <text class="pf-label">重点部位（可选）</text>
           <view class="pf-tags">
             <view
-              class="pf-tag {{selectedParts.indexOf(item) >= 0 ? 'pf-tag-active' : ''}}"
+              class="pf-tag {{selectedPartMap[item] ? 'pf-tag-active' : ''}}"
               wx:for="{{partOptions}}"
               wx:key="*this"
               bindtap="onTogglePart"
