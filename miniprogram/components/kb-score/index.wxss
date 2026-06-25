@@ -1,0 +1,17 @@
+.kb-score-label { font-size: var(--fs-label); color: var(--text-3); letter-spacing: 2rpx; text-transform: uppercase; display: block; }
+.kb-score-value { font-size: var(--fs-display); font-weight: 600; color: var(--brand); line-height: 1; font-variant-numeric: tabular-nums; }
+.kb-score-plain-wrap { display: flex; align-items: baseline; gap: 8rpx; margin-top: var(--sp-1); }
+.kb-score-unit { font-size: var(--fs-h2); color: var(--text-3); }
+.kb-score-delta { font-size: var(--fs-caption); font-weight: 600; margin-top: var(--sp-1); display: block; }
+.kb-score-up { color: var(--brand); }
+.kb-score-down { color: var(--accent-warn); }
+.kb-score-underline { height: 4rpx; background: var(--line-soft); border-radius: 2rpx; margin-top: var(--sp-2); }
+.kb-score-underline-fill { height: 100%; background: var(--brand); border-radius: 2rpx; }
+
+/* ring */
+.kb-score-ring-row { display: flex; flex-direction: row; align-items: center; }
+.kb-score-ring { width: 144rpx; height: 144rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.kb-score-ring-inner { width: 112rpx; height: 112rpx; border-radius: 50%; background: var(--surface); display: flex; align-items: center; justify-content: center; }
+.kb-score-ring-value { font-size: var(--fs-title); font-weight: 600; color: var(--brand); }
+.kb-score-ring-info { display: flex; flex-direction: column; gap: 4rpx; margin-left: var(--sp-3); }
+.kb-score-level { font-size: var(--fs-h2); font-weight: 600; color: var(--text-1); }

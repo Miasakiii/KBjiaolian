@@ -6,16 +6,22 @@
     "pages/chat/index",
     "pages/exercises/index"
   ],
+  "usingComponents": {
+    "kb-empty": "/components/kb-empty/index",
+    "kb-quota": "/components/kb-quota/index",
+    "kb-score": "/components/kb-score/index",
+    "kb-radar": "/components/kb-radar/index"
+  },
   "window": {
     "backgroundTextStyle": "dark",
-    "navigationBarBackgroundColor": "#22c55e",
+    "navigationBarBackgroundColor": "#0f766e",
     "navigationBarTitleText": "KB教练",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#f8fafc"
+    "backgroundColor": "#f6f8f7"
   },
   "tabBar": {
-    "color": "#b0b0b0",
-    "selectedColor": "#22c55e",
+    "color": "#94a3b8",
+    "selectedColor": "#0f766e",
     "backgroundColor": "#ffffff",
     "borderStyle": "white",
     "list": [
