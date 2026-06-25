@@ -3,32 +3,23 @@
   <view class="section-title">训练记录</view>
 
   <view class="record-list" wx:if="{{list.length > 0}}">
-    <view
-      class="workout-card card"
-      wx:for="{{list}}"
-      wx:key="id"
-      bindtap="onTapWorkout"
-      data-id="{{item.id}}"
-    >
-      <view class="wc-header flex-between">
-        <text class="wc-date">{{item.dateStr}}</text>
-        <text class="wc-duration">{{item.duration}}分钟</text>
+    <view class="workout-card card-flat wh-card" wx:for="{{list}}" wx:key="id" bindtap="onTapWorkout" data-id="{{item.id}}">
+      <view class="wh-header">
+        <text class="wh-date">{{item.dateStr}}</text>
+        <text class="wh-duration">{{item.duration}}分钟</text>
       </view>
-      <view class="wc-exercises">
-        <text class="wc-ex" wx:for="{{item.exercises}}" wx:key="name">{{item.name}}</text>
+      <view class="wh-exercises">
+        <text class="wh-ex" wx:for="{{item.exercises}}" wx:key="name" wx:for-item="ex">{{ex.name}}</text>
       </view>
-      <view class="wc-footer flex-between">
-        <text class="wc-cal">{{item.calories}} kcal</text>
-        <text class="wc-arrow">查看详情 ›</text>
+      <view class="wh-footer">
+        <text class="wh-cal">{{item.calories}} kcal</text>
+        <view class="wh-detail">
+          <text>查看详情</text>
+          <image src="/assets/icons/st-up.svg" mode="aspectFit" class="wh-arrow" />
+        </view>
       </view>
     </view>
   </view>
 
-  <view class="empty-state" wx:else>
-    <view class="empty-icon">
-      <image src="/assets/icons/st-info.svg" mode="aspectFit" style="width:80rpx;height:80rpx;opacity:0.4" />
-    </view>
-    <text class="empty-text">还没有训练记录</text>
-    <button class="btn-outline empty-btn" bindtap="onGoPlan">去制定训练方案</button>
-  </view>
+  <kb-empty wx:else icon="/assets/icons/tab-plan.svg" text="还没有训练记录" cta="去制定方案" bind:cta="onGoPlan" />
 </view>
