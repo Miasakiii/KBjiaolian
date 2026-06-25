@@ -306,7 +306,7 @@ export default function HomePage() {
                   key={i}
                   className={`rounded-2xl p-8 relative transition-all hover:-translate-y-1 ${
                     p.highlight
-                      ? 'bg-white border-2 border-primary-500 glow-green'
+                      ? 'bg-white border-2 border-primary-500 glow-brand'
                       : 'bg-white border border-neutral-200'
                   }`}
                 >
