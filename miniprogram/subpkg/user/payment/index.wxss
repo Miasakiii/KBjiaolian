@@ -1,34 +1,26 @@
-/* subpkg/user/payment/index.wxss */
-.page-container { min-height: 100vh; background: #f8fafb; display: flex; flex-direction: column; }
-.pay-card { margin: 24rpx; text-align: center; padding: 40rpx 32rpx; }
-.pc-title { font-size: 26rpx; color: #6b7280; display: block; }
-.pc-plan-name { font-size: 36rpx; font-weight: 700; display: block; margin: 12rpx 0; }
-.pc-price-wrap { display: flex; align-items: baseline; justify-content: center; }
-.pc-price { font-size: 60rpx; font-weight: 700; color: #0f766e; }
-.pc-period { font-size: 26rpx; color: #6b7280; margin-left: 4rpx; }
+/* subpkg/user/payment/index.wxss - 支付确认页 */
+.page-container { min-height: 100vh; background: var(--bg); padding: 0 var(--sp-4) env(safe-area-inset-bottom); }
+.pay-section-label { font-size: var(--fs-label); color: var(--text-3); letter-spacing: 2rpx; display: block; margin-bottom: var(--sp-2); }
+.pay-card { margin-bottom: var(--sp-3); }
+.pc-plan-name { font-size: var(--fs-h2); font-weight: 600; color: var(--text-1); display: block; }
+.pc-price-wrap { display: flex; align-items: baseline; gap: 4rpx; margin-top: var(--sp-1); }
+.pc-price { font-size: var(--fs-display); font-weight: 600; color: var(--brand); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.pc-period { font-size: var(--fs-caption); color: var(--text-3); }
 
-.pay-method { margin: 0 24rpx 20rpx; }
-.pm-title { font-size: 28rpx; font-weight: 500; display: block; margin-bottom: 16rpx; }
-.pm-option { display: flex; align-items: center; gap: 16rpx; padding: 20rpx 0; }
-.pm-icon-wrap {
-  width: 48rpx; height: 48rpx; border-radius: 50%;
-  background: #ccfbf1; display: flex; align-items: center; justify-content: center;
-}
-.pm-icon-char { font-size: 22rpx; font-weight: 700; color: #0d5a54; }
-.pm-name { flex: 1; font-size: 28rpx; }
-.pm-check { color: #0f766e; font-size: 32rpx; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-.pm-check-icon { width: 28rpx; height: 28rpx; }
-.pm-active { border: 2rpx solid #0f766e; border-radius: 12rpx; padding: 20rpx 24rpx !important; }
+.pay-method { margin-bottom: var(--sp-3); }
+.pm-option { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) 0; border: 2rpx solid var(--line-soft); border-radius: var(--radius-sm); padding: var(--sp-3); }
+.pm-active { border-color: var(--brand); background: var(--brand-soft); }
+.pm-icon-wrap { width: 56rpx; height: 56rpx; border-radius: var(--radius-sm); background: var(--brand); display: flex; align-items: center; justify-content: center; }
+.pm-icon-char { font-size: var(--fs-caption); font-weight: 600; color: #fff; }
+.pm-name { flex: 1; font-size: var(--fs-body); font-weight: 600; color: var(--text-1); }
+.pm-check { display: flex; align-items: center; justify-content: center; }
+.pm-check-icon { width: 32rpx; height: 32rpx; }
 
-.pay-notice { padding: 0 32rpx; }
-.pn-text { font-size: 22rpx; color: #9ca3af; }
+.pay-notice { padding: var(--sp-2) 0; }
+.pn-text { font-size: var(--fs-label); color: var(--text-3); }
 
-.pay-footer {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 20rpx 24rpx; background: #fff; margin-top: auto;
-  border-top: 1rpx solid #e5e7eb;
-}
-.pf-total { display: flex; align-items: baseline; }
-.pf-label { font-size: 28rpx; color: #374151; }
-.pf-amount { font-size: 36rpx; font-weight: 700; color: #ef4444; margin-left: 4rpx; }
-.pf-btn { width: 320rpx !important; font-size: 30rpx !important; }
+.pay-footer { position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4) calc(var(--sp-3) + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1rpx solid var(--line-soft); }
+.pf-total { display: flex; flex-direction: column; }
+.pf-label { font-size: var(--fs-label); color: var(--text-3); }
+.pf-amount { font-size: var(--fs-title); font-weight: 600; color: var(--brand); font-variant-numeric: tabular-nums; }
+.pf-btn { width: auto; flex: 1; padding: 22rpx 48rpx; }

@@ -1,20 +1,18 @@
 <!--subpkg/user/payment/index.wxml - 支付确认页-->
 <view class="page-container">
-  <view class="pay-card card">
-    <text class="pc-title">确认订单</text>
-    <view class="pc-plan-name">{{planName}}</view>
+  <view class="pay-card card-flat">
+    <text class="pay-section-label">确认订单</text>
+    <text class="pc-plan-name">{{planName}}</text>
     <view class="pc-price-wrap">
       <text class="pc-price">¥{{price}}</text>
       <text class="pc-period">/{{period === 'year' ? '年' : '月'}}</text>
     </view>
   </view>
 
-  <view class="pay-method card">
-    <text class="pm-title">支付方式</text>
+  <view class="pay-method card-flat">
+    <text class="pay-section-label">支付方式</text>
     <view class="pm-option pm-active">
-      <view class="pm-icon-wrap">
-        <text class="pm-icon-char">微</text>
-      </view>
+      <view class="pm-icon-wrap"><text class="pm-icon-char">微</text></view>
       <text class="pm-name">微信支付</text>
       <view class="pm-check"><image src="/assets/icons/st-ok.svg" mode="aspectFit" class="pm-check-icon" /></view>
     </view>
@@ -26,11 +24,9 @@
 
   <view class="pay-footer safe-bottom">
     <view class="pf-total">
-      <text class="pf-label">合计：</text>
+      <text class="pf-label">合计</text>
       <text class="pf-amount">¥{{price}}</text>
     </view>
-    <button class="btn-primary pf-btn" bindtap="onPay" loading="{{paying}}">
-      确认支付
-    </button>
+    <button class="btn-primary pf-btn" bindtap="onPay" loading="{{paying}}">确认支付</button>
   </view>
 </view>
