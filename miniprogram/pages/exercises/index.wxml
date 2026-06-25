@@ -6,91 +6,57 @@
       <view class="search-icon-wrap">
         <image src="/assets/icons/st-info.svg" mode="aspectFit" class="search-icon-img" />
       </view>
-      <input
-        class="search-input"
-        value="{{keyword}}"
-        bindinput="onSearchInput"
-        placeholder="搜索动作..."
-        confirm-type="search"
-        bindconfirm="onSearch"
-      />
+      <input class="search-input" value="{{keyword}}" bindinput="onSearchInput" placeholder="搜索动作..." confirm-type="search" bindconfirm="onSearch" />
     </view>
   </view>
 
   <!-- 肌群筛选 -->
   <scroll-view class="filter-scroll" scroll-x>
     <view class="filter-list">
-      <view
-        class="filter-tag {{activeGroup === item ? 'filter-tag-active' : ''}}"
-        wx:for="{{muscleGroups}}"
-        wx:key="*this"
-        bindtap="onSelectGroup"
-        data-group="{{item}}"
-      >{{item}}</view>
+      <view class="filter-tag {{activeGroup === item ? 'filter-tag-active' : ''}}" wx:for="{{muscleGroups}}" wx:key="*this" bindtap="onSelectGroup" data-group="{{item}}">{{item}}</view>
     </view>
   </scroll-view>
 
   <!-- 动作列表 -->
   <view class="exercise-list" wx:if="{{filteredList.length > 0}}">
-    <view
-      class="exercise-card card"
-      wx:for="{{filteredList}}"
-      wx:key="name"
-      bindtap="onTapExercise"
-      data-name="{{item.name}}"
-    >
-      <view class="ec-left">
-        <view class="ec-icon-wrap">
-          <text class="ec-icon-text">{{item.iconText || item.name[0]}}</text>
-        </view>
+    <view class="exercise-card card-flat" wx:for="{{filteredList}}" wx:key="name" bindtap="onTapExercise" data-name="{{item.name}}">
+      <view class="ec-icon-wrap">
+        <image src="/assets/icons/pat-{{item.pattern}}.svg" mode="aspectFit" class="ec-icon-img" />
       </view>
       <view class="ec-info">
         <text class="ec-name">{{item.name}}</text>
         <text class="ec-group">{{item.group}} · {{item.equipment}}</text>
         <text class="ec-desc">{{item.desc}}</text>
       </view>
-      <view class="ec-arrow">
-        <text class="ec-arrow-char">›</text>
-      </view>
+      <image src="/assets/icons/st-up.svg" mode="aspectFit" class="ec-arrow" />
     </view>
   </view>
 
   <!-- 空状态 -->
-  <view class="empty-state" wx:else>
-    <view class="empty-icon">
-      <image src="/assets/icons/st-info.svg" mode="aspectFit" style="width:80rpx;height:80rpx;opacity:0.4" />
-    </view>
-    <text class="empty-text">没有找到相关动作</text>
-  </view>
+  <kb-empty wx:else icon="/assets/icons/tab-exercises.svg" text="没有找到相关动作" />
+</view>
 
-  <!-- 动作详情弹窗 -->
-  <view class="detail-mask" wx:if="{{showDetail}}" bindtap="onCloseDetail">
-    <view class="detail-sheet" catchtap="">
-      <view class="ds-header">
+<!-- 动作详情弹窗 -->
+<view class="detail-mask" wx:if="{{showDetail}}" bindtap="onCloseDetail">
+  <view class="detail-sheet" catchtap="">
+    <view class="ds-header">
+      <view class="ds-title-wrap">
+        <image src="/assets/icons/pat-{{detailData.pattern}}.svg" mode="aspectFit" class="ds-pattern-icon" />
         <text class="ds-name">{{detailData.name}}</text>
-        <view class="ds-close" bindtap="onCloseDetail">
-          <image src="/assets/icons/st-close.svg" mode="aspectFit" class="ds-close-icon" />
-        </view>
       </view>
-      <view class="ds-body">
-        <view class="ds-row">
-          <text class="ds-label">目标肌群</text>
-          <text class="ds-value">{{detailData.group}}</text>
-        </view>
-        <view class="ds-row">
-          <text class="ds-label">所需器械</text>
-          <text class="ds-value">{{detailData.equipment}}</text>
-        </view>
-        <view class="ds-row">
-          <text class="ds-label">难度</text>
-          <text class="ds-value">{{detailData.difficulty}}</text>
-        </view>
-        <view class="ds-section">动作要点</view>
-        <view class="ds-tips">
-          <view class="ds-tip-item" wx:for="{{detailData.tips}}" wx:key="*this">
-            <view class="ds-tip-dot"></view>
-            <text class="ds-tip">{{item}}</text>
-          </view>
+      <view class="ds-close" bindtap="onCloseDetail">
+        <image src="/assets/icons/st-close.svg" mode="aspectFit" class="ds-close-icon" />
+      </view>
+    </view>
+    <view class="ds-body">
+      <view class="ds-row"><text class="ds-label">目标肌群</text><text class="ds-value">{{detailData.group}}</text></view>
+      <view class="ds-row"><text class="ds-label">所需器械</text><text class="ds-value">{{detailData.equipment}}</text></view>
+      <view class="ds-row"><text class="ds-label">难度</text><text class="ds-value">{{detailData.difficulty}}</text></view>
+      <view class="ds-section">动作要点</view>
+      <view class="ds-tips">
+        <view class="ds-tip-item" wx:for="{{detailData.tips}}" wx:key="*this">
+          <view class="ds-tip-dot"></view>
+          <text class="ds-tip">{{item}}</text>
         </view>
       </view>
     </view>
