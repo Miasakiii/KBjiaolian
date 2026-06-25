@@ -1,5 +1,5 @@
 <!--pages/chat/index.wxml - AI 对话页-->
-<view class="page-container">
+<view class="page-container chat-page">
   <view class="login-prompt" wx:if="{{!isLoggedIn}}">
     <view class="login-icon-wrap">
       <image src="/assets/icons/st-info.svg" mode="aspectFit" class="login-icon-img" />
@@ -10,30 +10,20 @@
 
   <block wx:else>
     <!-- 消息列表 -->
-    <scroll-view
-      class="chat-list"
-      scroll-y
-      scroll-into-view="{{scrollToId}}"
-      scroll-with-animation
-    >
+    <scroll-view class="chat-list" scroll-y scroll-into-view="{{scrollToId}}" scroll-with-animation>
       <!-- 空状态 -->
       <view class="empty-state" wx:if="{{messages.length === 0}}">
         <view class="empty-avatar">
-          <text class="empty-avatar-text">AI</text>
+          <image src="/assets/icons/tab-chat.svg" mode="aspectFit" class="empty-avatar-icon" />
         </view>
         <text class="empty-text">你好！我是 KB 教练 AI 助手</text>
         <text class="empty-hint">可以问我任何健身、康复、营养问题</text>
       </view>
 
       <!-- 消息气泡 -->
-      <view
-        class="msg-item {{item.role === 'user' ? 'msg-user' : 'msg-ai'}}"
-        wx:for="{{messages}}"
-        wx:key="id"
-        id="msg-{{item.id}}"
-      >
+      <view class="msg-item {{item.role === 'user' ? 'msg-user' : 'msg-ai'}}" wx:for="{{messages}}" wx:key="id" id="msg-{{item.id}}">
         <view class="msg-avatar msg-avatar-ai" wx:if="{{item.role === 'ai'}}">
-          <text class="msg-avatar-text">AI</text>
+          <image src="/assets/icons/tab-chat.svg" mode="aspectFit" class="msg-avatar-icon" />
         </view>
         <view class="msg-bubble">
           <rich-text class="msg-text" nodes="{{item.contentHtml || item.content}}" wx:if="{{item.role === 'ai'}}"></rich-text>
@@ -41,14 +31,14 @@
           <view class="msg-time">{{item.time}}</view>
         </view>
         <view class="msg-avatar msg-avatar-user" wx:if="{{item.role === 'user'}}">
-          <text class="msg-avatar-text">我</text>
+          <image src="/assets/icons/st-info.svg" mode="aspectFit" class="msg-avatar-icon" />
         </view>
       </view>
 
-      <!-- 打字中动画 -->
+      <!-- 打字中 -->
       <view class="msg-item msg-ai" wx:if="{{loading}}">
         <view class="msg-avatar msg-avatar-ai">
-          <text class="msg-avatar-text">AI</text>
+          <image src="/assets/icons/tab-chat.svg" mode="aspectFit" class="msg-avatar-icon" />
         </view>
         <view class="msg-bubble msg-typing">
           <view class="typing-dot"></view>
@@ -62,29 +52,13 @@
 
     <!-- 快捷提问 -->
     <view class="quick-prompts" wx:if="{{messages.length === 0}}">
-      <view
-        class="qp-item"
-        wx:for="{{quickPrompts}}"
-        wx:key="key"
-        bindtap="onTapQuick"
-        data-prompt="{{item.prompt}}"
-      >{{item.label}}</view>
+      <view class="qp-item" wx:for="{{quickPrompts}}" wx:key="key" bindtap="onTapQuick" data-prompt="{{item.prompt}}">{{item.label}}</view>
     </view>
 
     <!-- 输入栏 -->
     <view class="input-bar safe-bottom">
-      <input
-        class="input-field"
-        value="{{inputValue}}"
-        bindinput="onInput"
-        bindconfirm="onSend"
-        placeholder="输入健身问题..."
-        confirm-type="send"
-        adjust-position
-      />
-      <view class="send-btn {{inputValue ? 'send-btn-active' : ''}}" bindtap="onSend">
-        <text>发送</text>
-      </view>
+      <input class="input-field" value="{{inputValue}}" bindinput="onInput" bindconfirm="onSend" placeholder="输入健身问题..." confirm-type="send" adjust-position />
+      <view class="send-btn {{inputValue ? 'send-btn-active' : ''}}" bindtap="onSend"><text>发送</text></view>
     </view>
   </block>
 </view>
