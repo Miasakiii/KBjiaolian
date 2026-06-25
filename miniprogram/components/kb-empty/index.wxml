@@ -1,0 +1,5 @@
+<view class="kb-empty">
+  <image class="kb-empty-icon" src="{{icon}}" mode="aspectFit" />
+  <text class="kb-empty-text">{{text}}</text>
+  <button wx:if="{{cta}}" class="kb-empty-cta" bindtap="onTapCta">{{cta}}</button>
+</view>

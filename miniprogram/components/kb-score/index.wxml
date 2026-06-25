@@ -1,0 +1,29 @@
+<view class="kb-score kb-score-{{variant}}">
+  <!-- plain: 大数字 + 细底线 -->
+  <block wx:if="{{variant === 'plain'}}">
+    <text class="kb-score-label">{{label}}</text>
+    <view class="kb-score-plain-wrap">
+      <text class="kb-score-value">{{value}}</text>
+      <text class="kb-score-unit">分</text>
+    </view>
+    <text wx:if="{{deltaStr}}" class="kb-score-delta {{deltaUp ? 'kb-score-up' : 'kb-score-down'}}">{{deltaStr}}</text>
+    <view class="kb-score-underline" wx:if="{{value !== '--'}}">
+      <view class="kb-score-underline-fill" style="width: {{value}}%"></view>
+    </view>
+  </block>
+  <!-- ring: conic 环 + 数字 -->
+  <block wx:else>
+    <view class="kb-score-ring-row">
+      <view class="kb-score-ring" style="background: conic-gradient(var(--brand) 0% {{value}}%, var(--line) {{value}}% 100%)">
+        <view class="kb-score-ring-inner">
+          <text class="kb-score-ring-value">{{value}}</text>
+        </view>
+      </view>
+      <view class="kb-score-ring-info">
+        <text class="kb-score-label">{{label}}</text>
+        <text wx:if="{{level}}" class="kb-score-level">{{level}}</text>
+        <text wx:if="{{deltaStr}}" class="kb-score-delta {{deltaUp ? 'kb-score-up' : 'kb-score-down'}}">{{deltaStr}}</text>
+      </view>
+    </view>
+  </block>
+</view>

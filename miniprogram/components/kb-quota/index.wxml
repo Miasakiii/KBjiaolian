@@ -1,0 +1,11 @@
+<view class="kb-quota">
+  <view class="kb-quota-item" wx:for="{{computed}}" wx:key="label">
+    <view class="kb-quota-row">
+      <text class="kb-quota-label">{{item.label}}</text>
+      <text class="kb-quota-count {{item.over ? 'kb-quota-over' : ''}}">{{item.remaining}} / {{item.total}}</text>
+    </view>
+    <view class="kb-quota-bar-bg">
+      <view class="kb-quota-bar-fill {{item.over ? 'kb-quota-bar-over' : ''}}" style="width: {{item.percent}}%"></view>
+    </view>
+  </view>
+</view>
