@@ -26,7 +26,7 @@
 
   <view class="empty-state" wx:else>
     <view class="empty-icon">
-      <text style="font-size: 40rpx; color: #22c55e;">○</text>
+      <image src="/assets/icons/st-info.svg" mode="aspectFit" style="width:80rpx;height:80rpx;opacity:0.4" />
     </view>
     <text class="empty-text">还没有训练记录</text>
     <button class="btn-outline empty-btn" bindtap="onGoPlan">去制定训练方案</button>

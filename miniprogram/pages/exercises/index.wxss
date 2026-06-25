@@ -21,7 +21,7 @@
   background: #ffffff; color: #4b5563; font-size: 24rpx; flex-shrink: 0;
   border: 1rpx solid #f0f0f0;
 }
-.filter-tag-active { background: #dcfce7; color: #16a34a; border-color: #22c55e; font-weight: 600; }
+.filter-tag-active { background: #ccfbf1; color: #0d5a54; border-color: #0f766e; font-weight: 600; }
 
 /* 动作列表 */
 .exercise-list { padding: 16rpx 24rpx 40rpx; }
@@ -32,11 +32,11 @@
 .ec-left { flex-shrink: 0; }
 .ec-icon-wrap {
   width: 88rpx; height: 88rpx; border-radius: 50%;
-  background: linear-gradient(145deg, #dcfce7, #f0fdf4);
+  background: linear-gradient(145deg, #ccfbf1, #f6f8f7);
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 2rpx 10rpx rgba(34, 197, 94, 0.12);
 }
-.ec-icon-text { font-size: 32rpx; font-weight: 700; color: #16a34a; }
+.ec-icon-text { font-size: 32rpx; font-weight: 700; color: #0d5a54; }
 .ec-info { flex: 1; min-width: 0; }
 .ec-name { font-size: 28rpx; font-weight: 600; color: #111827; display: block; }
 .ec-group { font-size: 22rpx; color: #9ca3af; margin-top: 6rpx; display: block; }
@@ -66,5 +66,5 @@
 .ds-section { font-size: 28rpx; font-weight: 700; color: #111827; margin: 28rpx 0 16rpx; }
 .ds-tips { }
 .ds-tip-item { display: flex; align-items: flex-start; gap: 12rpx; margin-bottom: 12rpx; }
-.ds-tip-dot { width: 8rpx; height: 8rpx; border-radius: 50%; background: #dcfce7; margin-top: 14rpx; flex-shrink: 0; }
+.ds-tip-dot { width: 8rpx; height: 8rpx; border-radius: 50%; background: #ccfbf1; margin-top: 14rpx; flex-shrink: 0; }
 .ds-tip { font-size: 26rpx; color: #4b5563; line-height: 1.8; }

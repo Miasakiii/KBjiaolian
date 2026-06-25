@@ -4,7 +4,7 @@
 .pc-title { font-size: 26rpx; color: #6b7280; display: block; }
 .pc-plan-name { font-size: 36rpx; font-weight: 700; display: block; margin: 12rpx 0; }
 .pc-price-wrap { display: flex; align-items: baseline; justify-content: center; }
-.pc-price { font-size: 60rpx; font-weight: 700; color: #22c55e; }
+.pc-price { font-size: 60rpx; font-weight: 700; color: #0f766e; }
 .pc-period { font-size: 26rpx; color: #6b7280; margin-left: 4rpx; }
 
 .pay-method { margin: 0 24rpx 20rpx; }
@@ -12,12 +12,12 @@
 .pm-option { display: flex; align-items: center; gap: 16rpx; padding: 20rpx 0; }
 .pm-icon-wrap {
   width: 48rpx; height: 48rpx; border-radius: 50%;
-  background: #dcfce7; display: flex; align-items: center; justify-content: center;
+  background: #ccfbf1; display: flex; align-items: center; justify-content: center;
 }
-.pm-icon-char { font-size: 22rpx; font-weight: 700; color: #16a34a; }
+.pm-icon-char { font-size: 22rpx; font-weight: 700; color: #0d5a54; }
 .pm-name { flex: 1; font-size: 28rpx; }
-.pm-check { color: #22c55e; font-size: 32rpx; font-weight: 700; }
-.pm-active { border: 2rpx solid #22c55e; border-radius: 12rpx; padding: 20rpx 24rpx !important; }
+.pm-check { color: #0f766e; font-size: 32rpx; font-weight: 700; }
+.pm-active { border: 2rpx solid #0f766e; border-radius: 12rpx; padding: 20rpx 24rpx !important; }
 
 .pay-notice { padding: 0 32rpx; }
 .pn-text { font-size: 22rpx; color: #9ca3af; }
