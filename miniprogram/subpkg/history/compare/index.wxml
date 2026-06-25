@@ -5,7 +5,7 @@
 
   <!-- 已选记录展示 -->
   <view class="selected-wrap" wx:if="{{selected.length > 0}}">
-    <view class="selected-card card" wx:for="{{selected}}" wx:key="id">
+    <view class="selected-card card-flat" wx:for="{{selected}}" wx:key="id">
       <text class="sc-date">{{item.dateStr}}</text>
       <text class="sc-score">综合 {{item.overallScore}} 分</text>
       <view class="sc-remove" bindtap="onRemove" data-idx="{{index}}">✕</view>
@@ -15,7 +15,7 @@
   <!-- 记录列表（选择模式）-->
   <view class="record-list">
     <view
-      class="record-card card {{item.selected ? 'record-card-active' : ''}}"
+      class="record-card card-flat {{item.selected ? 'record-card-active' : ''}}"
       wx:for="{{list}}"
       wx:key="id"
       bindtap="onToggleSelect"
@@ -30,23 +30,33 @@
   </view>
 
   <!-- 对比结果 -->
-  <view wx:if="{{compareResult}}" class="compare-result card">
-    <text class="cr-title">变化报告</text>
-    <view class="cr-section">
-      <text class="cr-label">综合评分变化</text>
-      <text class="cr-value {{compareResult.scoreChange >= 0 ? 'text-brand' : 'text-red'}}">
-        {{compareResult.scoreChange >= 0 ? '+' : ''}}{{compareResult.scoreChange}} 分
+  <view wx:if="{{compareResult}}" class="compare-result animate-fade-in">
+    <view class="section-title">评分变化</view>
+    <view class="card-flat score-change-card">
+      <text class="score-change-value {{compareResult.scoreChange >= 0 ? 'text-brand' : 'text-warn'}}">
+        {{compareResult.scoreChange >= 0 ? '+' : ''}}{{compareResult.scoreChange}}
       </text>
+      <text class="score-change-from" wx:if="{{compareResult.scoreA}}">{{compareResult.scoreA}} → {{compareResult.scoreB}}</text>
     </view>
-    <view class="cr-dim-list">
-      <view class="cr-dim" wx:for="{{compareResult.dims}}" wx:key="name">
-        <text class="cd-name">{{item.name}}</text>
-        <text class="cd-change {{item.change >= 0 ? 'text-brand' : 'text-red'}}">
-          {{item.change >= 0 ? '+' : ''}}{{item.change}}
+
+    <view class="section-title">维度对比</view>
+    <view class="radar-wrap">
+      <kb-radar mode="compare" size="{{260}}" data="{{compareResult.radarB}}" prevData="{{compareResult.radarA}}" />
+    </view>
+
+    <view class="section-title">维度变化</view>
+    <view class="card-flat dim-change-card" wx:if="{{compareResult.dims}}">
+      <view class="dim-change-row" wx:for="{{compareResult.dims}}" wx:key="name">
+        <image class="dim-change-icon" src="/assets/icons/body-{{item.iconKey}}.svg" mode="aspectFit" />
+        <text class="dim-change-name">{{item.name}}</text>
+        <text class="dim-change-from" wx:if="{{item.before}}">{{item.before}}→{{item.after}}</text>
+        <text class="dim-change-delta {{item.change >= 0 ? 'text-brand' : 'text-warn'}}">
+          {{item.change >= 0 ? '↑' : '↓'}}{{item.change >= 0 ? '+' : ''}}{{item.change}}
         </text>
       </view>
     </view>
-    <text class="cr-summary">{{compareResult.summary}}</text>
+
+    <text class="compare-summary" wx:if="{{compareResult.summary}}">{{compareResult.summary}}</text>
   </view>
 
   <button class="btn-primary compare-btn" bindtap="onCompare" loading="{{loading}}" disabled="{{selected.length < 2}}">

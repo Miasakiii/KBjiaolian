@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "前后对比",
-  "usingComponents": {}
+  "usingComponents": {
+    "kb-radar": "/components/kb-radar/index"
+  }
 }
