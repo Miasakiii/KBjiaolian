@@ -1,4 +1,7 @@
 {
   "navigationBarTitleText": "体态分析",
-  "usingComponents": {}
+  "usingComponents": {
+    "kb-score": "/components/kb-score/index",
+    "kb-radar": "/components/kb-radar/index"
+  }
 }
