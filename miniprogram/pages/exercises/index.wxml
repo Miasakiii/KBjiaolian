@@ -4,7 +4,7 @@
   <view class="search-bar">
     <view class="search-input-wrap">
       <view class="search-icon-wrap">
-        <text class="search-icon-char">○</text>
+        <image src="/assets/icons/st-info.svg" mode="aspectFit" class="search-icon-img" />
       </view>
       <input
         class="search-input"
@@ -58,7 +58,7 @@
   <!-- 空状态 -->
   <view class="empty-state" wx:else>
     <view class="empty-icon">
-      <text style="font-size: 40rpx; color: #22c55e;">○</text>
+      <image src="/assets/icons/st-info.svg" mode="aspectFit" style="width:80rpx;height:80rpx;opacity:0.4" />
     </view>
     <text class="empty-text">没有找到相关动作</text>
   </view>

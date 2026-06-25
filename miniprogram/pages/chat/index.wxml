@@ -2,7 +2,7 @@
 <view class="page-container">
   <view class="login-prompt" wx:if="{{!isLoggedIn}}">
     <view class="login-icon-wrap">
-      <text class="login-icon-char">!</text>
+      <image src="/assets/icons/st-info.svg" mode="aspectFit" class="login-icon-img" />
     </view>
     <text class="lp-text">登录后可使用 AI 对话</text>
     <button class="btn-primary lp-btn" bindtap="onTapLogin">去登录</button>

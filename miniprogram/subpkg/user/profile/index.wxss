@@ -1,7 +1,7 @@
 /* subpkg/user/profile/index.wxss */
 .page-container { min-height: 100vh; background: #f8fafb; padding-bottom: 40rpx; }
 .profile-header {
-  background: linear-gradient(160deg, #22c55e 0%, #059669 100%);
+  background: linear-gradient(160deg, #0f766e 0%, #0d5a54 100%);
   padding: 60rpx 40rpx 48rpx; display: flex; flex-direction: column;
   align-items: center; border-radius: 0 0 48rpx 48rpx;
 }
@@ -19,10 +19,10 @@
   width: 56rpx; height: 56rpx; border-radius: 50%;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.mi-icon-green { background: #dcfce7; }
+.mi-icon-green { background: #ccfbf1; }
 .mi-icon-red { background: #fef2f2; }
 .mi-icon-char { font-size: 24rpx; font-weight: 700; }
-.mi-icon-green .mi-icon-char { color: #16a34a; }
+.mi-icon-green .mi-icon-char { color: #0d5a54; }
 .mi-icon-red .mi-icon-char { color: #ef4444; }
 .mi-label { flex: 1; font-size: 28rpx; font-weight: 500; color: #111827; }
 .mi-arrow-char { font-size: 32rpx; color: #d1d5db; font-weight: 300; }
