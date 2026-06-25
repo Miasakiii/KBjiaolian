@@ -12,7 +12,7 @@ Page({
       const list = (res.data || []).map(item => ({
         ...item,
         dateStr: this.formatDate(item.createdAt),
-        keyDims: (item.dimensions || []).slice(0, 3),
+        keyDims: (item.dimensions || []).slice(0, 3).map(d => (d.name ? d.name : d)),
       }));
       this.setData({ list });
     } catch (err) { /* error shown by request.js */ }
