@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/analysis_provider.dart';
+import '../theme/kb_colors.dart';
 import '../widgets/analyze/score_card.dart';
 import '../widgets/analyze/radar_chart.dart';
 import '../widgets/analyze/suggestion_list.dart';
@@ -94,7 +95,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
             height: 300,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              color: Colors.green.shade50,
+              color: KbColors.brandSoft,
             ),
             child: _imageFile != null
                 ? ClipRRect(
@@ -104,28 +105,28 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                       fit: BoxFit.cover,
                     ),
                   )
-                : Center(
+                : const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
                           Icons.camera_alt_outlined,
                           size: 64,
-                          color: Colors.green.shade300,
+                          color: KbColors.text3,
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16),
                         Text(
                           '拍照或上传体态照片',
                           style: TextStyle(
-                            color: Colors.green.shade600,
+                            color: KbColors.text2,
                             fontSize: 16,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 8),
                         Text(
                           '支持 JPG、PNG 格式',
                           style: TextStyle(
-                            color: Colors.green.shade400,
+                            color: KbColors.text3,
                             fontSize: 12,
                           ),
                         ),
@@ -172,16 +173,16 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
     return Consumer<AnalysisProvider>(
       builder: (context, provider, _) {
         if (provider.isAnalyzing) {
-          return Card(
+          return const Card(
             child: Padding(
-              padding: const EdgeInsets.all(32),
+              padding: EdgeInsets.all(32),
               child: Column(
                 children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 16),
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
                   Text(
                     'AI 正在分析体态...',
-                    style: TextStyle(color: Colors.green.shade700),
+                    style: TextStyle(color: KbColors.text2),
                   ),
                 ],
               ),
@@ -191,25 +192,25 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
 
         final result = provider.currentResult;
         if (result == null) {
-          return Card(
+          return const Card(
             child: Padding(
-              padding: const EdgeInsets.all(32),
+              padding: EdgeInsets.all(32),
               child: Column(
                 children: [
-                  Icon(Icons.insights, size: 48, color: Colors.green.shade200),
-                  const SizedBox(height: 16),
+                  Icon(Icons.insights, size: 48, color: KbColors.text3),
+                  SizedBox(height: 16),
                   Text(
                     '等待上传照片',
                     style: TextStyle(
-                      color: Colors.green.shade700,
+                      color: KbColors.text2,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8),
                   Text(
                     '上传后 AI 将自动分析体态',
-                    style: TextStyle(color: Colors.green.shade500),
+                    style: TextStyle(color: KbColors.text3),
                   ),
                 ],
               ),
@@ -234,12 +235,12 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
                     children: [
                       Row(
                         children: [
-                          const Text('📝', style: TextStyle(fontSize: 20)),
+                          const Icon(Icons.description, size: 20, color: KbColors.brand),
                           const SizedBox(width: 8),
                           Text(
                             '分析总结',
                             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.bold,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                         ],
