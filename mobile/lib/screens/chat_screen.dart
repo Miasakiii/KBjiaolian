@@ -2,6 +2,7 @@
 import 'package:provider/provider.dart';
 
 import '../providers/chat_provider.dart';
+import '../theme/kb_colors.dart';
 
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
@@ -170,7 +171,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: KbColors.surface,
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: 0.05),
@@ -193,7 +194,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         borderSide: BorderSide.none,
                       ),
                       filled: true,
-                      fillColor: Colors.grey.shade100,
+                      fillColor: KbColors.surface2,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 20,
                         vertical: 12,
@@ -229,26 +230,26 @@ class _ChatScreenState extends State<ChatScreen> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: KbColors.brandSoft,
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Row(
+        child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.smart_toy, size: 16, color: Colors.white),
-            const SizedBox(width: 8),
+            Icon(Icons.smart_toy, size: 16, color: KbColors.brand),
+            SizedBox(width: 8),
             SizedBox(
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
                 strokeWidth: 2,
-                color: Colors.grey.shade400,
+                color: KbColors.text3,
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8),
             Text(
               '思考中...',
-              style: TextStyle(color: Colors.grey.shade600),
+              style: TextStyle(color: KbColors.text2),
             ),
           ],
         ),
@@ -278,7 +279,7 @@ class _MessageBubble extends StatelessWidget {
           maxWidth: MediaQuery.of(context).size.width * 0.8,
         ),
         decoration: BoxDecoration(
-          color: isUser ? Theme.of(context).colorScheme.primary : Colors.grey.shade100,
+          color: isUser ? Theme.of(context).colorScheme.primary : KbColors.brandSoft,
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -290,16 +291,16 @@ class _MessageBubble extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (!isUser) ...[
-              Row(
+              const Row(
                 children: [
-                  const Icon(Icons.smart_toy, size: 16, color: Colors.white),
-                  const SizedBox(width: 8),
+                  Icon(Icons.smart_toy, size: 16, color: KbColors.brand),
+                  SizedBox(width: 8),
                   Text(
                     'KB教练',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade600,
+                      color: KbColors.text2,
                     ),
                   ),
                 ],
@@ -309,7 +310,7 @@ class _MessageBubble extends StatelessWidget {
             Text(
               message.content,
               style: TextStyle(
-                color: isUser ? Colors.white : Colors.black87,
+                color: isUser ? Colors.white : KbColors.text1,
                 height: 1.5,
               ),
             ),
@@ -318,7 +319,7 @@ class _MessageBubble extends StatelessWidget {
               '${message.timestamp.hour.toString().padLeft(2, '0')}:${message.timestamp.minute.toString().padLeft(2, '0')}',
               style: TextStyle(
                 fontSize: 10,
-                color: isUser ? Colors.white70 : Colors.grey.shade500,
+                color: isUser ? Colors.white70 : KbColors.text3,
               ),
             ),
           ],
@@ -342,8 +343,8 @@ class _QuickQuestion extends StatelessWidget {
     return ActionChip(
       label: Text(question),
       onPressed: onTap,
-      backgroundColor: Colors.white,
-      side: BorderSide(color: Colors.green.shade200),
+      backgroundColor: KbColors.surface,
+      side: const BorderSide(color: KbColors.lineSoft),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),

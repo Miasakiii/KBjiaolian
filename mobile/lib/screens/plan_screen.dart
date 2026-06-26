@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../providers/plan_provider.dart';
 import '../providers/analysis_provider.dart';
 import '../providers/workout_provider.dart';
+import '../theme/kb_colors.dart';
 
 class PlanScreen extends StatefulWidget {
   const PlanScreen({super.key});
@@ -60,7 +61,7 @@ class _PlanScreenState extends State<PlanScreen> {
             Text(
               '训练偏好',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 16),
@@ -293,16 +294,16 @@ class _PlanScreenState extends State<PlanScreen> {
       builder: (context, provider, _) {
         final plan = provider.currentPlan;
         if (plan == null) {
-          return Card(
+          return const Card(
             child: Padding(
-              padding: const EdgeInsets.all(32),
+              padding: EdgeInsets.all(32),
               child: Column(
                 children: [
-                  Icon(Icons.assignment, size: 48, color: Colors.green.shade200),
-                  const SizedBox(height: 16),
+                  Icon(Icons.assignment, size: 48, color: KbColors.text3),
+                  SizedBox(height: 16),
                   Text(
                     '设置偏好后生成训练方案',
-                    style: TextStyle(color: Colors.green.shade600),
+                    style: TextStyle(color: KbColors.text2),
                   ),
                 ],
               ),
@@ -324,7 +325,7 @@ class _PlanScreenState extends State<PlanScreen> {
                     Text(
                       plan.name.isNotEmpty ? plan.name : '训练方案',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -378,8 +379,8 @@ class _ChoiceChip extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelected(),
-      selectedColor: Colors.green.shade100,
-      checkmarkColor: Colors.green,
+      selectedColor: KbColors.brandSoft,
+      checkmarkColor: KbColors.brand,
     );
   }
 }

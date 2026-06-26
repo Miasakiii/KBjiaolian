@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
+import '../theme/kb_colors.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -95,13 +96,11 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF16a34a), Color(0xFF15803d)],
-                    ),
+                    color: KbColors.brand,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF16a34a).withValues(alpha: 0.3),
+                        color: KbColors.brand.withValues(alpha: 0.16),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
@@ -119,16 +118,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 'KB教练',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF166534),
+                  fontWeight: FontWeight.w600,
+                  color: KbColors.brand,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 _isRegister ? '创建账号开始健身之旅' : '登录你的账号',
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: Colors.green.shade600,
+                style: const TextStyle(
+                  color: KbColors.brand,
                   fontSize: 16,
                 ),
               ),
@@ -195,7 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         auth.error!,
-                        style: const TextStyle(color: Colors.red, fontSize: 14),
+                        style: const TextStyle(color: KbColors.accentWarn, fontSize: 14),
                         textAlign: TextAlign.center,
                       ),
                     );
@@ -238,7 +237,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   Text(
                     _isRegister ? '已有账号？' : '没有账号？',
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: const TextStyle(color: KbColors.text2),
                   ),
                   TextButton(
                     onPressed: () {
@@ -256,9 +255,9 @@ class _LoginScreenState extends State<LoginScreen> {
               // 跳过登录
               TextButton(
                 onPressed: () => context.go('/'),
-                child: Text(
+                child: const Text(
                   '先体验一下',
-                  style: TextStyle(color: Colors.grey.shade500),
+                  style: TextStyle(color: KbColors.text3),
                 ),
               ),
             ],
