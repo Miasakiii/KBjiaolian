@@ -163,7 +163,7 @@ export async function generatePaymentParams(order, platform = 'miniapp', openid)
       // 开发环境返回 mock 支付地址
       ...(process.env.NODE_ENV !== 'production' && {
         mockPayUrl: `/api/payment/mock-pay/${order.id}`,
-      })),
+      }),
     };
   }
 
