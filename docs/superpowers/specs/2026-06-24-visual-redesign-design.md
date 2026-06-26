@@ -1,6 +1,6 @@
 # KB 教练 · 新视觉设计系统
 
-> 状态：已确认 · 待写实现计划
+> 状态：已落地 · 跨端验证通过（miniprogram 两轮 + Flutter 全量）
 > 日期：2026-06-24
 > 范围：跨端设计系统规范 + 小程序端参照落地（4 高频屏）
 > 决策来源：brainstorming 视觉伴侣会话（`.superpowers/brainstorm/1404-1782312952/`）
@@ -216,8 +216,8 @@ C 留白的高级感不靠花字体，靠克制字号阶梯 + 大呼吸。minipr
 ## 8. 跨端一致性
 
 - token 三端各写一份（miniprogram CSS 变量 / Flutter ThemeData / Web tailwind config），值统一，以本文档为单一事实来源
-- Flutter：清掉 `Colors.green.shadeXXX`，全用 `#0f766e` 系；重构 `radar_chart.dart` 对齐第 5 节
-- Web：落地页已 polished，App 内页按本规范对齐（第二轮）
+- Flutter：✅ 已清掉 `Colors.green.shadeXXX`，全用 `#0f766e` 系（`KbColors` token）；重构 `radar_chart.dart` 对齐第 5 节
+- Web：落地页已 polished，App 内页按本规范对齐（第二轮，待执行）
 - 图标三端共用同源 SVG
 
 ## 9. 不在本期范围
@@ -228,10 +228,10 @@ C 留白的高级感不靠花字体，靠克制字号阶梯 + 大呼吸。minipr
 
 ## 10. 验收标准
 
-- [ ] `app.wxss` 所有页面颜色引用 token 变量，无硬编码 `#22c55e`/`#ffffff` 等
-- [ ] Flutter 无 `Colors.green.shadeXXX`，主色统一 `#0f766e`
-- [ ] `kb-radar` 两变体按第 5 节渲染，无彩虹图例
-- [ ] 4 屏布局按第 7 节，section 间距 ≥48rpx
-- [ ] 图标全线性 1.8 描边，无 emoji/文字字符占位（`○`/`!` 等）
-- [ ] 动作库按 `pattern`+`targetMuscle` 渲染图标+色标，无单动作图标资源
-- [ ] `--accent-warn` 仅出现在问题点/不达标处
+- [x] `app.wxss` 所有页面颜色引用 token 变量，无硬编码 `#22c55e`/`#ffffff` 等
+- [x] Flutter 无 `Colors.green.shadeXXX`，主色统一 `#0f766e`
+- [x] `kb-radar` 两变体按第 5 节渲染，无彩虹图例
+- [x] 4 屏布局按第 7 节，section 间距 ≥48rpx
+- [x] 图标全线性 1.8 描边，无 emoji/文字字符占位（`○`/`!` 等）
+- [x] 动作库按 `pattern`+`targetMuscle` 渲染图标+色标，无单动作图标资源
+- [x] `--accent-warn` 仅出现在问题点/不达标处

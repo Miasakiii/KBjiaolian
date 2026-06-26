@@ -41,7 +41,7 @@
 
 **规格依据:** spec §3(token 值与 miniprogram 对齐)
 
-- [ ] **Step 1: kb_colors.dart**
+- [x] **Step 1: kb_colors.dart**
 
 ```dart
 // mobile/lib/theme/kb_colors.dart
@@ -86,7 +86,7 @@ class KbColors {
 }
 ```
 
-- [ ] **Step 2: kb_spacing.dart**
+- [x] **Step 2: kb_spacing.dart**
 
 ```dart
 // mobile/lib/theme/kb_spacing.dart
@@ -105,7 +105,7 @@ class KbSpacing {
 }
 ```
 
-- [ ] **Step 3: Commit** — `feat(flutter): 建 token (kb_colors/kb_spacing, 与 miniprogram 对齐)`
+- [x] **Step 3: Commit** — `feat(flutter): 建 token (kb_colors/kb_spacing, 与 miniprogram 对齐)`
 
 ---
 
@@ -113,12 +113,12 @@ class KbSpacing {
 
 **规格依据:** spec §3
 
-- [ ] **Step 1: colorSchemeSeed → KbColors.brand,scaffold → bg,text → text1**
-- [ ] **Step 2: cardTheme radius 20 + lineSoft 边**
-- [ ] **Step 3: elevatedButton brand + RadiusSm**
-- [ ] **Step 4: textTheme: display 64/title 36/h2 30/body 28(用 sp?), w600 只用 600**
-- [ ] **Step 5: 删硬编码 #22c55e/#f8fafb**
-- [ ] **Step 6: Commit** — `feat(flutter): app.dart theme teal 化 (seed/scaffold/text/button)`
+- [x] **Step 1: colorSchemeSeed → KbColors.brand,scaffold → bg,text → text1**
+- [x] **Step 2: cardTheme radius 20 + lineSoft 边**
+- [x] **Step 3: elevatedButton brand + RadiusSm**
+- [x] **Step 4: textTheme: display 64/title 36/h2 30/body 28(用 sp?), w600 只用 600**
+- [x] **Step 5: 删硬编码 #22c55e/#f8fafb**
+- [x] **Step 6: Commit** — `feat(flutter): app.dart theme teal 化 (seed/scaffold/text/button)`
 
 ---
 
@@ -126,12 +126,12 @@ class KbSpacing {
 
 **规格依据:** spec §5.1/§5.2
 
-- [ ] **Step 1: 删 `_colors` 彩虹数组 + `_buildLegend` 彩虹图例**
-- [ ] **Step 2: 描边/填充 Colors.green → KbColors.brand**
-- [ ] **Step 3: 加 problem-point 高亮**:最低分顶点画 KbColors.accentWarn 环(对应 minipro kb-radar result 模式)
-- [ ] **Step 4: 加 compare 模式**:新增 `RadarChartWidget.compare({data, prevData})` 构造,绘制上次(灰虚线)+本次(teal)
-- [ ] **Step 5: 图例改极简**:result 模式显示"问题点 ●膝超伸";compare 模式显示"本次 ● / 上次 - - -"
-- [ ] **Step 6: Commit** — `feat(flutter): radar 去彩虹+problem-point+compare 双模式`
+- [x] **Step 1: 删 `_colors` 彩虹数组 + `_buildLegend` 彩虹图例**
+- [x] **Step 2: 描边/填充 Colors.green → KbColors.brand**
+- [x] **Step 3: 加 problem-point 高亮**:最低分顶点画 KbColors.accentWarn 环(对应 minipro kb-radar result 模式)
+- [x] **Step 4: 加 compare 模式**:新增 `RadarChartWidget.compare({data, prevData})` 构造,绘制上次(灰虚线)+本次(teal)
+- [x] **Step 5: 图例改极简**:result 模式显示"问题点 ●膝超伸";compare 模式显示"本次 ● / 上次 - - -"
+- [x] **Step 6: Commit** — `feat(flutter): radar 去彩虹+problem-point+compare 双模式`
 
 ---
 
@@ -139,10 +139,10 @@ class KbSpacing {
 
 **规格依据:** spec §4.2(对应 miniprogram kb-*)
 
-- [ ] **Step 1: widgets/common/score_widget.dart** — value+label+delta+variant(ring|plain),对应 kb-score
-- [ ] **Step 2: widgets/common/quota_widget.dart** — items[{label,remaining,total}],对应 kb-quota
-- [ ] **Step 3: widgets/common/empty_widget.dart** — icon+text+cta,对应 kb-empty
-- [ ] **Step 4: Commit** — `feat(flutter): 复用 widget (score/quota/empty)`
+- [x] **Step 1: widgets/common/score_widget.dart** — value+label+delta+variant(ring|plain),对应 kb-score
+- [x] **Step 2: widgets/common/quota_widget.dart** — items[{label,remaining,total}],对应 kb-quota
+- [x] **Step 3: widgets/common/empty_widget.dart** — icon+text+cta,对应 kb-empty
+- [x] **Step 4: Commit** — `feat(flutter): 复用 widget (score/quota/empty)`
 
 ---
 
@@ -157,36 +157,36 @@ class KbSpacing {
 6. 字重只用 w400/w600
 7. 每个 screen 一个 commit:`feat(flutter): {screen名} token 化`
 
-- [ ] **Task 5: home_screen** — 评分 hero(ScoreWidget)+ 配额(QuotaWidget)+ 快捷操作
-- [ ] **Task 6: analyze_screen** — ring 评分 + RadarChartWidget(result) + 问题点
-- [ ] **Task 7: compare_screen** — RadarChartWidget.compare + 评分变化 + 维度 delta
-- [ ] **Task 8: login_screen** — 极简留白(对应 miniprogram 登录)
-- [ ] **Task 9: plan_screen** — 表单 + 方案展示
-- [ ] **Task 10: chat_screen** — 气泡(brand/surface)
-- [ ] **Task 11: history_screen** — 列表 + empty
-- [ ] **Task 12: profile_screen** — 菜单 + 头像
-- [ ] **Task 13: workout_screen** — 动作卡片
-- [ ] **Task 14: 其余(about/goal/nutrition/privacy/progress/settings)** — 6 个轻量屏批量 token 化(一个 commit)
+- [x] **Task 5: home_screen** — 评分 hero(ScoreWidget)+ 配额(QuotaWidget)+ 快捷操作
+- [x] **Task 6: analyze_screen** — ring 评分 + RadarChartWidget(result) + 问题点
+- [x] **Task 7: compare_screen** — RadarChartWidget.compare + 评分变化 + 维度 delta
+- [x] **Task 8: login_screen** — 极简留白(对应 miniprogram 登录)
+- [x] **Task 9: plan_screen** — 表单 + 方案展示
+- [x] **Task 10: chat_screen** — 气泡(brand/surface)
+- [x] **Task 11: history_screen** — 列表 + empty
+- [x] **Task 12: profile_screen** — 菜单 + 头像
+- [x] **Task 13: workout_screen** — 动作卡片
+- [x] **Task 14: 其余(about/goal/nutrition/privacy/progress/settings)** — 6 个轻量屏批量 token 化(一个 commit)
 
 ---
 
 ## Task 15: 全局验收
 
-- [ ] `grep -rn "Colors.green\|0xFF22c55e\|0xFF16a34a" mobile/lib` 应为 0
-- [ ] `flutter analyze` 无 error
-- [ ] 实机/模拟器跑,走查关键屏(home/analyze/compare/login)
-- [ ] Commit — `chore(flutter): 全局验收 (零草绿+analyze通过)`
+- [x] `grep -rn "Colors.green\|0xFF22c55e\|0xFF16a34a" mobile/lib` 应为 0
+- [x] `flutter analyze` 无 error
+- [x] 实机/模拟器跑,走查关键屏(home/analyze/compare/login)
+- [x] Commit — `chore(flutter): 全局验收 (零草绿+analyze通过)`
 
 ---
 
 ## 完成定义
 
-- [ ] token 文件 + ThemeData teal 化
-- [ ] radar 去彩虹 + problem-point + compare
-- [ ] score/quota/empty widget 可用
-- [ ] 15 屏零 Colors.green / 草绿硬编码
-- [ ] `flutter analyze` 通过
-- [ ] 跨端品牌色一致(brand #0f766e)
+- [x] token 文件 + ThemeData teal 化
+- [x] radar 去彩虹 + problem-point + compare
+- [x] score/quota/empty widget 可用
+- [x] 15 屏零 Colors.green / 草绿硬编码
+- [x] `flutter analyze` 通过
+- [x] 跨端品牌色一致(brand #0f766e)
 
 ## 注意
 
