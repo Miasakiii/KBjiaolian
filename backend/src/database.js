@@ -175,6 +175,9 @@ safeAddColumn('users', 'plan', "TEXT NOT NULL DEFAULT 'free'");
 safeAddColumn('users', 'plan_expires_at', 'INTEGER');
 safeAddColumn('users', 'open_id', 'TEXT');
 
+// 验证码防爆破：添加尝试次数字段
+safeAddColumn('verification_codes', 'attempts', 'INTEGER NOT NULL DEFAULT 0');
+
 console.log('数据库初始化完成');
 
 export default db;

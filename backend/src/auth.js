@@ -62,11 +62,13 @@ const stmts = {
 
   // 验证码相关
   insertCode: db.prepare('INSERT INTO verification_codes (email, code, type, expires_at) VALUES (?, ?, ?, ?)'),
-  findValidCode: db.prepare(`
+  // 查找当前有效的验证码记录（不校验 code 值，在 JS 层比对以防爆破）
+  findActiveCode: db.prepare(`
     SELECT * FROM verification_codes
-    WHERE email = ? AND code = ? AND type = ? AND used = 0 AND expires_at > ?
+    WHERE email = ? AND type = ? AND used = 0 AND expires_at > ?
     ORDER BY created_at DESC LIMIT 1
   `),
+  incrementAttempts: db.prepare('UPDATE verification_codes SET attempts = attempts + 1 WHERE id = ?'),
   markCodeUsed: db.prepare('UPDATE verification_codes SET used = 1 WHERE id = ?'),
   findRecentCode: db.prepare(`
     SELECT * FROM verification_codes
@@ -142,16 +144,35 @@ export async function sendVerificationCode(req, res) {
 }
 
 // === 验证验证码（不立即标记已用，由调用方在动作成功后调用 markCodeUsed） ===
+const MAX_CODE_ATTEMPTS = 5;
+
 export function verifyCode(email, code, type = 'register') {
   const normalizedEmail = email.toLowerCase().trim();
-  const record = stmts.findValidCode.get(normalizedEmail, code, type, Date.now());
+  const record = stmts.findActiveCode.get(normalizedEmail, type, Date.now());
 
   if (!record) {
     return { valid: false, error: '验证码无效或已过期' };
   }
 
-  // 仅返回 codeId，调用方在动作真正成功后再调用 markCodeUsed
-  return { valid: true, codeId: record.id };
+  // 已达最大尝试次数
+  if (record.attempts >= MAX_CODE_ATTEMPTS) {
+    return { valid: false, error: '验证码错误次数过多，请重新获取' };
+  }
+
+  // 验证码匹配
+  if (record.code === code) {
+    return { valid: true, codeId: record.id };
+  }
+
+  // 验证码错误：递增尝试次数
+  stmts.incrementAttempts.run(record.id);
+  if (record.attempts + 1 >= MAX_CODE_ATTEMPTS) {
+    // 达到上限，锁定该验证码
+    stmts.markCodeUsed.run(record.id);
+    return { valid: false, error: '验证码错误次数过多，请重新获取' };
+  }
+
+  return { valid: false, error: '验证码无效或已过期' };
 }
 
 // 标记验证码已用
@@ -277,11 +298,9 @@ export async function wechatLogin(req, res) {
     // ===== 本地开发 Mock 模式 =====
     // 在 .env 中配置 MOCK_WECHAT_LOGIN=true 即可跳过真实微信 API 调用
     const isMock = process.env.MOCK_WECHAT_LOGIN === 'true';
-    console.log('[wechatLogin] isMock:', isMock, 'MOCK_WECHAT_LOGIN:', process.env.MOCK_WECHAT_LOGIN);
     let openid;
 
     if (isMock) {
-      console.log('[wechatLogin] Mock 模式：使用 code 作为 mock openid');
       openid = `mock_${code}`;
     } else {
       if (!WECHAT_APPID || !WECHAT_APPSECRET) {
@@ -472,8 +491,6 @@ export async function resetPassword(req, res) {
 // === JWT 认证中间件 ===
 export function authMiddleware(req, res, next) {
   const authHeader = req.get('Authorization') || req.headers['authorization'] || req.headers['Authorizaton'];
-  console.log('[authMiddleware] Authorization header present:', !!authHeader);
-  console.log('[authMiddleware] ALL headers:', JSON.stringify(req.headers).substring(0, 200));
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: '请先登录' });
