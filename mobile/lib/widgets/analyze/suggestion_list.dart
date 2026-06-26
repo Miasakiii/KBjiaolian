@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../models/analysis_result.dart';
+import '../../theme/kb_colors.dart';
+import '../../theme/kb_spacing.dart';
 
 class SuggestionList extends StatelessWidget {
   final List<Suggestion> suggestions;
@@ -21,12 +23,12 @@ class SuggestionList extends StatelessWidget {
           children: [
             Row(
               children: [
-                const Text('🎯', style: TextStyle(fontSize: 20)),
+                const Icon(Icons.lightbulb_outline, size: 20, color: KbColors.brand),
                 const SizedBox(width: 8),
                 Text(
                   '改善建议',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -57,11 +59,11 @@ class _SuggestionItem extends StatelessWidget {
   Color get difficultyColor {
     switch (suggestion.difficulty) {
       case '高级':
-        return Colors.red;
+        return KbColors.accentWarn;
       case '中级':
-        return Colors.orange;
+        return KbColors.brand600;
       default:
-        return Colors.green;
+        return KbColors.brand;
     }
   }
 
@@ -71,9 +73,9 @@ class _SuggestionItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.green.shade50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.green.shade100),
+        color: KbColors.brandSoft,
+        borderRadius: BorderRadius.circular(KbSpacing.radiusSm),
+        border: Border.all(color: KbColors.lineSoft),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -84,7 +86,7 @@ class _SuggestionItem extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: Colors.green,
+                  color: KbColors.brand,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Center(
@@ -92,7 +94,7 @@ class _SuggestionItem extends StatelessWidget {
                     index.toString(),
                     style: const TextStyle(
                       color: Colors.white,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       fontSize: 14,
                     ),
                   ),
@@ -112,8 +114,8 @@ class _SuggestionItem extends StatelessWidget {
                     ),
                     Text(
                       suggestion.targetMuscle,
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
+                      style: const TextStyle(
+                        color: KbColors.text2,
                         fontSize: 12,
                       ),
                     ),
@@ -148,18 +150,18 @@ class _SuggestionItem extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             suggestion.description,
-            style: TextStyle(
-              color: Colors.grey.shade700,
+            style: const TextStyle(
+              color: KbColors.text2,
               height: 1.5,
             ),
           ),
           if (suggestion.steps.isNotEmpty) ...[
             const SizedBox(height: 12),
-            Text(
+            const Text(
               '训练步骤',
               style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Colors.green.shade800,
+                color: KbColors.brand600,
                 fontSize: 13,
               ),
             ),
@@ -172,8 +174,8 @@ class _SuggestionItem extends StatelessWidget {
                   children: [
                     Text(
                       '${entry.key + 1}. ',
-                      style: TextStyle(
-                        color: Colors.green.shade600,
+                      style: const TextStyle(
+                        color: KbColors.brand,
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
                       ),
@@ -191,11 +193,11 @@ class _SuggestionItem extends StatelessWidget {
           ],
           if (suggestion.tips.isNotEmpty) ...[
             const SizedBox(height: 12),
-            Text(
+            const Text(
               '训练要点',
               style: TextStyle(
                 fontWeight: FontWeight.w600,
-                color: Colors.green.shade800,
+                color: KbColors.brand600,
                 fontSize: 13,
               ),
             ),
@@ -206,10 +208,10 @@ class _SuggestionItem extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       '• ',
                       style: TextStyle(
-                        color: Colors.green.shade600,
+                        color: KbColors.brand,
                         fontSize: 13,
                       ),
                     ),
@@ -240,13 +242,13 @@ class _InfoChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.green.shade100,
+        color: KbColors.brandSoft,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         label,
-        style: TextStyle(
-          color: Colors.green.shade700,
+        style: const TextStyle(
+          color: KbColors.brand600,
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
