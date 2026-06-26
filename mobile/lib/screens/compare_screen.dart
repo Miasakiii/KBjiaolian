@@ -74,7 +74,7 @@ class _CompareScreenState extends State<CompareScreen> {
                                 '$score',
                                 style: TextStyle(
                                   color: _getScoreColor(score),
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
