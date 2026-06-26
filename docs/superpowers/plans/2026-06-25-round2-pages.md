@@ -35,7 +35,7 @@
 
 **Files:** `subpkg/history/analysis/index.{wxml,wxss,js}`
 
-- [ ] **Step 1: wxml 重写**
+- [x] **Step 1: wxml 重写**
 
 ```xml
 <!--subpkg/history/analysis/index.wxml - 分析历史列表-->
@@ -66,7 +66,7 @@
 
 注意:内层 `wx:for` 用 `wx:for-item="dim"` 避免与外层 `item` 冲突;`text-orange`/`text-red` 改为统一 `text-warn`(spec 铁律:警示橙是唯一非品牌色,不引入 red/orange 两色)。
 
-- [ ] **Step 2: wxss 重写**
+- [x] **Step 2: wxss 重写**
 
 ```css
 /* subpkg/history/analysis/index.wxss */
@@ -82,11 +82,11 @@
 .ah-compare-icon { width: 28rpx; height: 28rpx; }
 ```
 
-- [ ] **Step 3: js 确认 onTapCompare/onGoAnalyze 存在**
+- [x] **Step 3: js 确认 onTapCompare/onGoAnalyze 存在**
 
 读 js 确认 `onTapCompare`/`onGoAnalyze` 方法存在且参数正确(应为 `data-id`)。若 `onTapCompare` 取参用的是 `e.currentTarget.dataset.id` 则 wxml 的 `data-id="{{item.id}}"` 一致。
 
-- [ ] **Step 4: 验证 + Commit**
+- [x] **Step 4: 验证 + Commit**
 
 开发者工具预览,确认卡片样式 + 空态 kb-empty。Commit: `feat(page): 分析历史页重排 (token+kb-empty+评分色阶)`
 
@@ -98,7 +98,7 @@
 
 **Files:** `subpkg/history/workouts/index.{wxml,wxss,js}`
 
-- [ ] **Step 1: wxml 重写**
+- [x] **Step 1: wxml 重写**
 
 ```xml
 <!--subpkg/history/workouts/index.wxml - 训练历史页-->
@@ -130,7 +130,7 @@
 
 注意:`wx:for-list` 是笔误,删除该属性,只留 `wx:if`。修正后:`<view class="record-list" wx:if="{{list.length > 0}}">`。内层 exercises `wx:for` 用 `wx:for-item="ex"` 避免冲突。
 
-- [ ] **Step 2: wxss 重写**
+- [x] **Step 2: wxss 重写**
 
 ```css
 /* subpkg/history/workouts/index.wxss */
@@ -147,7 +147,7 @@
 .wh-arrow { width: 24rpx; height: 24rpx; transform: rotate(90deg); }
 ```
 
-- [ ] **Step 3: 验证 + Commit**
+- [x] **Step 3: 验证 + Commit**
 
 Commit: `feat(page): 训练历史页重排 (token+kb-empty+动作标签)`
 
@@ -159,7 +159,7 @@ Commit: `feat(page): 训练历史页重排 (token+kb-empty+动作标签)`
 
 **Files:** `subpkg/user/pricing/index.{wxml,wxss,js}`
 
-- [ ] **Step 1: wxml 重写**
+- [x] **Step 1: wxml 重写**
 
 ```xml
 <!--subpkg/user/pricing/index.wxml - 套餐定价页-->
@@ -198,7 +198,7 @@ Commit: `feat(page): 训练历史页重排 (token+kb-empty+动作标签)`
 </view>
 ```
 
-- [ ] **Step 2: js 改特性为对象数组**
+- [x] **Step 2: js 改特性为对象数组**
 
 `pages/.../pricing/index.js` data 加:
 ```js
@@ -218,7 +218,7 @@ proFeatures: [
 ],
 ```
 
-- [ ] **Step 3: wxss 重写**
+- [x] **Step 3: wxss 重写**
 
 ```css
 /* subpkg/user/pricing/index.wxss */
@@ -246,7 +246,7 @@ proFeatures: [
 .pricing-btn { margin: var(--sp-5) 0; }
 ```
 
-- [ ] **Step 4: 验证 + Commit**
+- [x] **Step 4: 验证 + Commit**
 
 Commit: `feat(page): 定价页重排 (Pro卡brand-soft强调+线性check图标)`
 
@@ -258,13 +258,13 @@ Commit: `feat(page): 定价页重排 (Pro卡brand-soft强调+线性check图标)`
 
 **Files:** `subpkg/user/payment/index.{wxml,wxss,js}`
 
-- [ ] **Step 1: 读现状 + wxml 重写**
+- [x] **Step 1: 读现状 + wxml 重写**
 
 先读 `payment/index.wxml` 全文确认结构(订单信息/金额/方式/按钮)。重写为 token 版:金额用 `--fs-display` brand,方式项用线性图标,底部 `btn-primary`。
 
-- [ ] **Step 2: wxss 重写** —— 全引 token,移除 `#f8fafb`/`#111827` 等硬编码。
+- [x] **Step 2: wxss 重写** —— 全引 token,移除 `#f8fafb`/`#111827` 等硬编码。
 
-- [ ] **Step 3: 验证 + Commit** —— `feat(page): 付费页重排 (token+金额突出)`
+- [x] **Step 3: 验证 + Commit** —— `feat(page): 付费页重排 (token+金额突出)`
 
 ---
 
@@ -274,15 +274,15 @@ Commit: `feat(page): 定价页重排 (Pro卡brand-soft强调+线性check图标)`
 
 **Files:** `subpkg/user/profile/index.{wxml,wxss,js}`
 
-- [ ] **Step 1: 读现状 + wxml 重写**
+- [x] **Step 1: 读现状 + wxml 重写**
 
 读 `profile/index.wxml` 全文(用户卡/会员状态/菜单组)。菜单图标:体态分析→tab-analyze,训练记录→tab-plan,设置→st-info,关于→st-info,退出→st-close-red。用户卡头像区用 brand-soft 底。
 
-- [ ] **Step 2: wxss 重写** —— 移除残留 `#f3f4f6`/`#111827`,头像/会员 badge 用 token。
+- [x] **Step 2: wxss 重写** —— 移除残留 `#f3f4f6`/`#111827`,头像/会员 badge 用 token。
 
-- [ ] **Step 3: js 补菜单图标字段** —— 若菜单数据是数组,每项加 `icon` 路径。
+- [x] **Step 3: js 补菜单图标字段** —— 若菜单数据是数组,每项加 `icon` 路径。
 
-- [ ] **Step 4: 验证 + Commit** —— `feat(page): 个人页重排 (菜单线性图标+token)`
+- [x] **Step 4: 验证 + Commit** —— `feat(page): 个人页重排 (菜单线性图标+token)`
 
 ---
 
@@ -292,7 +292,7 @@ Commit: `feat(page): 定价页重排 (Pro卡brand-soft强调+线性check图标)`
 
 **Files:** `pages/exercises/index.{wxml,wxss,js}`
 
-- [ ] **Step 1: js 数据加 pattern 字段**
+- [x] **Step 1: js 数据加 pattern 字段**
 
 `EXERCISE_DB` 每项加 `pattern`(推/拉/蹲/髋铰链/核心/拉伸/活动度/呼吸 8 选 1),`group` 已有。映射:
 - 深蹲/弓步蹲/高抬腿 → squat
@@ -302,15 +302,15 @@ Commit: `feat(page): 定价页重排 (Pro卡brand-soft强调+线性check图标)`
 - 臀桥 → hinge
 图标用 `/assets/icons/pat-{{pattern}}.svg`。
 
-- [ ] **Step 2: wxml 卡片图标改 pattern svg**
+- [x] **Step 2: wxml 卡片图标改 pattern svg**
 
 `ec-icon-text {{item.name[0]}}` → `<image src="/assets/icons/pat-{{item.pattern}}.svg" class="ec-icon-img" />`。
 
-- [ ] **Step 3: wxss 重写** —— 卡片用 card-flat,图标容器 brand-soft 圆,筛选 tag active 用 brand。
+- [x] **Step 3: wxss 重写** —— 卡片用 card-flat,图标容器 brand-soft 圆,筛选 tag active 用 brand。
 
-- [ ] **Step 4: 详情弹窗重排** —— ds-header 用 st-close 图标,ds-tips 用 brand dot。
+- [x] **Step 4: 详情弹窗重排** —— ds-header 用 st-close 图标,ds-tips 用 brand dot。
 
-- [ ] **Step 5: 验证 + Commit** —— `feat(page): 动作库页重排 (pattern图标+卡片网格+详情弹窗)`
+- [x] **Step 5: 验证 + Commit** —— `feat(page): 动作库页重排 (pattern图标+卡片网格+详情弹窗)`
 
 ---
 
@@ -320,13 +320,13 @@ Commit: `feat(page): 定价页重排 (Pro卡brand-soft强调+线性check图标)`
 
 **Files:** `pages/plan/index.{wxml,wxss,js}`
 
-- [ ] **Step 1: wxml 表单态重排** —— pf-option/pf-tag active 用 brand-soft + brand,表单用 card。
+- [x] **Step 1: wxml 表单态重排** —— pf-option/pf-tag active 用 brand-soft + brand,表单用 card。
 
-- [ ] **Step 2: wxml 方案态重排** —— day-card 用 card-flat,展开箭头用 st-up rotate,exercise-item 用 brand dot。
+- [x] **Step 2: wxml 方案态重排** —— day-card 用 card-flat,展开箭头用 st-up rotate,exercise-item 用 brand dot。
 
-- [ ] **Step 3: wxss 重写** —— 全引 token,移除 `#f8fafb`/`#111827`/`#dcfce7` 残留(已机械替换过但 class 名旧)。
+- [x] **Step 3: wxss 重写** —— 全引 token,移除 `#f8fafb`/`#111827`/`#dcfce7` 残留(已机械替换过但 class 名旧)。
 
-- [ ] **Step 4: 验证 + Commit** —— `feat(page): 训练方案页重排 (表单+方案两态token化)`
+- [x] **Step 4: 验证 + Commit** —— `feat(page): 训练方案页重排 (表单+方案两态token化)`
 
 ---
 
@@ -336,31 +336,31 @@ Commit: `feat(page): 定价页重排 (Pro卡brand-soft强调+线性check图标)`
 
 **Files:** `pages/chat/index.{wxml,wxss,js}`
 
-- [ ] **Step 1: wxml 重写** —— 空态/头像 `AI`/`我` 文字 → 线性图标(tab-chat for AI, tab-plan or st-info for user)。气泡 msg-ai 用 brand-soft,msg-user 用 brand。typing 动画保留。
+- [x] **Step 1: wxml 重写** —— 空态/头像 `AI`/`我` 文字 → 线性图标(tab-chat for AI, tab-plan or st-info for user)。气泡 msg-ai 用 brand-soft,msg-user 用 brand。typing 动画保留。
 
-- [ ] **Step 2: wxss 重写** —— 气泡圆角 radius,间距 sp-2,输入栏用 surface + line 上边框,send-btn active 用 brand。
+- [x] **Step 2: wxss 重写** —— 气泡圆角 radius,间距 sp-2,输入栏用 surface + line 上边框,send-btn active 用 brand。
 
-- [ ] **Step 3: js 确认 markdown 渲染** —— `utils/markdown.js` 已 teal 化(第一轮),确认 rich-text nodes 正常。
+- [x] **Step 3: js 确认 markdown 渲染** —— `utils/markdown.js` 已 teal 化(第一轮),确认 rich-text nodes 正常。
 
-- [ ] **Step 4: 验证 + Commit** —— `feat(page): AI对话页重排 (气泡token化+线性头像)`
+- [x] **Step 4: 验证 + Commit** —— `feat(page): AI对话页重排 (气泡token化+线性头像)`
 
 ---
 
 ## Task 9: 全局验收
 
-- [ ] **Step 1: 全量 js 语法** —— `for f in pages/*/index.js subpkg/*/*/index.js; do node --check "$f"; done`
-- [ ] **Step 2: 全量硬编码色扫描** —— `grep -rn "#[0-9a-f]\{6\}" pages subpkg --include=*.wxss` 排除 token 定义,确认无残留草绿/旧灰。
-- [ ] **Step 3: 全量字符占位扫描** —— 无 `○`/`!`/`×`/`✓` 当图标。
-- [ ] **Step 4: 实机走查 8 屏** —— 开发者工具逐屏点,确认布局 + 空态 + 交互。
-- [ ] **Step 5: Commit** —— `chore: 第二轮页重构全局验收`
+- [x] **Step 1: 全量 js 语法** —— `for f in pages/*/index.js subpkg/*/*/index.js; do node --check "$f"; done`
+- [x] **Step 2: 全量硬编码色扫描** —— `grep -rn "#[0-9a-f]\{6\}" pages subpkg --include=*.wxss` 排除 token 定义,确认无残留草绿/旧灰。
+- [x] **Step 3: 全量字符占位扫描** —— 无 `○`/`!`/`×`/`✓` 当图标。
+- [x] **Step 4: 实机走查 8 屏** —— 开发者工具逐屏点,确认布局 + 空态 + 交互。
+- [x] **Step 5: Commit** —— `chore: 第二轮页重构全局验收`
 
 ---
 
 ## 完成定义
 
-- [ ] 8 屏 wxml/wxss 按新设计语言重排(非机械换色)
-- [ ] 所有屏颜色引 token,无硬编码草绿/旧灰
-- [ ] 空态统一 kb-empty
-- [ ] 图标全线性 SVG,动作库用 pattern 图标
-- [ ] section 间距 ≥48rpx
-- [ ] js 语法全通过,无 WXML 不兼容表达式
+- [x] 8 屏 wxml/wxss 按新设计语言重排(非机械换色)
+- [x] 所有屏颜色引 token,无硬编码草绿/旧灰
+- [x] 空态统一 kb-empty
+- [x] 图标全线性 SVG,动作库用 pattern 图标
+- [x] section 间距 ≥48rpx
+- [x] js 语法全通过,无 WXML 不兼容表达式
