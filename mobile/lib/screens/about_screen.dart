@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import '../theme/kb_colors.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -18,13 +19,11 @@ class AboutScreen extends StatelessWidget {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF16a34a), Color(0xFF15803d)],
-                ),
+                color: KbColors.brand,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF16a34a).withValues(alpha: 0.3),
+                    color: KbColors.brand.withValues(alpha: 0.16),
                     blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
@@ -38,21 +37,21 @@ class AboutScreen extends StatelessWidget {
             Text(
               'KB教练',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF166534),
+                fontWeight: FontWeight.w600,
+                color: KbColors.brand,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'AI 驱动的健身康复师',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                color: Colors.green.shade600,
+                color: KbColors.brand600,
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               '版本 1.0.0',
-              style: TextStyle(color: Colors.grey.shade500),
+              style: TextStyle(color: KbColors.text3),
             ),
             const SizedBox(height: 32),
 
@@ -66,22 +65,22 @@ class AboutScreen extends StatelessWidget {
                     Text(
                       '产品介绍',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Text(
+                    const Text(
                       'KB教练是一款 AI 驱动的健身康复应用，专为久坐白领、健身新手和体态问题人群设计。',
                       style: TextStyle(
-                        color: Colors.grey.shade700,
+                        color: KbColors.text2,
                         height: 1.6,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    Text(
+                    const Text(
                       '通过先进的 AI 技术，我们提供专业的体态分析、个性化训练方案、饮食指导和智能问答服务，帮助用户科学健身，改善体态，提升生活质量。',
                       style: TextStyle(
-                        color: Colors.grey.shade700,
+                        color: KbColors.text2,
                         height: 1.6,
                       ),
                     ),
@@ -101,7 +100,7 @@ class AboutScreen extends StatelessWidget {
                     Text(
                       '核心功能',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -141,7 +140,7 @@ class AboutScreen extends StatelessWidget {
                     Text(
                       '数据安全',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -189,7 +188,7 @@ class _FeatureItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 24, color: const Color(0xFF22c55e)),
+          Icon(icon, size: 24, color: KbColors.brand),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -201,8 +200,8 @@ class _FeatureItem extends StatelessWidget {
                 ),
                 Text(
                   description,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
+                  style: const TextStyle(
+                    color: KbColors.text2,
                     fontSize: 13,
                   ),
                 ),
@@ -230,8 +229,8 @@ class _SecurityItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       leading: CircleAvatar(
-        backgroundColor: Colors.green.shade50,
-        child: Icon(icon, color: Colors.green),
+        backgroundColor: KbColors.brandSoft,
+        child: Icon(icon, color: KbColors.brand),
       ),
       title: Text(title),
       subtitle: Text(subtitle),
