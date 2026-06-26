@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/workout_provider.dart';
 import '../providers/plan_provider.dart';
+import '../theme/kb_colors.dart';
 
 class WorkoutScreen extends StatelessWidget {
   const WorkoutScreen({super.key});
@@ -66,13 +67,13 @@ class _WorkoutHome extends StatelessWidget {
                   Text(
                     '${provider.totalWorkouts}',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.green,
+                      fontWeight: FontWeight.w600,
+                      color: KbColors.brand,
                     ),
                   ),
-                  Text(
+                  const Text(
                     '总训练次数',
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: TextStyle(color: KbColors.text2),
                   ),
                 ],
               ),
@@ -88,13 +89,13 @@ class _WorkoutHome extends StatelessWidget {
                   Text(
                     '${provider.thisWeekWorkouts}',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+                      fontWeight: FontWeight.w600,
+                      color: KbColors.brand,
                     ),
                   ),
-                  Text(
+                  const Text(
                     '本周训练',
-                    style: TextStyle(color: Colors.grey.shade600),
+                    style: TextStyle(color: KbColors.text2),
                   ),
                 ],
               ),
@@ -116,7 +117,7 @@ class _WorkoutHome extends StatelessWidget {
               padding: const EdgeInsets.all(32),
               child: Column(
                 children: [
-                  Icon(Icons.fitness_center, size: 48, color: Colors.green.shade200),
+                  const Icon(Icons.fitness_center, size: 48, color: KbColors.text3),
                   const SizedBox(height: 16),
                   const Text('请先生成训练方案'),
                   const SizedBox(height: 16),
@@ -143,7 +144,7 @@ class _WorkoutHome extends StatelessWidget {
                 Text(
                   plan.name.isNotEmpty ? plan.name : '训练方案',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -151,10 +152,10 @@ class _WorkoutHome extends StatelessWidget {
                   final day = entry.value;
                   return ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: Colors.green.shade100,
+                      backgroundColor: KbColors.brandSoft,
                       child: Text(
                         '${day['day']}',
-                        style: TextStyle(color: Colors.green.shade800),
+                        style: const TextStyle(color: KbColors.brand600),
                       ),
                     ),
                     title: Text(day['name'] ?? ''),
@@ -183,27 +184,27 @@ class _WorkoutHome extends StatelessWidget {
           Text(
             '训练记录',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 24),
           Center(
             child: Column(
               children: [
-                Icon(Icons.fitness_center, size: 64, color: Colors.grey.shade300),
+                const Icon(Icons.fitness_center, size: 64, color: KbColors.line),
                 const SizedBox(height: 16),
-                Text(
+                const Text(
                   '暂无训练记录',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade600,
+                    color: KbColors.text2,
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
+                const Text(
                   '完成训练后可查看记录',
-                  style: TextStyle(color: Colors.grey.shade500),
+                  style: TextStyle(color: KbColors.text3),
                 ),
                 const SizedBox(height: 16),
                 TextButton(
@@ -223,7 +224,7 @@ class _WorkoutHome extends StatelessWidget {
         Text(
           '训练记录',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 12),
@@ -232,7 +233,7 @@ class _WorkoutHome extends StatelessWidget {
           return Card(
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: Colors.green.shade100,
+                backgroundColor: KbColors.brandSoft,
                 child: Text(
                   '${record.rating}⭐',
                   style: const TextStyle(fontSize: 12),
@@ -294,7 +295,7 @@ class _ActiveWorkoutState extends State<_ActiveWorkout> {
         // 进度指示
         LinearProgressIndicator(
           value: exercises.isEmpty ? 0 : (_currentExerciseIndex + 1) / exercises.length,
-          backgroundColor: Colors.green.shade100,
+          backgroundColor: KbColors.brandSoft,
         ),
 
         // 计时器
@@ -303,7 +304,7 @@ class _ActiveWorkoutState extends State<_ActiveWorkout> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.timer, color: Colors.green),
+              const Icon(Icons.timer, color: KbColors.brand),
               const SizedBox(width: 8),
               StreamBuilder<int>(
                 stream: _timerStream,
@@ -316,7 +317,7 @@ class _ActiveWorkoutState extends State<_ActiveWorkout> {
                   return Text(
                     '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}',
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       fontFamily: 'monospace',
                     ),
                   );
@@ -339,13 +340,13 @@ class _ActiveWorkoutState extends State<_ActiveWorkout> {
                       children: [
                         Text(
                           '动作 ${_currentExerciseIndex + 1}/${exercises.length}',
-                          style: TextStyle(color: Colors.grey.shade600),
+                          style: const TextStyle(color: KbColors.text2),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           currentExercise['name'] ?? '',
                           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -353,8 +354,8 @@ class _ActiveWorkoutState extends State<_ActiveWorkout> {
                         const SizedBox(height: 16),
                         Text(
                           '$completedSets/$totalSets 组完成',
-                          style: TextStyle(
-                            color: Colors.green.shade700,
+                          style: const TextStyle(
+                            color: KbColors.brand600,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -371,10 +372,10 @@ class _ActiveWorkoutState extends State<_ActiveWorkout> {
                   final isCompleted = set['completed'] == true;
 
                   return Card(
-                    color: isCompleted ? Colors.green.shade50 : null,
+                    color: isCompleted ? KbColors.brandSoft : null,
                     child: ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: isCompleted ? Colors.green : Colors.grey.shade300,
+                        backgroundColor: isCompleted ? KbColors.brand : KbColors.line,
                         child: isCompleted
                             ? const Icon(Icons.check, color: Colors.white)
                             : Text('${setIndex + 1}'),
@@ -382,7 +383,7 @@ class _ActiveWorkoutState extends State<_ActiveWorkout> {
                       title: Text('第 ${setIndex + 1} 组'),
                       subtitle: Text('${currentExercise['reps'] ?? '10'} 次'),
                       trailing: isCompleted
-                          ? const Icon(Icons.check_circle, color: Colors.green)
+                          ? const Icon(Icons.check_circle, color: KbColors.brand)
                           : ElevatedButton(
                               onPressed: () {
                                 widget.provider.completeSet(
@@ -423,7 +424,7 @@ class _ActiveWorkoutState extends State<_ActiveWorkout> {
                   child: ElevatedButton(
                     onPressed: _showFinishDialog,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
+                      backgroundColor: KbColors.brand,
                     ),
                     child: const Text('完成训练'),
                   ),
