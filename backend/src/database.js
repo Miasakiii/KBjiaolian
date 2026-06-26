@@ -180,4 +180,35 @@ safeAddColumn('verification_codes', 'attempts', 'INTEGER NOT NULL DEFAULT 0');
 
 console.log('数据库初始化完成');
 
+// === WAL checkpoint 定时器（每 5 分钟） ===
+// 将 WAL 日志合并回主数据库文件，防止 WAL 文件无限增长
+const checkpointTimer = setInterval(() => {
+  try {
+    db.pragma('wal_checkpoint(TRUNCATE)');
+  } catch (err) {
+    console.error('[db] WAL checkpoint 失败:', err.message);
+  }
+}, 5 * 60 * 1000);
+checkpointTimer.unref();
+
+// === 优雅关闭函数 ===
+// 先执行 WAL checkpoint，再关闭数据库连接
+let dbClosed = false;
+export function closeDatabase() {
+  if (dbClosed) return;
+  dbClosed = true;
+  try {
+    db.pragma('wal_checkpoint(TRUNCATE)');
+    console.log('[db] 关闭前 WAL checkpoint 完成');
+  } catch (err) {
+    console.error('[db] 关闭前 WAL checkpoint 失败:', err.message);
+  }
+  try {
+    db.close();
+    console.log('[db] 数据库已关闭');
+  } catch (err) {
+    console.error('[db] 关闭数据库出错:', err.message);
+  }
+}
+
 export default db;
