@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { createApp } from './app.js';
-import db from './database.js';
+import { closeDatabase } from './database.js';
+import './backup.js';
 
 const PORT = process.env.PORT || 3001;
 const app = createApp();
@@ -25,12 +26,7 @@ function shutdown(signal) {
 
   server.close((err) => {
     if (err) console.error('关闭 HTTP 服务出错:', err.message);
-    try {
-      db.close();
-      console.log('数据库已关闭');
-    } catch (e) {
-      console.error('关闭数据库出错:', e.message);
-    }
+    closeDatabase();
     clearTimeout(forceExitTimer);
     process.exit(err ? 1 : 0);
   });
