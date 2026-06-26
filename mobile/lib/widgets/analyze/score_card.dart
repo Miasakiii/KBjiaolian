@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/analysis_result.dart';
+import '../../theme/kb_colors.dart';
 
 class ScoreCard extends StatelessWidget {
   final int score;
@@ -13,9 +14,8 @@ class ScoreCard extends StatelessWidget {
   });
 
   Color get scoreColor {
-    if (score >= 80) return Colors.green;
-    if (score >= 60) return Colors.orange;
-    return Colors.red;
+    if (score >= 80) return KbColors.brand;
+    return KbColors.accentWarn;
   }
 
   String get scoreLabel {
@@ -39,8 +39,8 @@ class ScoreCard extends StatelessWidget {
                 Text(
                   '体态评分',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF166534),
+                    fontWeight: FontWeight.w600,
+                    color: KbColors.brand,
                   ),
                 ),
                 Container(
@@ -91,17 +91,15 @@ class ScoreCard extends StatelessWidget {
                   Color chipColor;
                   switch (issue.severity) {
                     case 'severe':
-                      chipColor = Colors.red;
-                      break;
                     case 'moderate':
-                      chipColor = Colors.orange;
+                      chipColor = KbColors.accentWarn;
                       break;
                     case 'mild':
-                      chipColor = Colors.yellow.shade700;
+                      chipColor = KbColors.brand;
                       break;
                     default:
                       // 未知 severity 用灰色，区别于 mild
-                      chipColor = Colors.grey;
+                      chipColor = KbColors.text3;
                   }
 
                   return Chip(
