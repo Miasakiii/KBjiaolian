@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/nutrition_provider.dart';
+import '../theme/kb_colors.dart';
 
 class NutritionScreen extends StatefulWidget {
   const NutritionScreen({super.key});
@@ -85,7 +86,7 @@ class _NutritionScreenState extends State<NutritionScreen> {
             Text(
               '选择餐次',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(height: 12),
@@ -138,22 +139,22 @@ class _NutritionScreenState extends State<NutritionScreen> {
             height: 200,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(16),
-              color: Colors.green.shade50,
+              color: KbColors.brandSoft,
             ),
             child: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.restaurant,
                     size: 48,
-                    color: Colors.green.shade300,
+                    color: KbColors.brand,
                   ),
                   const SizedBox(height: 16),
-                  Text(
+                  const Text(
                     '拍照识别食物',
                     style: TextStyle(
-                      color: Colors.green.shade600,
+                      color: KbColors.brand600,
                       fontSize: 16,
                     ),
                   ),
@@ -200,12 +201,12 @@ class _NutritionScreenState extends State<NutritionScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.restaurant, size: 20, color: Color(0xFF22c55e)),
+                    const Icon(Icons.restaurant, size: 20, color: KbColors.brand),
                     const SizedBox(width: 8),
                     Text(
                       '今日营养',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -218,25 +219,25 @@ class _NutritionScreenState extends State<NutritionScreen> {
                       label: '热量',
                       value: '${nutrition['calories']}',
                       unit: 'kcal',
-                      color: Colors.orange,
+                      color: KbColors.brand,
                     ),
                     _NutritionItem(
                       label: '蛋白质',
                       value: '${nutrition['protein']}',
                       unit: 'g',
-                      color: Colors.blue,
+                      color: KbColors.brand,
                     ),
                     _NutritionItem(
                       label: '碳水',
                       value: '${nutrition['carbs']}',
                       unit: 'g',
-                      color: Colors.green,
+                      color: KbColors.brand,
                     ),
                     _NutritionItem(
                       label: '脂肪',
                       value: '${nutrition['fat']}',
                       unit: 'g',
-                      color: Colors.red,
+                      color: KbColors.brand,
                     ),
                   ],
                 ),
@@ -252,16 +253,16 @@ class _NutritionScreenState extends State<NutritionScreen> {
     return Consumer<NutritionProvider>(
       builder: (context, provider, _) {
         if (provider.isAnalyzing) {
-          return Card(
+          return const Card(
             child: Padding(
-              padding: const EdgeInsets.all(32),
+              padding: EdgeInsets.all(32),
               child: Column(
                 children: [
-                  const CircularProgressIndicator(),
-                  const SizedBox(height: 16),
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
                   Text(
                     'AI 正在识别食物...',
-                    style: TextStyle(color: Colors.green.shade700),
+                    style: TextStyle(color: KbColors.brand600),
                   ),
                 ],
               ),
@@ -271,23 +272,23 @@ class _NutritionScreenState extends State<NutritionScreen> {
 
         final analysis = provider.currentAnalysis;
         if (analysis == null) {
-          return Center(
+          return const Center(
             child: Column(
               children: [
-                Icon(Icons.restaurant, size: 64, color: Colors.grey.shade300),
-                const SizedBox(height: 16),
+                Icon(Icons.restaurant, size: 64, color: KbColors.line),
+                SizedBox(height: 16),
                 Text(
                   '暂无饮食记录',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade600,
+                    color: KbColors.text2,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8),
                 Text(
                   '拍照识别食物后可查看记录',
-                  style: TextStyle(color: Colors.grey.shade500),
+                  style: TextStyle(color: KbColors.text3),
                 ),
               ],
             ),
@@ -305,19 +306,19 @@ class _NutritionScreenState extends State<NutritionScreen> {
                 Text(
                   '识别结果',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 12),
                 ...foods.whereType<Map>().map((food) {
                   final calories = food['calories'];
                   return ListTile(
-                    leading: const Icon(Icons.restaurant_menu, size: 24, color: Color(0xFF22c55e)),
+                    leading: const Icon(Icons.restaurant_menu, size: 24, color: KbColors.brand),
                     title: Text(food['name']?.toString() ?? ''),
                     subtitle: Text(food['portion']?.toString() ?? ''),
                     trailing: Text(
                       calories != null ? '$calories kcal' : '--',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   );
                 }),
@@ -353,8 +354,8 @@ class _MealChip extends StatelessWidget {
         label: Text(label),
         selected: selected,
         onSelected: (_) => onTap(),
-        selectedColor: Colors.green.shade100,
-        checkmarkColor: Colors.green,
+        selectedColor: KbColors.brandSoft,
+        checkmarkColor: KbColors.brand,
       ),
     );
   }
@@ -381,15 +382,15 @@ class _NutritionItem extends StatelessWidget {
           '$value$unit',
           style: TextStyle(
             fontSize: 20,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: color,
           ),
         ),
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 12,
-            color: Colors.grey.shade600,
+            color: KbColors.text2,
           ),
         ),
       ],
