@@ -55,7 +55,7 @@ class ScoreCard extends StatelessWidget {
                         score.toString(),
                         style: TextStyle(
                           fontSize: 32,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                           color: scoreColor,
                         ),
                       ),
