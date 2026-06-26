@@ -6,6 +6,15 @@ process.env.JWT_SECRET = 'test-secret-key-for-auth-comprehensive';
 
 // 模拟数据库
 const mockUsers = new Map();
+const mockCodeRecord = {
+  id: 1,
+  email: 'test@example.com',
+  code: '123456',
+  type: 'register',
+  used: 0,
+  expires_at: Date.now() + 300000,
+  attempts: 0,
+};
 const mockStmts = {
   findUserByEmail: {
     get: jest.fn((email) => mockUsers.get(email)),
@@ -23,18 +32,38 @@ const mockStmts = {
       mockUsers.set(email, { id, email, password, nickname, created_at: Date.now() });
     }),
   },
+  findActiveCode: {
+    get: jest.fn(() => ({ ...mockCodeRecord })),
+  },
+  markCodeUsed: {
+    run: jest.fn(),
+  },
 };
 
 jest.unstable_mockModule('../src/database.js', () => ({
   default: {
     prepare: jest.fn((sql) => {
-      if (sql.includes('WHERE email')) return mockStmts.findUserByEmail;
-      if (sql.includes('WHERE id')) return mockStmts.findUserById;
-      if (sql.includes('INSERT')) return mockStmts.createUser;
+      // 验证码相关查询
+      if (sql.includes('verification_codes') && sql.includes('SELECT')) return mockStmts.findActiveCode;
+      if (sql.includes('verification_codes') && sql.includes('UPDATE')) return mockStmts.markCodeUsed;
+      if (sql.includes('verification_codes') && sql.includes('DELETE')) return { run: jest.fn() };
+      if (sql.includes('verification_codes') && sql.includes('INSERT')) return { run: jest.fn() };
+      // 用户相关查询
+      if (sql.includes('users') && sql.includes('WHERE email')) return mockStmts.findUserByEmail;
+      if (sql.includes('users') && sql.includes('WHERE id')) return mockStmts.findUserById;
+      if (sql.includes('users') && sql.includes('INSERT')) return mockStmts.createUser;
       return { get: jest.fn(), run: jest.fn() };
     }),
   },
 }));
+
+// 创建带 get 方法的 mock req（模拟 Express req.get）
+function createMockReq(headers = {}) {
+  return {
+    headers,
+    get: jest.fn((name) => headers[name.toLowerCase()] || headers[name]),
+  };
+}
 
 // 动态导入模块
 const authModule = await import('../src/auth.js');
@@ -47,7 +76,7 @@ describe('Auth Module - Comprehensive Tests', () => {
 
   describe('authMiddleware', () => {
     it('应该拒绝没有 Authorization 头的请求', () => {
-      const req = { headers: {} };
+      const req = createMockReq({});
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
@@ -61,7 +90,7 @@ describe('Auth Module - Comprehensive Tests', () => {
     });
 
     it('应该拒绝不以 Bearer 开头的 Authorization 头', () => {
-      const req = { headers: { authorization: 'Basic token123' } };
+      const req = createMockReq({ authorization: 'Basic token123' });
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
@@ -75,7 +104,7 @@ describe('Auth Module - Comprehensive Tests', () => {
     });
 
     it('应该拒绝无效的 JWT token', () => {
-      const req = { headers: { authorization: 'Bearer invalid-token' } };
+      const req = createMockReq({ authorization: 'Bearer invalid-token' });
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
@@ -88,14 +117,14 @@ describe('Auth Module - Comprehensive Tests', () => {
       expect(next).not.toHaveBeenCalled();
     });
 
-    it('应该拒绝过期的 JWT token', () => {
+    it('应该拒绝过期的 JWT token', (done) => {
       const expiredToken = jwt.sign(
         { userId: 'user123' },
         process.env.JWT_SECRET,
         { expiresIn: '0s' }
       );
 
-      const req = { headers: { authorization: `Bearer ${expiredToken}` } };
+      const req = createMockReq({ authorization: `Bearer ${expiredToken}` });
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
@@ -108,6 +137,7 @@ describe('Auth Module - Comprehensive Tests', () => {
 
         expect(res.status).toHaveBeenCalledWith(401);
         expect(next).not.toHaveBeenCalled();
+        done();
       }, 100);
     });
 
@@ -118,7 +148,7 @@ describe('Auth Module - Comprehensive Tests', () => {
         { expiresIn: '1h' }
       );
 
-      const req = { headers: { authorization: `Bearer ${validToken}` } };
+      const req = createMockReq({ authorization: `Bearer ${validToken}` });
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
@@ -139,6 +169,7 @@ describe('Auth Module - Comprehensive Tests', () => {
           email: 'test@example.com',
           password: 'password123',
           nickname: '测试用户',
+          code: '123456',
         },
       };
       const res = {

@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import db from './database.js';
+import { sendVerificationEmail } from './email.js';
 
 // JWT_SECRET 必须从环境变量读取，不允许硬编码后备值（安全要求）
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -115,20 +116,8 @@ export async function sendVerificationCode(req, res) {
     const expiresAt = Date.now() + CODE_EXPIRE_MS;
     stmts.insertCode.run(normalizedEmail, code, type, expiresAt);
 
-    // TODO: 接入真实邮件服务（Resend / QQ邮箱 SMTP / SendGrid）
-    // 开发模式打印验证码到控制台；生产环境只记录发送事件不打印验证码本身
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('');
-      console.log('='.repeat(50));
-      console.log(`📧 验证码 [${type === 'register' ? '注册' : '重置密码'}]`);
-      console.log(`   邮箱: ${normalizedEmail}`);
-      console.log(`   验证码: ${code}`);
-      console.log(`   有效期: 5 分钟`);
-      console.log('='.repeat(50));
-      console.log('');
-    } else {
-      console.log(`📧 验证码已发送 [${type === 'register' ? '注册' : '重置密码'}] 邮箱:${normalizedEmail}`);
-    }
+    // 发送验证码邮件（开发模式打印到控制台，生产模式通过 Resend 真实发送）
+    await sendVerificationEmail(normalizedEmail, code, type);
 
     res.json({
       message: '验证码已发送',
@@ -418,19 +407,8 @@ export async function forgotPassword(req, res) {
     const expiresAt = Date.now() + CODE_EXPIRE_MS;
     stmts.insertCode.run(normalizedEmail, code, 'reset', expiresAt);
 
-    // TODO: 接入真实邮件服务
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('');
-      console.log('='.repeat(50));
-      console.log(`📧 重置密码验证码`);
-      console.log(`   邮箱: ${normalizedEmail}`);
-      console.log(`   验证码: ${code}`);
-      console.log(`   有效期: 5 分钟`);
-      console.log('='.repeat(50));
-      console.log('');
-    } else {
-      console.log(`📧 重置密码验证码已发送 邮箱:${normalizedEmail}`);
-    }
+    // 发送重置密码验证码邮件
+    await sendVerificationEmail(normalizedEmail, code, 'reset');
 
     res.json({
       message: '如果该邮箱已注册，验证码已发送',
