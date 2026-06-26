@@ -14,6 +14,7 @@ import '../providers/workout_provider.dart';
 import '../providers/nutrition_provider.dart';
 import '../providers/chat_provider.dart';
 import '../services/storage_service.dart';
+import '../theme/kb_colors.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -77,7 +78,7 @@ class SettingsScreen extends StatelessWidget {
                 onTap: () {
                   _showClearDataDialog(context);
                 },
-                textColor: Colors.red,
+                textColor: KbColors.danger,
               ),
             ],
           ),
@@ -96,7 +97,7 @@ class SettingsScreen extends StatelessWidget {
                       title: '退出登录',
                       subtitle: auth.email,
                       onTap: () => _showLogoutDialog(context, auth),
-                      textColor: Colors.red,
+                      textColor: KbColors.danger,
                     );
                   } else {
                     return _buildListTile(
@@ -152,13 +153,11 @@ class SettingsScreen extends StatelessWidget {
           margin: const EdgeInsets.all(16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF16a34a), Color(0xFF15803d)],
-            ),
+            color: KbColors.brand,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF16a34a).withValues(alpha: 0.3),
+                color: KbColors.brand.withValues(alpha: 0.16),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -187,7 +186,7 @@ class SettingsScreen extends StatelessWidget {
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     if (auth.email != null)
@@ -231,10 +230,10 @@ class SettingsScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
           child: Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Colors.green.shade700,
+              color: KbColors.brand600,
             ),
           ),
         ),
@@ -257,7 +256,7 @@ class SettingsScreen extends StatelessWidget {
     Color? textColor,
   }) {
     return ListTile(
-      leading: Icon(icon, color: textColor ?? Colors.green),
+      leading: Icon(icon, color: textColor ?? KbColors.brand),
       title: Text(
         title,
         style: TextStyle(color: textColor),
@@ -354,7 +353,7 @@ class SettingsScreen extends StatelessWidget {
               );
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: KbColors.danger,
             ),
             child: const Text('确定清空'),
           ),
@@ -383,7 +382,7 @@ class SettingsScreen extends StatelessWidget {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: KbColors.danger,
             ),
             child: const Text('退出'),
           ),
