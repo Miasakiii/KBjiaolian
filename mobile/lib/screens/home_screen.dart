@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../providers/analysis_provider.dart';
 import '../providers/workout_provider.dart';
 import '../providers/nutrition_provider.dart';
+import '../theme/kb_colors.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -62,13 +63,11 @@ class HomeScreen extends StatelessWidget {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF22c55e), Color(0xFF059669)],
-            ),
+            color: KbColors.brand,
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF22c55e).withValues(alpha: 0.25),
+                color: KbColors.brand.withValues(alpha: 0.16),
                 blurRadius: 16,
                 offset: const Offset(0, 6),
               ),
@@ -89,17 +88,17 @@ class HomeScreen extends StatelessWidget {
                 '$greeting！',
                 style: const TextStyle(
                   fontSize: 24,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF111827),
+                  fontWeight: FontWeight.w600,
+                  color: KbColors.text1,
                 ),
               ),
               const SizedBox(height: 2),
-              Text(
+              const Text(
                 '欢迎使用 KB教练',
                 style: TextStyle(
                   fontSize: 14,
-                  color: Colors.green.shade600,
-                  fontWeight: FontWeight.w500,
+                  color: KbColors.brand,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],
@@ -158,8 +157,8 @@ class HomeScreen extends StatelessWidget {
           '快捷操作',
           style: TextStyle(
             fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
+            fontWeight: FontWeight.w600,
+            color: KbColors.text1,
           ),
         ),
         const SizedBox(height: 14),
@@ -209,13 +208,13 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            const Row(
               children: [
-                Icon(Icons.checklist, size: 20, color: Colors.green.shade600),
-                const SizedBox(width: 8),
-                const Text(
+                Icon(Icons.checklist, size: 20, color: KbColors.brand),
+                SizedBox(width: 8),
+                Text(
                   '今日任务',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -252,8 +251,8 @@ class HomeScreen extends StatelessWidget {
           '更多功能',
           style: TextStyle(
             fontSize: 17,
-            fontWeight: FontWeight.w700,
-            color: Color(0xFF111827),
+            fontWeight: FontWeight.w600,
+            color: KbColors.text1,
           ),
         ),
         const SizedBox(height: 14),
@@ -319,29 +318,29 @@ class _StatCard extends StatelessWidget {
         padding: const EdgeInsets.all(14),
         child: Column(
           children: [
-            Icon(icon, size: 24, color: Colors.green.shade500),
+            Icon(icon, size: 24, color: KbColors.brand),
             const SizedBox(height: 10),
             Text(
               value,
               style: const TextStyle(
                 fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF111827),
+                fontWeight: FontWeight.w600,
+                color: KbColors.text1,
               ),
             ),
             const SizedBox(height: 2),
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 12,
-                color: Colors.green.shade600,
-                fontWeight: FontWeight.w500,
+                color: KbColors.brand,
+                fontWeight: FontWeight.w400,
               ),
             ),
             Text(
               subtitle,
               style: const TextStyle(
-                color: Color(0xFF9ca3af),
+                color: KbColors.text3,
                 fontSize: 10,
               ),
             ),
@@ -377,13 +376,11 @@ class _ActionButton extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFF22c55e), Color(0xFF059669)],
-                  ),
+                  color: KbColors.brand,
                   borderRadius: BorderRadius.circular(14),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF22c55e).withValues(alpha: 0.2),
+                      color: KbColors.brand.withValues(alpha: 0.16),
                       blurRadius: 8,
                       offset: const Offset(0, 4),
                     ),
@@ -397,7 +394,7 @@ class _ActionButton extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF111827),
+                  color: KbColors.text1,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -434,7 +431,7 @@ class _TaskItem extends StatelessWidget {
             Icon(
               icon,
               size: 18,
-              color: completed ? Colors.green.shade600 : const Color(0xFF9ca3af),
+              color: completed ? KbColors.brand : KbColors.text3,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -442,16 +439,16 @@ class _TaskItem extends StatelessWidget {
                 title,
                 style: TextStyle(
                   fontSize: 14,
-                  color: completed ? Colors.green.shade600 : const Color(0xFF111827),
+                  color: completed ? KbColors.brand : KbColors.text1,
                   decoration: completed ? TextDecoration.lineThrough : null,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ),
             Icon(
               completed ? Icons.check_circle : Icons.arrow_forward_ios,
               size: 16,
-              color: completed ? Colors.green : const Color(0xFFd1d5db),
+              color: completed ? KbColors.brand : KbColors.line,
             ),
           ],
         ),
@@ -474,18 +471,18 @@ class _FeatureChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ActionChip(
-      avatar: Icon(icon, size: 16, color: Colors.green.shade600),
+      avatar: Icon(icon, size: 16, color: KbColors.brand),
       label: Text(
         label,
         style: const TextStyle(
           fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: Color(0xFF111827),
+          fontWeight: FontWeight.w400,
+          color: KbColors.text1,
         ),
       ),
       onPressed: onTap,
-      backgroundColor: Colors.white,
-      side: const BorderSide(color: Color(0xFFf0f0f0)),
+      backgroundColor: KbColors.surface,
+      side: const BorderSide(color: KbColors.lineSoft),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
