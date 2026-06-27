@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import db from './database.js';
+import logger from './logger.js';
 import { PLANS, upgradePlan } from './subscription.js';
 import {
   isWechatPayConfigured,
@@ -207,7 +208,7 @@ export async function generatePaymentParams(order, platform = 'miniapp', openid)
 
     throw new Error(`不支持的支付平台: ${platform}`);
   } catch (err) {
-    console.error('生成支付参数失败:', err.message);
+    logger.error({ err }, '生成支付参数失败');
     throw err;
   }
 }

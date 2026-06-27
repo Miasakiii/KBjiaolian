@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import logger from './logger.js';
 
 const apiKey = process.env.RESEND_API_KEY;
 const FROM = process.env.MAIL_FROM || 'KB教练 <noreply@kbcoach.app>';
@@ -16,14 +17,7 @@ const resend = apiKey ? new Resend(apiKey) : null;
 export async function sendVerificationEmail(to, code, type) {
   // 开发模式 fallback
   if (!resend || process.env.NODE_ENV !== 'production') {
-    console.log('');
-    console.log('='.repeat(50));
-    console.log(`📧 验证码 [${type === 'register' ? '注册' : '重置密码'}]`);
-    console.log(`   邮箱: ${to}`);
-    console.log(`   验证码: ${code}`);
-    console.log(`   有效期: 5 分钟`);
-    console.log('='.repeat(50));
-    console.log('');
+    logger.info({ to, code, type: type === 'register' ? '注册' : '重置密码' }, '📧 验证码（开发模式）');
     return { dev: true };
   }
 
@@ -41,11 +35,11 @@ export async function sendVerificationEmail(to, code, type) {
   });
 
   if (error) {
-    console.error('[email] Resend 发送失败:', error.message);
+    logger.error({ err: error }, 'Resend 发送失败');
     throw new Error('邮件发送失败');
   }
 
-  console.log(`[email] 验证码已发送至 ${to} [${type}]`);
+  logger.info({ to, type }, '验证码已发送');
 }
 
 /**

@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import logger from './logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -162,11 +163,11 @@ db.exec(`
 function safeAddColumn(table, column, type) {
   try {
     db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
-    console.log(`迁移: ${table}.${column} 已添加`);
+    logger.info({ table, column }, '迁移列已添加');
   } catch (err) {
     // 列已存在，忽略
     if (!err.message.includes('duplicate column')) {
-      console.error(`迁移失败: ${table}.${column}:`, err.message);
+      logger.error({ err, table, column }, '迁移失败');
     }
   }
 }
@@ -178,7 +179,7 @@ safeAddColumn('users', 'open_id', 'TEXT');
 // 验证码防爆破：添加尝试次数字段
 safeAddColumn('verification_codes', 'attempts', 'INTEGER NOT NULL DEFAULT 0');
 
-console.log('数据库初始化完成');
+logger.info('数据库初始化完成');
 
 // === WAL checkpoint 定时器（每 5 分钟） ===
 // 将 WAL 日志合并回主数据库文件，防止 WAL 文件无限增长
@@ -186,7 +187,7 @@ const checkpointTimer = setInterval(() => {
   try {
     db.pragma('wal_checkpoint(TRUNCATE)');
   } catch (err) {
-    console.error('[db] WAL checkpoint 失败:', err.message);
+    logger.error({ err }, 'WAL checkpoint 失败');
   }
 }, 5 * 60 * 1000);
 checkpointTimer.unref();
@@ -199,15 +200,15 @@ export function closeDatabase() {
   dbClosed = true;
   try {
     db.pragma('wal_checkpoint(TRUNCATE)');
-    console.log('[db] 关闭前 WAL checkpoint 完成');
+    logger.info('关闭前 WAL checkpoint 完成');
   } catch (err) {
-    console.error('[db] 关闭前 WAL checkpoint 失败:', err.message);
+    logger.error({ err }, '关闭前 WAL checkpoint 失败');
   }
   try {
     db.close();
-    console.log('[db] 数据库已关闭');
+    logger.info('数据库已关闭');
   } catch (err) {
-    console.error('[db] 关闭数据库出错:', err.message);
+    logger.error({ err }, '关闭数据库出错');
   }
 }
 

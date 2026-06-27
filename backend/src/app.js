@@ -1,4 +1,5 @@
 import express from 'express';
+import logger from './logger.js';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import { analyzePhoto, compareAnalysis } from './analyze.js';
@@ -47,15 +48,15 @@ import {
 
 // 全局兜底未处理的 Promise rejection 与未捕获异常，避免进程崩溃
 process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled Rejection:', reason);
+  logger.error({ reason }, 'Unhandled Rejection');
 });
 process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err.message);
+  logger.error({ err }, 'Uncaught Exception');
 });
 
 // 定时清理过期订单（每 5 分钟）
 setInterval(() => {
-  try { closeExpiredOrders(); } catch (err) { console.error('清理过期订单失败:', err.message); }
+  try { closeExpiredOrders(); } catch (err) { logger.error({ err }, '清理过期订单失败'); }
 }, 5 * 60 * 1000).unref();
 
 export function createApp() {
@@ -133,7 +134,7 @@ export function createApp() {
       const quota = getQuotaStatus(req.userId);
       res.json(quota);
     } catch (err) {
-      console.error('查询配额失败:', err.message);
+      logger.error({ err }, '查询配额失败');
       res.status(500).json({ error: '查询配额失败' });
     }
   });
@@ -164,7 +165,7 @@ export function createApp() {
         },
       });
     } catch (err) {
-      console.error('创建订单失败:', err.message);
+      logger.error({ err }, '创建订单失败');
       if (err.statusCode) {
         return res.status(err.statusCode).json({ error: err.message });
       }
@@ -191,7 +192,7 @@ export function createApp() {
       const paymentParams = await generatePaymentParams(order, platform, openid);
       res.json({ payment: paymentParams });
     } catch (err) {
-      console.error('获取支付参数失败:', err.message);
+      logger.error({ err }, '获取支付参数失败');
       if (err.statusCode) {
         return res.status(err.statusCode).json({ error: err.message });
       }
@@ -217,7 +218,7 @@ export function createApp() {
         created_at: order.created_at,
       });
     } catch (err) {
-      console.error('查询订单失败:', err.message);
+      logger.error({ err }, '查询订单失败');
       res.status(500).json({ error: '查询订单失败' });
     }
   });
@@ -237,7 +238,7 @@ export function createApp() {
         created_at: o.created_at,
       })));
     } catch (err) {
-      console.error('查询订单列表失败:', err.message);
+      logger.error({ err }, '查询订单列表失败');
       res.status(500).json({ error: '查询订单列表失败' });
     }
   });
@@ -265,7 +266,7 @@ export function createApp() {
           },
         });
       } catch (err) {
-        console.error('模拟支付失败:', err.message);
+        logger.error({ err }, '模拟支付失败');
         if (err.statusCode) {
           return res.status(err.statusCode).json({ error: err.message });
         }
@@ -281,7 +282,7 @@ export function createApp() {
 
       // 验证签名
       if (!verifyCallbackSignature(req.headers, bodyStr)) {
-        console.error('微信支付回调签名验证失败');
+        logger.error('微信支付回调签名验证失败');
         return res.status(401).json({ code: 'FAIL', message: '签名验证失败' });
       }
 
@@ -293,26 +294,26 @@ export function createApp() {
         const result = decryptNotification(notification.resource);
         const { out_trade_no, transaction_id, trade_state, amount } = result;
 
-        console.log(`微信支付通知: ${out_trade_no}, 交易号: ${transaction_id}, 状态: ${trade_state}`);
+        logger.info({ out_trade_no, transaction_id, trade_state }, '微信支付通知');
 
         if (trade_state === 'SUCCESS') {
           // 校验金额（防止篡改）
           const order = getOrder(out_trade_no);
           if (order && amount && amount.total !== order.amount) {
-            console.error(`微信支付金额不匹配: 订单 ${order.amount}, 回调 ${amount.total}`);
+            logger.error({ order_amount: order.amount, callback_amount: amount.total }, '微信支付金额不匹配');
             return res.status(400).json({ code: 'FAIL', message: '金额不匹配' });
           }
 
           // 完成订单（幂等）
           completeOrder(out_trade_no, transaction_id);
-          console.log(`订单 ${out_trade_no} 支付成功，套餐已升级`);
+          logger.info({ out_trade_no }, '订单支付成功，套餐已升级');
         }
       }
 
       // 必须返回 200 + SUCCESS，否则微信会重复通知
       res.json({ code: 'SUCCESS', message: '成功' });
     } catch (err) {
-      console.error('微信支付回调处理失败:', err.message);
+      logger.error({ err }, '微信支付回调处理失败');
       res.status(500).json({ code: 'FAIL', message: '处理失败' });
     }
   });
@@ -348,7 +349,7 @@ export function createApp() {
         throw err;
       }
     } catch (err) {
-      console.error('分析失败:', err.message);
+      logger.error({ err }, '分析失败');
       res.status(500).json({ error: '分析失败，请稍后重试' });
     }
   });
@@ -391,7 +392,7 @@ export function createApp() {
         afterDate: afterRecord.created_at
       });
     } catch (err) {
-      console.error('对比分析失败:', err.message);
+      logger.error({ err }, '对比分析失败');
       res.status(500).json({ error: '对比分析失败，请稍后重试' });
     }
   });
@@ -430,7 +431,7 @@ export function createApp() {
         throw err;
       }
     } catch (err) {
-      console.error('生成训练方案失败:', err.message);
+      logger.error({ err }, '生成训练方案失败');
       res.status(500).json({ error: '生成训练方案失败，请稍后重试' });
     }
   });
@@ -481,7 +482,7 @@ export function createApp() {
         throw err;
       }
     } catch (err) {
-      console.error('渐进式方案生成失败:', err.message);
+      logger.error({ err }, '渐进式方案生成失败');
       res.status(500).json({ error: '生成训练方案失败，请稍后重试' });
     }
   });
@@ -502,7 +503,7 @@ export function createApp() {
         totalSessions: workoutHistory.length,
       });
     } catch (err) {
-      console.error('获取训练建议失败:', err.message);
+      logger.error({ err }, '获取训练建议失败');
       res.status(500).json({ error: '获取训练建议失败' });
     }
   });
@@ -537,7 +538,7 @@ export function createApp() {
         throw err;
       }
     } catch (err) {
-      console.error('食物识别失败:', err.message);
+      logger.error({ err }, '食物识别失败');
       res.status(500).json({ error: '食物识别失败，请稍后重试' });
     }
   });
@@ -579,7 +580,7 @@ export function createApp() {
         throw err;
       }
     } catch (err) {
-      console.error('AI 对话失败:', err.message);
+      logger.error({ err }, 'AI 对话失败');
       res.status(500).json({ error: 'AI 对话失败，请稍后重试' });
     }
   });
@@ -667,7 +668,7 @@ export function createApp() {
     } catch (err) {
       // AI 流式失败：补偿释放配额
       if (usageId) releaseQuota(usageId);
-      console.error('流式对话失败:', err.message);
+      logger.error({ err }, '流式对话失败');
       if (headersSent) {
         // 响应头已发送，无法改 status，仅能写入错误事件后结束
         try {

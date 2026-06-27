@@ -12,6 +12,7 @@
  */
 import crypto from 'crypto';
 import fs from 'fs';
+import logger from './logger.js';
 
 // ========== 配置 ==========
 
@@ -115,7 +116,7 @@ export function verifyCallbackSignature(headers, body) {
   const serial = headers['wechatpay-serial'];
 
   if (!timestamp || !nonce || !signature || !serial) {
-    console.error('微信回调签名参数缺失');
+    logger.error('微信回调签名参数缺失');
     return false;
   }
 
@@ -130,7 +131,7 @@ export function verifyCallbackSignature(headers, body) {
     verify.update(message);
     return verify.verify(publicKey, signature, 'base64');
   } catch (err) {
-    console.error('验证微信回调签名失败:', err.message);
+    logger.error({ err }, '验证微信回调签名失败');
     return false;
   }
 }
@@ -195,7 +196,7 @@ async function requestApi(method, path, body = null) {
 
   if (resp.status !== 200) {
     const errMsg = data.message || data.code || '未知错误';
-    console.error(`微信支付 API 错误 [${resp.status}]:`, data);
+    logger.error({ status: resp.status, data }, '微信支付 API 错误');
     throw new Error(`微信支付: ${errMsg}`);
   }
 

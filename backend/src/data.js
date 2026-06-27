@@ -1,5 +1,6 @@
 import db from './database.js';
 import crypto from 'crypto';
+import logger from './logger.js';
 
 // 输入校验上限
 const MAX_IMAGE_PREVIEW_BYTES = 2_000_000; // 单条预览图最大 2MB
@@ -171,7 +172,7 @@ export function saveAnalysisRecord(req, res) {
     res.status(201).json({ id, message: '保存成功' });
   } catch (err) {
     if (err.statusCode) return res.status(err.statusCode).json({ error: err.message });
-    console.error('保存分析记录失败:', err.message);
+    logger.error({ err }, '保存分析记录失败');
     res.status(500).json({ error: '保存失败' });
   }
 }
@@ -230,7 +231,7 @@ export function getAnalysisRecords(req, res) {
 
     res.json(formatted);
   } catch (err) {
-    console.error('获取分析记录失败:', err.message);
+    logger.error({ err }, '获取分析记录失败');
     res.status(500).json({ error: '获取失败' });
   }
 }
@@ -245,7 +246,7 @@ export function deleteAnalysisRecord(req, res) {
     }
     res.json({ message: '删除成功' });
   } catch (err) {
-    console.error('删除分析记录失败:', err.message);
+    logger.error({ err }, '删除分析记录失败');
     res.status(500).json({ error: '删除失败' });
   }
 }
@@ -256,7 +257,7 @@ export function deleteAllAnalysisRecords(req, res) {
     stmts.deleteAllAnalysis.run(userId);
     res.json({ message: '清空成功' });
   } catch (err) {
-    console.error('清空分析记录失败:', err.message);
+    logger.error({ err }, '清空分析记录失败');
     res.status(500).json({ error: '清空失败' });
   }
 }
@@ -318,7 +319,7 @@ export function savePlan(req, res) {
 
     res.status(201).json({ id: planId, message: '保存成功' });
   } catch (err) {
-    console.error('保存训练方案失败:', err.message);
+    logger.error({ err }, '保存训练方案失败');
     res.status(500).json({ error: '保存失败' });
   }
 }
@@ -383,7 +384,7 @@ export function getPlans(req, res) {
 
     res.json(formatted);
   } catch (err) {
-    console.error('获取训练方案失败:', err.message);
+    logger.error({ err }, '获取训练方案失败');
     res.status(500).json({ error: '获取失败' });
   }
 }
@@ -398,7 +399,7 @@ export function deletePlanRecord(req, res) {
     }
     res.json({ message: '删除成功' });
   } catch (err) {
-    console.error('删除训练方案失败:', err.message);
+    logger.error({ err }, '删除训练方案失败');
     res.status(500).json({ error: '删除失败' });
   }
 }
@@ -409,7 +410,7 @@ export function deleteAllPlanRecords(req, res) {
     stmts.deleteAllPlans.run(userId);
     res.json({ message: '清空成功' });
   } catch (err) {
-    console.error('清空训练方案失败:', err.message);
+    logger.error({ err }, '清空训练方案失败');
     res.status(500).json({ error: '清空失败' });
   }
 }
@@ -445,7 +446,7 @@ export function saveWorkoutRecord(req, res) {
 
     res.status(201).json({ id, message: '保存成功' });
   } catch (err) {
-    console.error('保存训练记录失败:', err.message);
+    logger.error({ err }, '保存训练记录失败');
     res.status(500).json({ error: '保存失败' });
   }
 }
@@ -510,7 +511,7 @@ export function getWorkoutRecords(req, res) {
 
     res.json(formatted);
   } catch (err) {
-    console.error('获取训练记录失败:', err.message);
+    logger.error({ err }, '获取训练记录失败');
     res.status(500).json({ error: '获取失败' });
   }
 }
@@ -525,7 +526,7 @@ export function deleteWorkoutRecord(req, res) {
     }
     res.json({ message: '删除成功' });
   } catch (err) {
-    console.error('删除训练记录失败:', err.message);
+    logger.error({ err }, '删除训练记录失败');
     res.status(500).json({ error: '删除失败' });
   }
 }
@@ -536,7 +537,7 @@ export function deleteAllWorkoutRecords(req, res) {
     stmts.deleteAllWorkouts.run(userId);
     res.json({ message: '清空成功' });
   } catch (err) {
-    console.error('清空训练记录失败:', err.message);
+    logger.error({ err }, '清空训练记录失败');
     res.status(500).json({ error: '清空失败' });
   }
 }
@@ -574,7 +575,7 @@ export function saveNutritionRecord(req, res) {
     res.status(201).json({ id, message: '保存成功' });
   } catch (err) {
     if (err.statusCode) return res.status(err.statusCode).json({ error: err.message });
-    console.error('保存饮食记录失败:', err.message);
+    logger.error({ err }, '保存饮食记录失败');
     res.status(500).json({ error: '保存失败' });
   }
 }
@@ -637,7 +638,7 @@ export function getNutritionRecords(req, res) {
 
     res.json(formatted);
   } catch (err) {
-    console.error('获取饮食记录失败:', err.message);
+    logger.error({ err }, '获取饮食记录失败');
     res.status(500).json({ error: '获取失败' });
   }
 }
@@ -652,7 +653,7 @@ export function deleteNutritionRecord(req, res) {
     }
     res.json({ message: '删除成功' });
   } catch (err) {
-    console.error('删除饮食记录失败:', err.message);
+    logger.error({ err }, '删除饮食记录失败');
     res.status(500).json({ error: '删除失败' });
   }
 }
@@ -663,7 +664,7 @@ export function deleteAllNutritionRecords(req, res) {
     stmts.deleteAllNutrition.run(userId);
     res.json({ message: '清空成功' });
   } catch (err) {
-    console.error('清空饮食记录失败:', err.message);
+    logger.error({ err }, '清空饮食记录失败');
     res.status(500).json({ error: '清空失败' });
   }
 }
@@ -688,7 +689,7 @@ export function getChatHistory(req, res) {
 
     res.json(formatted);
   } catch (err) {
-    console.error('获取聊天历史失败:', err.message);
+    logger.error({ err }, '获取聊天历史失败');
     res.status(500).json({ error: '获取失败' });
   }
 }
@@ -699,7 +700,7 @@ export function deleteChatHistory(req, res) {
     stmts.deleteAllChat.run(userId);
     res.json({ message: '清空成功' });
   } catch (err) {
-    console.error('清空聊天历史失败:', err.message);
+    logger.error({ err }, '清空聊天历史失败');
     res.status(500).json({ error: '清空失败' });
   }
 }

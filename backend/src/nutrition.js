@@ -8,6 +8,7 @@ if (process.env.NODE_ENV !== 'test' && (!API_URL || !API_KEY)) {
 }
 
 import crypto from 'crypto';
+import logger from './logger.js';
 import { extractJsonObject } from './validation.js';
 
 const FOOD_ANALYSIS_PROMPT = `你是一位专业的营养师和食品识别专家。请识别这张图片中的食物，并估算营养成分。
@@ -80,7 +81,7 @@ export async function analyzeFood(base64Image) {
   // 检查缓存
   const cacheKey = getCacheKey(base64Image);
   if (analysisCache.has(cacheKey)) {
-    console.log('使用食物识别缓存');
+    logger.debug('使用食物识别缓存');
     return analysisCache.get(cacheKey);
   }
 

@@ -5,110 +5,91 @@ void main() {
   group('NutritionRecord Model', () {
     test('should create NutritionRecord from JSON', () {
       final json = {
-        'id': 'nutrition-123',
-        'imagePreview': 'data:image/jpeg;base64,...',
+        'id': 'nr-001',
         'mealType': 'lunch',
-        'foods': [
-          {'name': '鸡胸肉', 'calories': 165, 'protein': 31},
-          {'name': '米饭', 'calories': 130, 'protein': 2.7},
-        ],
-        'totalCalories': 295,
-        'totalProtein': 33.7,
-        'totalCarbs': 45,
-        'totalFat': 5,
-        'tips': '蛋白质摄入充足',
-        'notes': '午餐记录',
-        'createdAt': 1718000000000,
+        'analysis': {
+          'totalCalories': 520,
+          'totalProtein': 35,
+          'totalCarbs': 60,
+          'totalFat': 12,
+        },
+        'createdAt': '2024-06-10T12:00:00',
       };
 
-      final nutrition = NutritionRecord.fromJson(json);
+      final record = NutritionRecord.fromJson(json);
 
-      expect(nutrition.id, 'nutrition-123');
-      expect(nutrition.imagePreview, 'data:image/jpeg;base64,...');
-      expect(nutrition.mealType, 'lunch');
-      expect(nutrition.foods.length, 2);
-      expect(nutrition.totalCalories, 295);
-      expect(nutrition.totalProtein, 33.7);
-      expect(nutrition.totalCarbs, 45);
-      expect(nutrition.totalFat, 5);
-      expect(nutrition.tips, '蛋白质摄入充足');
-      expect(nutrition.notes, '午餐记录');
-      expect(nutrition.createdAt, 1718000000000);
+      expect(record.id, 'nr-001');
+      expect(record.mealType, 'lunch');
+      expect(record.totalCalories, 520);
+      expect(record.totalProtein, 35);
+      expect(record.totalCarbs, 60);
+      expect(record.totalFat, 12);
+      expect(record.createdAt, '2024-06-10T12:00:00');
     });
 
     test('should convert NutritionRecord to JSON', () {
-      final nutrition = NutritionRecord(
-        id: 'nutrition-123',
-        imagePreview: 'data:image/jpeg;base64,...',
-        mealType: 'lunch',
-        foods: [
-          {'name': '鸡胸肉', 'calories': 165, 'protein': 31},
-        ],
-        totalCalories: 295,
-        totalProtein: 33.7,
-        totalCarbs: 45,
-        totalFat: 5,
-        tips: '蛋白质摄入充足',
-        notes: '午餐记录',
-        createdAt: 1718000000000,
+      final record = NutritionRecord(
+        id: 'nr-002',
+        mealType: 'dinner',
+        analysis: {
+          'totalCalories': 680,
+          'totalProtein': 40,
+        },
+        createdAt: '2024-06-10T19:00:00',
       );
 
-      final json = nutrition.toJson();
+      final json = record.toJson();
 
-      expect(json['id'], 'nutrition-123');
-      expect(json['imagePreview'], 'data:image/jpeg;base64,...');
-      expect(json['mealType'], 'lunch');
-      expect(json['foods'].length, 1);
-      expect(json['totalCalories'], 295);
-      expect(json['totalProtein'], 33.7);
-      expect(json['totalCarbs'], 45);
-      expect(json['totalFat'], 5);
-      expect(json['tips'], '蛋白质摄入充足');
-      expect(json['notes'], '午餐记录');
-      expect(json['createdAt'], 1718000000000);
+      expect(json['id'], 'nr-002');
+      expect(json['mealType'], 'dinner');
+      expect((json['analysis'] as Map)['totalCalories'], 680);
+      expect(json['createdAt'], '2024-06-10T19:00:00');
     });
 
     test('should handle missing fields with defaults', () {
       final json = <String, dynamic>{
-        'id': 'nutrition-456',
+        'id': 'nr-003',
       };
 
-      final nutrition = NutritionRecord.fromJson(json);
+      final record = NutritionRecord.fromJson(json);
 
-      expect(nutrition.id, 'nutrition-456');
-      expect(nutrition.imagePreview, isNull);
-      expect(nutrition.mealType, 'lunch');
-      expect(nutrition.foods, isEmpty);
-      expect(nutrition.totalCalories, 0);
-      expect(nutrition.totalProtein, 0);
-      expect(nutrition.totalCarbs, 0);
-      expect(nutrition.totalFat, 0);
-      expect(nutrition.tips, '');
-      expect(nutrition.notes, '');
-      expect(nutrition.createdAt, 0);
+      expect(record.id, 'nr-003');
+      expect(record.mealType, 'lunch');
+      expect(record.analysis, isEmpty);
+      expect(record.totalCalories, 0);
+      expect(record.totalProtein, 0);
+      expect(record.createdAt, '');
+    });
+
+    test('should handle string numbers in analysis', () {
+      final record = NutritionRecord(
+        id: 'nr-004',
+        mealType: 'breakfast',
+        analysis: {
+          'totalCalories': '350',
+          'totalProtein': 20.5,
+        },
+        createdAt: '2024-06-10T08:00:00',
+      );
+
+      expect(record.totalCalories, 350);
+      expect(record.totalProtein, 21); // 20.5.round() = 21 (Dart rounds to even, but 20.5 -> 20 in Dart)
     });
 
     test('should handle toString', () {
-      final nutrition = NutritionRecord(
-        id: 'nutrition-123',
-        imagePreview: null,
-        mealType: 'lunch',
-        foods: [],
-        totalCalories: 295,
-        totalProtein: 33.7,
-        totalCarbs: 45,
-        totalFat: 5,
-        tips: '',
-        notes: '',
-        createdAt: 1718000000000,
+      final record = NutritionRecord(
+        id: 'nr-005',
+        mealType: 'snack',
+        analysis: {'totalCalories': 200},
+        createdAt: '2024-06-10T15:00:00',
       );
 
-      final string = nutrition.toString();
+      final str = record.toString();
 
-      expect(string, contains('NutritionRecord'));
-      expect(string, contains('nutrition-123'));
-      expect(string, contains('lunch'));
-      expect(string, contains('295'));
+      expect(str, contains('NutritionRecord'));
+      expect(str, contains('nr-005'));
+      expect(str, contains('snack'));
+      expect(str, contains('200'));
     });
   });
 }

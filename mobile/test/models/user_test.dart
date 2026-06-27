@@ -43,11 +43,11 @@ void main() {
         createdAt: 1718000000000,
       );
 
-      final string = user.toString();
+      final str = user.toString();
 
-      expect(string, contains('User'));
-      expect(string, contains('123'));
-      expect(string, contains('test@example.com'));
+      expect(str, contains('User'));
+      expect(str, contains('123'));
+      expect(str, contains('test@example.com'));
     });
 
     test('should create User with all required fields', () {
