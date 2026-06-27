@@ -80,6 +80,11 @@ nginx/logs/
 coverage/
 .nyc_output/
 
+# === Playwright E2E ===
+web/test-results/
+web/playwright-report/
+web/blob-report/
+
 # === Claude Code ===
 .claude/
 .codegraph/
