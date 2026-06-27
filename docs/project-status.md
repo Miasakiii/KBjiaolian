@@ -1,6 +1,6 @@
 # KB教练 — 项目状态总结
 
-> 更新时间: 2026-06-26 | Sprint 1-4 全部完成 + 体验优化 + 代码审查修复（95 个问题）+ Flutter 移动端内测版完善（15 页）+ 微信支付对接 + 视觉设计系统跨端落地 + P0 安全加固
+> 更新时间: 2026-06-27 | Sprint 1-4 全部完成 + 体验优化 + 代码审查修复（95 个问题）+ Flutter 移动端内测版完善（15 页）+ 微信支付对接 + 视觉设计系统跨端落地 + P0 安全加固 + P0/P1 全扫（品牌色对齐/Flutter测试修复/pino日志/测试覆盖+75）
 
 ## 项目概述
 
@@ -431,12 +431,14 @@ npm run dev
 | ✅ 已完成 | 接入微信支付 | API v3 签名/验签/统一下单，支持小程序+App |
 | ✅ 已完成 | 视觉设计系统跨端落地 | miniprogram 两轮 + Flutter 全量，深 teal + 极简留白 |
 | ✅ 已完成 | P0 安全加固 | 验证码防爆破 + 日志泄露 + Resend 邮件 + 数据库备份 |
-| 🔴 P0 | Web emerald 辅色对齐 | 8 处 `emerald-500` 硬编码待改为 teal |
-| 🟡 P1 | Web Modal a11y | 迁 Headless UI Dialog，补 Escape/focus trap/aria-modal |
-| 🟡 P1 | 单元测试补全 | Backend 已有 9 套件，Web Vitest 覆盖率提升，Mobile 测试修复 |
-| 🟡 P1 | Token 改 httpOnly cookie | localStorage 易遭 XSS，长期方案应为 SameSite=Strict cookie |
+| ✅ 已完成 | P0/P1 全扫 — 品牌色对齐 | Web emerald→teal 8处替换，grep 零残留 |
+| ✅ 已完成 | P0/P1 全扫 — Flutter 测试修复 | 6个测试文件重写，38个测试全通过 |
+| ✅ 已完成 | P0/P1 全扫 — pino 结构化日志 | logger.js 三态配置，13文件 82处 console→logger |
+| ✅ 已完成 | P0/P1 全扫 — 后端测试覆盖补全 | +3 test suite（progression 24 + subscription 29 + orders 22），总计 194 测试 |
+| ⚪ 不适用 | Web Modal a11y | Web 前端仅落地页，无 Modal 组件 |
+| ⚪ 不适用 | Token 改 httpOnly cookie | 小程序/Flutter 用平台安全存储，Web 无认证流程 |
 | 🟢 P2 | E2E 测试 | 接入 Playwright，覆盖关键用户流程 |
-| 🟢 P2 | 结构化日志 | 接入 pino/winston 替换 console.log |
+| ✅ 已完成 | 结构化日志 | pino 三态配置（test/dev/prod），替换全部 console.log |
 | 🟢 P2 | 后端 TypeScript 化 | 提升类型安全，配合 OpenAPI 自动生成客户端 |
 | 🟢 P2 | 后端集群部署 | 引入 cluster or PM2，利用多核 |
 | 🟢 P2 | 社区功能 | 用户互动、分享 |
