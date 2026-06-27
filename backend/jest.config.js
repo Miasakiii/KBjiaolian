@@ -1,10 +1,21 @@
+import { createDefaultEsmPreset } from 'ts-jest';
+
+/** @type {import('jest').Config} */
 export default {
   testEnvironment: 'node',
-  transform: {},
-  testMatch: ['**/__tests__/**/*.js', '**/*.test.js'],
+  ...createDefaultEsmPreset({
+    tsconfig: 'tsconfig.test.json',
+  }),
+  moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
+  },
+  testMatch: [
+    '**/__tests__/**/*.ts',
+    '**/*.test.ts',
+  ],
   collectCoverageFrom: [
-    'src/**/*.js',
-    '!src/index.js',
+    'src/**/*.ts',
+    '!src/index.ts',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'clover'],

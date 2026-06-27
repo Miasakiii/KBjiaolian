@@ -4,7 +4,7 @@ import { closeDatabase } from './database.js';
 import logger from './logger.js';
 import './backup.js';
 
-const PORT = process.env.PORT || 3001;
+const PORT: number = Number(process.env.PORT) || 3001;
 const app = createApp();
 
 const server = app.listen(PORT, '0.0.0.0', () => {
@@ -13,7 +13,7 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 
 // 优雅关闭：收到 SIGTERM/SIGINT 时停止接收新连接，等待在途请求完成后关闭数据库
 let shuttingDown = false;
-function shutdown(signal) {
+function shutdown(signal: string): void {
   if (shuttingDown) return;
   shuttingDown = true;
   logger.info({ signal }, '收到信号，开始优雅关闭');

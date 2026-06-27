@@ -1,6 +1,8 @@
 import db from './database.js';
 import crypto from 'crypto';
 import logger from './logger.js';
+import type { Request, Response } from 'express';
+import type { AnalysisRecordRow, WorkoutRecordRow, NutritionRecordRow, TrainingPlanRow, ChatHistoryRow, AppError } from './types.js';
 
 // 输入校验上限
 const MAX_IMAGE_PREVIEW_BYTES = 2_000_000; // 单条预览图最大 2MB
@@ -13,16 +15,16 @@ function generateId() {
 }
 
 // 安全清理字符串
-function safeStr(v, max = MAX_STRING_LENGTH) {
+function safeStr(v: unknown, max: number = MAX_STRING_LENGTH): string {
   if (typeof v !== 'string') return '';
   return v.slice(0, max);
 }
 
 // 校验预览图大小并返回标准化字符串
-function safeImagePreview(v) {
+function safeImagePreview(v: unknown): string | null {
   if (typeof v !== 'string') return null;
   if (v.length > MAX_IMAGE_PREVIEW_BYTES) {
-    const err = new Error('预览图过大');
+    const err = new Error('预览图过大') as AppError;
     err.statusCode = 400;
     throw err;
   }
@@ -30,7 +32,7 @@ function safeImagePreview(v) {
 }
 
 // 限定数值字段
-function safeInt(v, fallback = 0, max = Number.MAX_SAFE_INTEGER) {
+function safeInt(v: unknown, fallback: number = 0, max: number = Number.MAX_SAFE_INTEGER): number {
   const n = Number(v);
   if (!Number.isFinite(n)) return fallback;
   if (n < 0) return fallback;
@@ -38,7 +40,7 @@ function safeInt(v, fallback = 0, max = Number.MAX_SAFE_INTEGER) {
 }
 
 // 分页参数解析（带最大值约束）
-function parsePagination(query) {
+function parsePagination(query: Record<string, any>): { pageNum: number; limitNum: number; offset: number } {
   const pageNum = Math.max(1, parseInt(query.page, 10) || 1);
   const limitNum = Math.min(Math.max(1, parseInt(query.limit, 10) || 20), MAX_RECORDS_PER_PAGE);
   const offset = (pageNum - 1) * limitNum;
@@ -52,16 +54,16 @@ const stmts = {
     INSERT INTO analysis_records (id, user_id, image_preview, score, summary, issues, radar, suggestions)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `),
-  getAnalysisByUser: db.prepare(`
+  getAnalysisByUser: db.prepare<unknown[], AnalysisRecordRow>(`
     SELECT * FROM analysis_records WHERE user_id = ? ORDER BY created_at DESC
   `),
-  getAnalysisByUserPaginated: db.prepare(`
+  getAnalysisByUserPaginated: db.prepare<unknown[], AnalysisRecordRow>(`
     SELECT * FROM analysis_records WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?
   `),
-  countAnalysisByUser: db.prepare(`
+  countAnalysisByUser: db.prepare<unknown[], { total: number }>(`
     SELECT COUNT(*) as total FROM analysis_records WHERE user_id = ?
   `),
-  getAnalysisById: db.prepare(`
+  getAnalysisById: db.prepare<unknown[], AnalysisRecordRow>(`
     SELECT * FROM analysis_records WHERE id = ? AND user_id = ?
   `),
   deleteAnalysis: db.prepare(`
@@ -76,13 +78,13 @@ const stmts = {
     INSERT INTO training_plans (id, user_id, name, goal, experience, equipment, days_per_week, session_duration, schedule, nutrition, notes, duration_weeks)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `),
-  getPlansByUser: db.prepare(`
+  getPlansByUser: db.prepare<unknown[], TrainingPlanRow>(`
     SELECT * FROM training_plans WHERE user_id = ? ORDER BY created_at DESC
   `),
-  getPlansByUserPaginated: db.prepare(`
+  getPlansByUserPaginated: db.prepare<unknown[], TrainingPlanRow>(`
     SELECT * FROM training_plans WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?
   `),
-  countPlansByUser: db.prepare(`
+  countPlansByUser: db.prepare<unknown[], { total: number }>(`
     SELECT COUNT(*) as total FROM training_plans WHERE user_id = ?
   `),
   deletePlan: db.prepare(`
@@ -97,13 +99,13 @@ const stmts = {
     INSERT INTO workout_records (id, user_id, plan_id, plan_name, day_number, day_name, start_time, end_time, duration, exercises, rating, notes)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `),
-  getWorkoutsByUser: db.prepare(`
+  getWorkoutsByUser: db.prepare<unknown[], WorkoutRecordRow>(`
     SELECT * FROM workout_records WHERE user_id = ? ORDER BY created_at DESC
   `),
-  getWorkoutsByUserPaginated: db.prepare(`
+  getWorkoutsByUserPaginated: db.prepare<unknown[], WorkoutRecordRow>(`
     SELECT * FROM workout_records WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?
   `),
-  countWorkoutsByUser: db.prepare(`
+  countWorkoutsByUser: db.prepare<unknown[], { total: number }>(`
     SELECT COUNT(*) as total FROM workout_records WHERE user_id = ?
   `),
   deleteWorkout: db.prepare(`
@@ -118,13 +120,13 @@ const stmts = {
     INSERT INTO nutrition_records (id, user_id, image_preview, meal_type, foods, total_calories, total_protein, total_carbs, total_fat, tips, notes)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `),
-  getNutritionByUser: db.prepare(`
+  getNutritionByUser: db.prepare<unknown[], NutritionRecordRow>(`
     SELECT * FROM nutrition_records WHERE user_id = ? ORDER BY created_at DESC
   `),
-  getNutritionByUserPaginated: db.prepare(`
+  getNutritionByUserPaginated: db.prepare<unknown[], NutritionRecordRow>(`
     SELECT * FROM nutrition_records WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?
   `),
-  countNutritionByUser: db.prepare(`
+  countNutritionByUser: db.prepare<unknown[], { total: number }>(`
     SELECT COUNT(*) as total FROM nutrition_records WHERE user_id = ?
   `),
   deleteNutrition: db.prepare(`
@@ -138,7 +140,7 @@ const stmts = {
   insertChat: db.prepare(`
     INSERT INTO chat_history (user_id, role, content) VALUES (?, ?, ?)
   `),
-  getChatByUser: db.prepare(`
+  getChatByUser: db.prepare<unknown[], ChatHistoryRow>(`
     SELECT role, content, created_at FROM chat_history WHERE user_id = ? ORDER BY created_at DESC LIMIT 50
   `),
   deleteAllChat: db.prepare(`
@@ -148,7 +150,7 @@ const stmts = {
 
 // === 分析记录 API ===
 
-export function saveAnalysisRecord(req, res) {
+export function saveAnalysisRecord(req: Request, res: Response) {
   try {
     const { imagePreview, result } = req.body;
     const userId = req.userId;
@@ -171,23 +173,23 @@ export function saveAnalysisRecord(req, res) {
 
     res.status(201).json({ id, message: '保存成功' });
   } catch (err) {
-    if (err.statusCode) return res.status(err.statusCode).json({ error: err.message });
+    if ((err as AppError).statusCode) return res.status((err as AppError).statusCode!).json({ error: (err as AppError).message });
     logger.error({ err }, '保存分析记录失败');
     res.status(500).json({ error: '保存失败' });
   }
 }
 
-export function getAnalysisRecords(req, res) {
+export function getAnalysisRecords(req: Request, res: Response) {
   try {
     const userId = req.userId;
     const { page, limit } = req.query;
 
     // 如果提供了分页参数，使用分页查询
     if (page && limit) {
-      const { pageNum, limitNum, offset } = parsePagination({ page, limit });
+      const { pageNum, limitNum, offset } = parsePagination({ page: page as string, limit: limit as string });
 
       const records = stmts.getAnalysisByUserPaginated.all(userId, limitNum, offset);
-      const { total } = stmts.countAnalysisByUser.get(userId);
+      const { total } = stmts.countAnalysisByUser.get(userId)!;
 
       const formatted = records.map(r => ({
         id: r.id,
@@ -236,7 +238,7 @@ export function getAnalysisRecords(req, res) {
   }
 }
 
-export function deleteAnalysisRecord(req, res) {
+export function deleteAnalysisRecord(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const userId = req.userId;
@@ -251,7 +253,7 @@ export function deleteAnalysisRecord(req, res) {
   }
 }
 
-export function deleteAllAnalysisRecords(req, res) {
+export function deleteAllAnalysisRecords(req: Request, res: Response) {
   try {
     const userId = req.userId;
     stmts.deleteAllAnalysis.run(userId);
@@ -263,12 +265,12 @@ export function deleteAllAnalysisRecords(req, res) {
 }
 
 // 按 ID 获取单条分析记录（供对比分析使用）
-export function getAnalysisRecordById(userId, recordId) {
+export function getAnalysisRecordById(userId: string, recordId: string): AnalysisRecordRow | undefined {
   return stmts.getAnalysisById.get(recordId, userId);
 }
 
 // 获取原始训练记录（供渐进式算法使用）
-export function getWorkoutRecordsRaw(userId, limit = 20) {
+export function getWorkoutRecordsRaw(userId: string, limit: number = 20): any[] {
   return stmts.getWorkoutsByUserPaginated.all(userId, limit, 0).map(r => ({
     id: r.id,
     planId: r.plan_id,
@@ -287,7 +289,7 @@ export function getWorkoutRecordsRaw(userId, limit = 20) {
 
 // === 训练方案 API ===
 
-export function savePlan(req, res) {
+export function savePlan(req: Request, res: Response) {
   try {
     const plan = req.body;
     const userId = req.userId;
@@ -324,19 +326,19 @@ export function savePlan(req, res) {
   }
 }
 
-export function getPlans(req, res) {
+export function getPlans(req: Request, res: Response) {
   try {
     const userId = req.userId;
     const { page, limit } = req.query;
 
     // 如果提供了分页参数，使用分页查询
     if (page && limit) {
-      const pageNum = parseInt(page, 10) || 1;
-      const limitNum = parseInt(limit, 10) || 20;
+      const pageNum = parseInt(page as string, 10) || 1;
+      const limitNum = parseInt(limit as string, 10) || 20;
       const offset = (pageNum - 1) * limitNum;
 
       const plans = stmts.getPlansByUserPaginated.all(userId, limitNum, offset);
-      const { total } = stmts.countPlansByUser.get(userId);
+      const { total } = stmts.countPlansByUser.get(userId)!;
 
       const formatted = plans.map(p => ({
         id: p.id,
@@ -389,7 +391,7 @@ export function getPlans(req, res) {
   }
 }
 
-export function deletePlanRecord(req, res) {
+export function deletePlanRecord(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const userId = req.userId;
@@ -404,7 +406,7 @@ export function deletePlanRecord(req, res) {
   }
 }
 
-export function deleteAllPlanRecords(req, res) {
+export function deleteAllPlanRecords(req: Request, res: Response) {
   try {
     const userId = req.userId;
     stmts.deleteAllPlans.run(userId);
@@ -417,7 +419,7 @@ export function deleteAllPlanRecords(req, res) {
 
 // === 训练记录 API ===
 
-export function saveWorkoutRecord(req, res) {
+export function saveWorkoutRecord(req: Request, res: Response) {
   try {
     const workout = req.body;
     const userId = req.userId;
@@ -451,19 +453,19 @@ export function saveWorkoutRecord(req, res) {
   }
 }
 
-export function getWorkoutRecords(req, res) {
+export function getWorkoutRecords(req: Request, res: Response) {
   try {
     const userId = req.userId;
     const { page, limit } = req.query;
 
     // 如果提供了分页参数，使用分页查询
     if (page && limit) {
-      const pageNum = parseInt(page, 10) || 1;
-      const limitNum = parseInt(limit, 10) || 20;
+      const pageNum = parseInt(page as string, 10) || 1;
+      const limitNum = parseInt(limit as string, 10) || 20;
       const offset = (pageNum - 1) * limitNum;
 
       const records = stmts.getWorkoutsByUserPaginated.all(userId, limitNum, offset);
-      const { total } = stmts.countWorkoutsByUser.get(userId);
+      const { total } = stmts.countWorkoutsByUser.get(userId)!;
 
       const formatted = records.map(r => ({
         id: r.id,
@@ -516,7 +518,7 @@ export function getWorkoutRecords(req, res) {
   }
 }
 
-export function deleteWorkoutRecord(req, res) {
+export function deleteWorkoutRecord(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const userId = req.userId;
@@ -531,7 +533,7 @@ export function deleteWorkoutRecord(req, res) {
   }
 }
 
-export function deleteAllWorkoutRecords(req, res) {
+export function deleteAllWorkoutRecords(req: Request, res: Response) {
   try {
     const userId = req.userId;
     stmts.deleteAllWorkouts.run(userId);
@@ -544,7 +546,7 @@ export function deleteAllWorkoutRecords(req, res) {
 
 // === 饮食记录 API ===
 
-export function saveNutritionRecord(req, res) {
+export function saveNutritionRecord(req: Request, res: Response) {
   try {
     const nutrition = req.body;
     const userId = req.userId;
@@ -574,25 +576,25 @@ export function saveNutritionRecord(req, res) {
 
     res.status(201).json({ id, message: '保存成功' });
   } catch (err) {
-    if (err.statusCode) return res.status(err.statusCode).json({ error: err.message });
+    if ((err as AppError).statusCode) return res.status((err as AppError).statusCode!).json({ error: (err as AppError).message });
     logger.error({ err }, '保存饮食记录失败');
     res.status(500).json({ error: '保存失败' });
   }
 }
 
-export function getNutritionRecords(req, res) {
+export function getNutritionRecords(req: Request, res: Response) {
   try {
     const userId = req.userId;
     const { page, limit } = req.query;
 
     // 如果提供了分页参数，使用分页查询
     if (page && limit) {
-      const pageNum = parseInt(page, 10) || 1;
-      const limitNum = parseInt(limit, 10) || 20;
+      const pageNum = parseInt(page as string, 10) || 1;
+      const limitNum = parseInt(limit as string, 10) || 20;
       const offset = (pageNum - 1) * limitNum;
 
       const records = stmts.getNutritionByUserPaginated.all(userId, limitNum, offset);
-      const { total } = stmts.countNutritionByUser.get(userId);
+      const { total } = stmts.countNutritionByUser.get(userId)!;
 
       const formatted = records.map(r => ({
         id: r.id,
@@ -643,7 +645,7 @@ export function getNutritionRecords(req, res) {
   }
 }
 
-export function deleteNutritionRecord(req, res) {
+export function deleteNutritionRecord(req: Request, res: Response) {
   try {
     const { id } = req.params;
     const userId = req.userId;
@@ -658,7 +660,7 @@ export function deleteNutritionRecord(req, res) {
   }
 }
 
-export function deleteAllNutritionRecords(req, res) {
+export function deleteAllNutritionRecords(req: Request, res: Response) {
   try {
     const userId = req.userId;
     stmts.deleteAllNutrition.run(userId);
@@ -671,11 +673,11 @@ export function deleteAllNutritionRecords(req, res) {
 
 // === 聊天历史 API ===
 
-export function saveChatMessage(userId, role, content) {
+export function saveChatMessage(userId: string, role: string, content: string): void {
   stmts.insertChat.run(userId, role, content);
 }
 
-export function getChatHistory(req, res) {
+export function getChatHistory(req: Request, res: Response) {
   try {
     const userId = req.userId;
     const messages = stmts.getChatByUser.all(userId);
@@ -694,7 +696,7 @@ export function getChatHistory(req, res) {
   }
 }
 
-export function deleteChatHistory(req, res) {
+export function deleteChatHistory(req: Request, res: Response) {
   try {
     const userId = req.userId;
     stmts.deleteAllChat.run(userId);
