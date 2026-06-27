@@ -1,4 +1,5 @@
 import db from './database.js';
+import logger from './logger.js';
 
 // === 套餐配置 ===
 export const PLANS = {
@@ -236,7 +237,7 @@ export function releaseQuota(usageId) {
   try {
     stmts.deleteUsageById.run(usageId);
   } catch (err) {
-    console.error('释放配额失败:', err.message);
+    logger.error({ err }, '释放配额失败');
   }
 }
 

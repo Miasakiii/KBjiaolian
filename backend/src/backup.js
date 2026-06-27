@@ -1,6 +1,7 @@
 import { copyFileSync, mkdirSync, readdirSync, unlinkSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import logger from './logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -23,9 +24,9 @@ function createBackup() {
     const filename = getBackupFilename();
     const backupPath = join(BACKUP_DIR, filename);
     copyFileSync(DB_PATH, backupPath);
-    console.log(`[backup] 数据库备份完成: ${filename}`);
+    logger.info({ filename }, '数据库备份完成');
   } catch (err) {
-    console.error('[backup] 备份失败:', err.message);
+    logger.error({ err }, '备份失败');
   }
 }
 
@@ -41,11 +42,11 @@ function cleanOldBackups() {
       const stats = statSync(filePath);
       if (now - stats.mtimeMs > maxAge) {
         unlinkSync(filePath);
-        console.log(`[backup] 清理旧备份: ${file}`);
+        logger.info({ file }, '清理旧备份');
       }
     }
   } catch (err) {
-    console.error('[backup] 清理旧备份失败:', err.message);
+    logger.error({ err }, '清理旧备份失败');
   }
 }
 
@@ -60,4 +61,4 @@ const backupTimer = setInterval(() => {
 }, BACKUP_INTERVAL_MS);
 backupTimer.unref();
 
-console.log('[backup] 备份服务已启动（每日备份，保留 7 天）');
+logger.info('备份服务已启动（每日备份，保留 7 天）');

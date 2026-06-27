@@ -1,4 +1,5 @@
 import crypto from 'crypto';
+import logger from './logger.js';
 
 const API_URL = process.env.MIMO_API_URL;
 const API_KEY = process.env.MIMO_API_KEY;
@@ -157,7 +158,7 @@ export async function analyzePhoto(base64Image) {
   // 检查缓存
   const cacheKey = getCacheKey(base64Image);
   if (analysisCache.has(cacheKey)) {
-    console.log('使用缓存结果');
+    logger.debug('使用缓存结果');
     return analysisCache.get(cacheKey);
   }
 

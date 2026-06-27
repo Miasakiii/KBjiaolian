@@ -8,10 +8,10 @@ void main() {
         'id': 'workout-123',
         'planId': 'plan-456',
         'planName': '增肌计划',
-        'dayNumber': 1,
+        'dayIndex': 1,
         'dayName': '胸+三头',
-        'startTime': 1718000000000,
-        'endTime': 1718003600000,
+        'startTime': '2024-06-10T10:00:00',
+        'endTime': '2024-06-10T11:00:00',
         'duration': 60,
         'exercises': [
           {'name': '卧推', 'sets': 4, 'reps': 10},
@@ -19,7 +19,7 @@ void main() {
         ],
         'rating': 4,
         'notes': '感觉不错',
-        'createdAt': 1718003600000,
+        'createdAt': '2024-06-10T11:00:00',
       };
 
       final workout = WorkoutRecord.fromJson(json);
@@ -27,15 +27,15 @@ void main() {
       expect(workout.id, 'workout-123');
       expect(workout.planId, 'plan-456');
       expect(workout.planName, '增肌计划');
-      expect(workout.dayNumber, 1);
+      expect(workout.dayIndex, 1);
       expect(workout.dayName, '胸+三头');
-      expect(workout.startTime, 1718000000000);
-      expect(workout.endTime, 1718003600000);
+      expect(workout.startTime, '2024-06-10T10:00:00');
+      expect(workout.endTime, '2024-06-10T11:00:00');
       expect(workout.duration, 60);
       expect(workout.exercises.length, 2);
       expect(workout.rating, 4);
       expect(workout.notes, '感觉不错');
-      expect(workout.createdAt, 1718003600000);
+      expect(workout.createdAt, '2024-06-10T11:00:00');
     });
 
     test('should convert WorkoutRecord to JSON', () {
@@ -43,17 +43,17 @@ void main() {
         id: 'workout-123',
         planId: 'plan-456',
         planName: '增肌计划',
-        dayNumber: 1,
+        dayIndex: 1,
         dayName: '胸+三头',
-        startTime: 1718000000000,
-        endTime: 1718003600000,
+        startTime: '2024-06-10T10:00:00',
+        endTime: '2024-06-10T11:00:00',
         duration: 60,
         exercises: [
           {'name': '卧推', 'sets': 4, 'reps': 10},
         ],
         rating: 4,
         notes: '感觉不错',
-        createdAt: 1718003600000,
+        createdAt: '2024-06-10T11:00:00',
       );
 
       final json = workout.toJson();
@@ -61,15 +61,15 @@ void main() {
       expect(json['id'], 'workout-123');
       expect(json['planId'], 'plan-456');
       expect(json['planName'], '增肌计划');
-      expect(json['dayNumber'], 1);
+      expect(json['dayIndex'], 1);
       expect(json['dayName'], '胸+三头');
-      expect(json['startTime'], 1718000000000);
-      expect(json['endTime'], 1718003600000);
+      expect(json['startTime'], '2024-06-10T10:00:00');
+      expect(json['endTime'], '2024-06-10T11:00:00');
       expect(json['duration'], 60);
       expect(json['exercises'].length, 1);
       expect(json['rating'], 4);
       expect(json['notes'], '感觉不错');
-      expect(json['createdAt'], 1718003600000);
+      expect(json['createdAt'], '2024-06-10T11:00:00');
     });
 
     test('should handle missing fields with defaults', () {
@@ -82,15 +82,15 @@ void main() {
       expect(workout.id, 'workout-789');
       expect(workout.planId, isNull);
       expect(workout.planName, '');
-      expect(workout.dayNumber, 0);
+      expect(workout.dayIndex, 0);
       expect(workout.dayName, '');
-      expect(workout.startTime, 0);
-      expect(workout.endTime, 0);
+      expect(workout.startTime, '');
+      expect(workout.endTime, '');
       expect(workout.duration, 0);
       expect(workout.exercises, isEmpty);
       expect(workout.rating, 0);
       expect(workout.notes, '');
-      expect(workout.createdAt, 0);
+      expect(workout.createdAt, '');
     });
 
     test('should handle toString', () {
@@ -98,24 +98,24 @@ void main() {
         id: 'workout-123',
         planId: 'plan-456',
         planName: '增肌计划',
-        dayNumber: 1,
+        dayIndex: 1,
         dayName: '胸+三头',
-        startTime: 1718000000000,
-        endTime: 1718003600000,
+        startTime: '2024-06-10T10:00:00',
+        endTime: '2024-06-10T11:00:00',
         duration: 60,
         exercises: [],
         rating: 4,
         notes: '',
-        createdAt: 1718003600000,
+        createdAt: '2024-06-10T11:00:00',
       );
 
-      final string = workout.toString();
+      final str = workout.toString();
 
-      expect(string, contains('WorkoutRecord'));
-      expect(string, contains('workout-123'));
-      expect(string, contains('增肌计划'));
-      expect(string, contains('胸+三头'));
-      expect(string, contains('60'));
+      expect(str, contains('WorkoutRecord'));
+      expect(str, contains('workout-123'));
+      expect(str, contains('增肌计划'));
+      expect(str, contains('胸+三头'));
+      expect(str, contains('60'));
     });
   });
 }

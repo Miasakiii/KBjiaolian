@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import db from './database.js';
+import logger from './logger.js';
 import { sendVerificationEmail } from './email.js';
 
 // JWT_SECRET 必须从环境变量读取，不允许硬编码后备值（安全要求）
@@ -127,7 +128,7 @@ export async function sendVerificationCode(req, res) {
       }),
     });
   } catch (err) {
-    console.error('发送验证码失败:', err.message);
+    logger.error({ err }, '发送验证码失败');
     res.status(500).json({ error: '发送验证码失败，请稍后重试' });
   }
 }
@@ -229,7 +230,7 @@ export async function register(req, res) {
       throw err;
     }
   } catch (err) {
-    console.error('注册失败:', err.message);
+    logger.error({ err }, '注册失败');
     res.status(500).json({ error: '注册失败，请稍后重试' });
   }
 }
@@ -267,7 +268,7 @@ export async function login(req, res) {
       },
     });
   } catch (err) {
-    console.error('登录失败:', err.message);
+    logger.error({ err }, '登录失败');
     res.status(500).json({ error: '登录失败，请稍后重试' });
   }
 }
@@ -293,7 +294,7 @@ export async function wechatLogin(req, res) {
       openid = `mock_${code}`;
     } else {
       if (!WECHAT_APPID || !WECHAT_APPSECRET) {
-        console.error('WECHAT_APPID 或 WECHAT_APPSECRET 环境变量未配置');
+        logger.error('WECHAT_APPID 或 WECHAT_APPSECRET 环境变量未配置');
         return res.status(500).json({ error: '服务器配置错误，请联系管理员' });
       }
 
@@ -304,14 +305,14 @@ export async function wechatLogin(req, res) {
       try {
         wechatRes = await fetch(wechatUrl);
       } catch (err) {
-        console.error('调用微信 code2Session 失败:', err.message);
+        logger.error({ err }, '调用微信 code2Session 失败');
         return res.status(502).json({ error: '无法连接微信登录服务，请稍后重试' });
       }
 
       const wechatData = await wechatRes.json();
 
       if (wechatData.errcode) {
-        console.error('微信 code2Session 错误:', wechatData.errcode, wechatData.errmsg);
+        logger.error({ errcode: wechatData.errcode, errmsg: wechatData.errmsg }, '微信 code2Session 错误');
         return res.status(400).json({ error: `微信登录失败: ${wechatData.errmsg}` });
       }
 
@@ -348,7 +349,7 @@ export async function wechatLogin(req, res) {
       },
     });
   } catch (err) {
-    console.error('微信登录失败:', err.message);
+    logger.error({ err }, '微信登录失败');
     res.status(500).json({ error: '登录失败，请稍后重试' });
   }
 }
@@ -370,7 +371,7 @@ export function getProfile(req, res) {
       createdAt: user.created_at,
     });
   } catch (err) {
-    console.error('获取用户信息失败:', err.message);
+    logger.error({ err }, '获取用户信息失败');
     res.status(500).json({ error: '获取用户信息失败' });
   }
 }
@@ -417,7 +418,7 @@ export async function forgotPassword(req, res) {
       }),
     });
   } catch (err) {
-    console.error('忘记密码失败:', err.message);
+    logger.error({ err }, '忘记密码失败');
     res.status(500).json({ error: '操作失败，请稍后重试' });
   }
 }
@@ -461,7 +462,7 @@ export async function resetPassword(req, res) {
       throw err;
     }
   } catch (err) {
-    console.error('重置密码失败:', err.message);
+    logger.error({ err }, '重置密码失败');
     res.status(500).json({ error: '重置失败，请稍后重试' });
   }
 }
@@ -481,7 +482,7 @@ export function authMiddleware(req, res, next) {
     req.userId = decoded.userId;
     next();
     } catch (err) {
-      console.error('[authMiddleware] JWT 校验失败:', err.name, err.message);
+      logger.warn({ err: { name: err.name, message: err.message } }, '[authMiddleware] JWT 校验失败');
       if (err.name === 'TokenExpiredError') {
         return res.status(401).json({ error: '登录已过期，请重新登录' });
       }
