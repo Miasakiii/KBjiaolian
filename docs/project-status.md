@@ -437,7 +437,7 @@ npm run dev
 | ✅ 已完成 | P0/P1 全扫 — 后端测试覆盖补全 | +3 test suite（progression 24 + subscription 29 + orders 22），总计 194 测试 |
 | ⚪ 不适用 | Web Modal a11y | Web 前端仅落地页，无 Modal 组件 |
 | ⚪ 不适用 | Token 改 httpOnly cookie | 小程序/Flutter 用平台安全存储，Web 无认证流程 |
-| 🟢 P2 | E2E 测试 | 接入 Playwright，覆盖关键用户流程 |
+| ✅ 已完成 | E2E 测试 | Playwright 落地页 40 个测试（desktop+mobile，33 passed + 7 skipped） |
 | ✅ 已完成 | 结构化日志 | pino 三态配置（test/dev/prod），替换全部 console.log |
 | 🟢 P2 | 后端 TypeScript 化 | 提升类型安全，配合 OpenAPI 自动生成客户端 |
 | 🟢 P2 | 后端集群部署 | 引入 cluster or PM2，利用多核 |
