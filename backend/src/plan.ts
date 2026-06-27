@@ -1,8 +1,9 @@
 import crypto from 'crypto';
 import { extractJsonObject } from './validation.js';
+import type { PlanParams, AnalysisResult } from './types.js';
 
-const API_URL = process.env.MIMO_API_URL;
-const API_KEY = process.env.MIMO_API_KEY;
+const API_URL = process.env.MIMO_API_URL ?? '';
+const API_KEY = process.env.MIMO_API_KEY ?? '';
 const MODEL = process.env.MIMO_MODEL || 'mimo-v2.5';
 
 // 启动时校验关键环境变量（测试环境跳过以方便 mock）
@@ -10,23 +11,23 @@ if (process.env.NODE_ENV !== 'test' && (!API_URL || !API_KEY)) {
   throw new Error('MIMO_API_URL / MIMO_API_KEY 环境变量未设置');
 }
 
-function buildPlanPrompt(params, analysisResult) {
+function buildPlanPrompt(params: PlanParams, analysisResult: AnalysisResult): string {
   const { goal, experience, equipment, daysPerWeek, sessionDuration } = params;
 
-  const goalMap = {
+  const goalMap: Record<string, string> = {
     muscle_gain: '增肌塑形',
     fat_loss: '减脂瘦身',
     posture_fix: '体态矫正',
     rehab: '康复训练',
   };
 
-  const experienceMap = {
+  const experienceMap: Record<string, string> = {
     beginner: '新手（0-1年经验）',
     intermediate: '中级（1-3年经验）',
     advanced: '高级（3年以上经验）',
   };
 
-  const equipmentMap = {
+  const equipmentMap: Record<string, string> = {
     gym: '健身房（完整器械）',
     dumbbell: '家用哑铃',
     bodyweight: '徒手训练',
@@ -35,16 +36,16 @@ function buildPlanPrompt(params, analysisResult) {
   return `你是一位拥有 15 年经验的健身教练和运动康复专家。请根据用户的体态分析结果和训练偏好，生成个性化训练方案。
 
 用户信息：
-- 训练目标：${goalMap[goal]}
-- 经验水平：${experienceMap[experience]}
-- 训练设备：${equipmentMap[equipment]}
+- 训练目标：${goalMap[goal] || goal}
+- 经验水平：${experienceMap[experience] || experience}
+- 训练设备：${equipmentMap[equipment] || equipment}
 - 每周训练：${daysPerWeek} 天
 - 每次时长：${sessionDuration} 分钟
 
 体态分析结果：
 - 综合评分：${analysisResult.score}/100
 - 体态问题：${analysisResult.issues.map((i) => `${i.name}（${i.severity === 'severe' ? '严重' : i.severity === 'moderate' ? '中度' : '轻微'}）`).join('、')}
-- 雷达数据：头前伸 ${analysisResult.radar.headForward}%、圆肩 ${analysisResult.radar.roundShoulder}%、骨盆前倾 ${analysisResult.radar.pelvicTilt}%、膝超伸 ${analysisResult.radar.kneeExtension}%
+- 雷达数据：头前伸 ${analysisResult.radar.headForward ?? 0}%、圆肩 ${analysisResult.radar.roundShoulder ?? 0}%、骨盆前倾 ${analysisResult.radar.pelvicTilt ?? 0}%、膝超伸 ${analysisResult.radar.kneeExtension ?? 0}%
 
 要求：
 1. 训练方案必须针对用户的体态问题进行优化
@@ -95,7 +96,7 @@ function buildPlanPrompt(params, analysisResult) {
 `;
 }
 
-export async function generatePlan(params, analysisResult, extraPrompt = '') {
+export async function generatePlan(params: PlanParams, analysisResult: AnalysisResult, extraPrompt: string = ''): Promise<Record<string, unknown>> {
   const prompt = buildPlanPrompt(params, analysisResult) + (extraPrompt ? '\n\n' + extraPrompt : '');
 
   // 设置超时时间为 60 秒
@@ -128,7 +129,7 @@ export async function generatePlan(params, analysisResult, extraPrompt = '') {
       throw new Error(`MiMo API 错误: ${response.status} ${err}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
     const content = data.choices?.[0]?.message?.content;
 
     if (!content) {
@@ -149,7 +150,8 @@ export async function generatePlan(params, analysisResult, extraPrompt = '') {
     };
   } catch (error) {
     clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
+    const e = error as Error;
+    if (e.name === 'AbortError') {
       throw new Error('AI API 请求超时，请稍后重试');
     }
     throw error;

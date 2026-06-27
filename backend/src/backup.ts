@@ -14,12 +14,12 @@ const BACKUP_INTERVAL_MS = 24 * 60 * 60 * 1000; // 24 小时
 // 确保备份目录存在
 mkdirSync(BACKUP_DIR, { recursive: true });
 
-function getBackupFilename() {
+function getBackupFilename(): string {
   const date = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
   return `kb-coach-${date}.db`;
 }
 
-function createBackup() {
+function createBackup(): void {
   try {
     const filename = getBackupFilename();
     const backupPath = join(BACKUP_DIR, filename);
@@ -30,7 +30,7 @@ function createBackup() {
   }
 }
 
-function cleanOldBackups() {
+function cleanOldBackups(): void {
   try {
     const files = readdirSync(BACKUP_DIR);
     const now = Date.now();

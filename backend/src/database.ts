@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { mkdirSync } from 'fs';
 import logger from './logger.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -10,7 +11,6 @@ const __dirname = dirname(__filename);
 const DB_PATH = join(__dirname, '..', 'data', 'kb-coach.db');
 
 // 确保 data 目录存在
-import { mkdirSync } from 'fs';
 mkdirSync(join(__dirname, '..', 'data'), { recursive: true });
 
 // 初始化数据库
@@ -160,14 +160,15 @@ db.exec(`
 
 // === 数据库迁移 ===
 // 为已有数据库添加新列（IF NOT EXISTS 不适用于 ALTER TABLE）
-function safeAddColumn(table, column, type) {
+function safeAddColumn(table: string, column: string, type: string): void {
   try {
     db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`);
     logger.info({ table, column }, '迁移列已添加');
   } catch (err) {
     // 列已存在，忽略
-    if (!err.message.includes('duplicate column')) {
-      logger.error({ err, table, column }, '迁移失败');
+    const e = err as Error;
+    if (!e.message.includes('duplicate column')) {
+      logger.error({ err: e, table, column }, '迁移失败');
     }
   }
 }
@@ -195,7 +196,7 @@ checkpointTimer.unref();
 // === 优雅关闭函数 ===
 // 先执行 WAL checkpoint，再关闭数据库连接
 let dbClosed = false;
-export function closeDatabase() {
+export function closeDatabase(): void {
   if (dbClosed) return;
   dbClosed = true;
   try {

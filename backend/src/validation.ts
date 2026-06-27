@@ -1,7 +1,7 @@
 // 输入校验工具
 
 // 验证 base64 图片格式
-export function isValidBase64Image(str) {
+export function isValidBase64Image(str: unknown): boolean {
   if (typeof str !== 'string') return false;
   // 检查是否是 data:image 开头的 base64
   if (str.startsWith('data:image/')) {
@@ -12,62 +12,63 @@ export function isValidBase64Image(str) {
 }
 
 // 验证枚举值
-export function isValidEnum(value, allowedValues) {
-  return allowedValues.includes(value);
+export function isValidEnum(value: unknown, allowedValues: readonly string[]): boolean {
+  return typeof value === 'string' && allowedValues.includes(value);
 }
 
 // 验证数值范围
-export function isInRange(value, min, max) {
+export function isInRange(value: unknown, min: number, max: number): boolean {
   const num = Number(value);
   return !isNaN(num) && num >= min && num <= max;
 }
 
 // 清理字符串输入
-export function sanitizeString(str, maxLength = 1000) {
+export function sanitizeString(str: unknown, maxLength: number = 1000): string {
   if (typeof str !== 'string') return '';
   return str.trim().substring(0, maxLength);
 }
 
 // 验证训练目标
-export function isValidGoal(goal) {
+export function isValidGoal(goal: unknown): boolean {
   return isValidEnum(goal, ['muscle_gain', 'fat_loss', 'posture_fix', 'rehab']);
 }
 
 // 验证经验水平
-export function isValidExperience(experience) {
+export function isValidExperience(experience: unknown): boolean {
   return isValidEnum(experience, ['beginner', 'intermediate', 'advanced']);
 }
 
 // 验证设备类型
-export function isValidEquipment(equipment) {
+export function isValidEquipment(equipment: unknown): boolean {
   return isValidEnum(equipment, ['gym', 'dumbbell', 'bodyweight']);
 }
 
 // 验证每周训练天数
-export function isValidDaysPerWeek(days) {
+export function isValidDaysPerWeek(days: unknown): boolean {
   return isInRange(days, 1, 7);
 }
 
 // 验证训练时长
-export function isValidSessionDuration(duration) {
+export function isValidSessionDuration(duration: unknown): boolean {
   return isInRange(duration, 15, 180);
 }
 
 // 验证聊天消息
-export function isValidChatMessage(message) {
+export function isValidChatMessage(message: unknown): boolean {
   return typeof message === 'string' && message.length > 0 && message.length <= 2000;
 }
 
 // 验证聊天历史
-export function isValidChatHistory(history) {
+export function isValidChatHistory(history: unknown): boolean {
   if (!Array.isArray(history)) return false;
   if (history.length > 20) return false;
   return history.every(msg =>
     typeof msg === 'object' &&
-    isValidEnum(msg.role, ['user', 'assistant']) &&
-    typeof msg.content === 'string' &&
-    msg.content.length > 0 &&
-    msg.content.length <= 5000
+    msg !== null &&
+    isValidEnum((msg as Record<string, unknown>).role, ['user', 'assistant']) &&
+    typeof (msg as Record<string, unknown>).content === 'string' &&
+    ((msg as Record<string, unknown>).content as string).length > 0 &&
+    ((msg as Record<string, unknown>).content as string).length <= 5000
   );
 }
 
@@ -77,7 +78,7 @@ export function isValidChatHistory(history) {
  * 2. 退回到平衡括号扫描，捕获第一段完整的 JSON 对象
  * 3. 失败抛错
  */
-export function extractJsonObject(content) {
+export function extractJsonObject(content: string): Record<string, unknown> {
   if (typeof content !== 'string') {
     throw new Error('AI 返回内容不是字符串');
   }
@@ -86,7 +87,7 @@ export function extractJsonObject(content) {
   const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/i);
   if (fenced) {
     try {
-      return JSON.parse(fenced[1].trim());
+      return JSON.parse(fenced[1].trim()) as Record<string, unknown>;
     } catch {
       // 围栏内容非合法 JSON，继续走平衡括号
     }
@@ -121,7 +122,7 @@ export function extractJsonObject(content) {
         if (depth === 0 && start !== -1) {
           const slice = content.slice(start, i + 1);
           try {
-            return JSON.parse(slice);
+            return JSON.parse(slice) as Record<string, unknown>;
           } catch {
             // 该段不合法，继续往后找
             start = -1;

@@ -1,9 +1,10 @@
 import pino from 'pino';
+import type { Logger } from 'pino';
 
 const isTest = process.env.JEST_WORKER_ID !== undefined;
 const isProd = process.env.NODE_ENV === 'production';
 
-let logger;
+let logger: Logger;
 
 if (isTest) {
   // 测试环境：静默，不启用 transport（规避 --detectOpenHandles 误报）

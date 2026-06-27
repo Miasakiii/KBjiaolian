@@ -1,8 +1,10 @@
 import crypto from 'crypto';
 import logger from './logger.js';
+import { extractJsonObject } from './validation.js';
+import type { AnalysisResult, ComparisonResult } from './types.js';
 
-const API_URL = process.env.MIMO_API_URL;
-const API_KEY = process.env.MIMO_API_KEY;
+const API_URL = process.env.MIMO_API_URL ?? '';
+const API_KEY = process.env.MIMO_API_KEY ?? '';
 const MODEL = process.env.MIMO_MODEL || 'mimo-v2.5';
 
 // 启动时校验关键环境变量（测试环境跳过以方便 mock）
@@ -10,18 +12,16 @@ if (process.env.NODE_ENV !== 'test' && (!API_URL || !API_KEY)) {
   throw new Error('MIMO_API_URL / MIMO_API_KEY 环境变量未设置');
 }
 
-import { extractJsonObject } from './validation.js';
-
 // 结果缓存：对相同图片返回一致结果
-const analysisCache = new Map();
+const analysisCache = new Map<string, AnalysisResult>();
 const CACHE_MAX_SIZE = 100;
 
-function getCacheKey(base64Image) {
+function getCacheKey(base64Image: string): string {
   // 使用 sha256 计算完整图片哈希，避免前缀/哈希碰撞导致返回错误结果
   return crypto.createHash('sha256').update(base64Image).digest('hex');
 }
 
-function normalizeScore(value, min = 0, max = 100) {
+function normalizeScore(value: unknown, min: number = 0, max: number = 100): number {
   const num = Math.round(Number(value));
   return Math.max(min, Math.min(max, num));
 }
@@ -38,37 +38,46 @@ const RADAR_FIELDS = [
   'coreStability',   // 核心稳定性
 ];
 
-function normalizeResult(result) {
+function normalizeResult(result: Record<string, unknown>): AnalysisResult {
   // 标准化评分到合理范围
-  const radar = {};
+  const radar: Record<string, number> = {};
+  const radarData = (result.radar ?? {}) as Record<string, unknown>;
   for (const field of RADAR_FIELDS) {
-    radar[field] = normalizeScore(result.radar?.[field] ?? 0);
+    radar[field] = normalizeScore(radarData[field] ?? 0);
   }
+
+  const bodyMetricsData = result.bodyMetrics as Record<string, unknown> | undefined;
 
   return {
     score: normalizeScore(result.score),
-    summary: String(result.summary || '').substring(0, 300),
-    issues: Array.isArray(result.issues) ? result.issues.map(issue => ({
-      name: String(issue.name || ''),
-      severity: ['mild', 'moderate', 'severe'].includes(issue.severity) ? issue.severity : 'moderate',
-      description: String(issue.description || '')
-    })) : [],
+    summary: String(result.summary ?? '').substring(0, 300),
+    issues: Array.isArray(result.issues) ? (result.issues as unknown[]).map(issue => {
+      const i = issue as Record<string, unknown>;
+      return {
+        name: String(i.name ?? ''),
+        severity: (['mild', 'moderate', 'severe'] as const).includes(i.severity as 'mild' | 'moderate' | 'severe') ? i.severity as 'mild' | 'moderate' | 'severe' : 'moderate',
+        description: String(i.description ?? '')
+      };
+    }) : [],
     radar,
-    bodyMetrics: result.bodyMetrics ? {
-      postureType: String(result.bodyMetrics.postureType || ''),
-      riskLevel: ['低', '中', '高'].includes(result.bodyMetrics.riskLevel) ? result.bodyMetrics.riskLevel : '中',
-      affectedAreas: Array.isArray(result.bodyMetrics.affectedAreas) ? result.bodyMetrics.affectedAreas.map(String) : []
+    bodyMetrics: bodyMetricsData ? {
+      postureType: String(bodyMetricsData.postureType ?? ''),
+      riskLevel: (typeof bodyMetricsData.riskLevel === 'string' && ['低', '中', '高'].includes(bodyMetricsData.riskLevel)) ? bodyMetricsData.riskLevel : '中',
+      affectedAreas: Array.isArray(bodyMetricsData.affectedAreas) ? (bodyMetricsData.affectedAreas as unknown[]).map(String) : []
     } : { postureType: '', riskLevel: '中', affectedAreas: [] },
-    suggestions: Array.isArray(result.suggestions) ? result.suggestions.slice(0, 6).map(s => ({
-      exercise: String(s.exercise || ''),
-      sets: String(s.sets || ''),
-      description: String(s.description || ''),
-      targetMuscle: String(s.targetMuscle || ''),
-      difficulty: ['初级', '中级', '高级'].includes(s.difficulty) ? s.difficulty : '初级',
-      priority: ['高', '中', '低'].includes(s.priority) ? s.priority : '中',
-      steps: Array.isArray(s.steps) ? s.steps.slice(0, 6).map(String) : [],
-      tips: Array.isArray(s.tips) ? s.tips.slice(0, 4).map(String) : []
-    })) : []
+    suggestions: Array.isArray(result.suggestions) ? (result.suggestions as unknown[]).slice(0, 6).map(s => {
+      const sg = s as Record<string, unknown>;
+      return {
+        exercise: String(sg.exercise ?? ''),
+        sets: String(sg.sets ?? ''),
+        description: String(sg.description ?? ''),
+        targetMuscle: String(sg.targetMuscle ?? ''),
+        difficulty: (typeof sg.difficulty === 'string' && ['初级', '中级', '高级'].includes(sg.difficulty)) ? sg.difficulty : '初级',
+        priority: (typeof sg.priority === 'string' && ['高', '中', '低'].includes(sg.priority)) ? sg.priority : '中',
+        steps: Array.isArray(sg.steps) ? (sg.steps as unknown[]).slice(0, 6).map(String) : [],
+        tips: Array.isArray(sg.tips) ? (sg.tips as unknown[]).slice(0, 4).map(String) : []
+      };
+    }) : []
   };
 }
 
@@ -154,12 +163,12 @@ ${FEW_SHOT_EXAMPLE}
 - 建议动作要针对识别出的问题，按优先级排序
 - 不要输出 JSON 以外的任何内容`;
 
-export async function analyzePhoto(base64Image) {
+export async function analyzePhoto(base64Image: string): Promise<AnalysisResult> {
   // 检查缓存
   const cacheKey = getCacheKey(base64Image);
   if (analysisCache.has(cacheKey)) {
     logger.debug('使用缓存结果');
-    return analysisCache.get(cacheKey);
+    return analysisCache.get(cacheKey)!;
   }
 
   // 设置超时时间为 60 秒
@@ -199,7 +208,7 @@ export async function analyzePhoto(base64Image) {
       throw new Error(`MiMo API 错误: ${response.status} ${err}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
     const content = data.choices?.[0]?.message?.content;
 
     if (!content) {
@@ -211,7 +220,7 @@ export async function analyzePhoto(base64Image) {
 
     // 存入缓存
     if (analysisCache.size >= CACHE_MAX_SIZE) {
-      const firstKey = analysisCache.keys().next().value;
+      const firstKey = analysisCache.keys().next().value as string;
       analysisCache.delete(firstKey);
     }
     analysisCache.set(cacheKey, normalizedResult);
@@ -219,7 +228,8 @@ export async function analyzePhoto(base64Image) {
     return normalizedResult;
   } catch (error) {
     clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
+    const e = error as Error;
+    if (e.name === 'AbortError') {
       throw new Error('AI API 请求超时，请稍后重试');
     }
     throw error;
@@ -271,12 +281,12 @@ const COMPARE_PROMPT = `你是一位专业的健身康复师。请对比分析�
 - 只报告有明显变化（>=5分）的方面
 - 不要输出 JSON 以外的任何内容`;
 
-export async function compareAnalysis(beforeResult, afterResult) {
+export async function compareAnalysis(beforeResult: AnalysisResult, afterResult: AnalysisResult): Promise<ComparisonResult> {
   const prompt = COMPARE_PROMPT
-    .replace('{score1}', beforeResult.score)
+    .replace('{score1}', String(beforeResult.score))
     .replace('{issues1}', beforeResult.issues.map(i => `${i.name}(${i.severity})`).join('、') || '无')
     .replace('{radar1}', JSON.stringify(beforeResult.radar))
-    .replace('{score2}', afterResult.score)
+    .replace('{score2}', String(afterResult.score))
     .replace('{issues2}', afterResult.issues.map(i => `${i.name}(${i.severity})`).join('、') || '无')
     .replace('{radar2}', JSON.stringify(afterResult.radar));
 
@@ -309,7 +319,7 @@ export async function compareAnalysis(beforeResult, afterResult) {
       throw new Error(`MiMo API 错误: ${response.status} ${err}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
     const content = data.choices?.[0]?.message?.content;
 
     if (!content) {
@@ -321,17 +331,18 @@ export async function compareAnalysis(beforeResult, afterResult) {
     // 标准化对比结果
     return {
       scoreChange: Number(result.scoreChange) || 0,
-      overallAssessment: String(result.overallAssessment || '').substring(0, 200),
-      improvedAreas: Array.isArray(result.improvedAreas) ? result.improvedAreas.map(String) : [],
-      worsenedAreas: Array.isArray(result.worsenedAreas) ? result.worsenedAreas.map(String) : [],
-      unchangedAreas: Array.isArray(result.unchangedAreas) ? result.unchangedAreas.map(String) : [],
-      radarComparison: result.radarComparison || {},
-      recommendations: Array.isArray(result.recommendations) ? result.recommendations.slice(0, 5).map(String) : [],
-      encouragement: String(result.encouragement || '')
-    };
+      overallAssessment: String(result.overallAssessment ?? '').substring(0, 200),
+      improvedAreas: Array.isArray(result.improvedAreas) ? (result.improvedAreas as unknown[]).map(String) : [],
+      worsenedAreas: Array.isArray(result.worsenedAreas) ? (result.worsenedAreas as unknown[]).map(String) : [],
+      unchangedAreas: Array.isArray(result.unchangedAreas) ? (result.unchangedAreas as unknown[]).map(String) : [],
+      radarComparison: (result.radarComparison ?? {}) as Record<string, unknown>,
+      recommendations: Array.isArray(result.recommendations) ? (result.recommendations as unknown[]).slice(0, 5).map(String) : [],
+      encouragement: String(result.encouragement ?? '')
+    } satisfies ComparisonResult;
   } catch (error) {
     clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
+    const e = error as Error;
+    if (e.name === 'AbortError') {
       throw new Error('AI API 请求超时，请稍后重试');
     }
     throw error;

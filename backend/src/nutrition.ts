@@ -1,15 +1,16 @@
-const API_URL = process.env.MIMO_API_URL;
-const API_KEY = process.env.MIMO_API_KEY;
+import crypto from 'crypto';
+import logger from './logger.js';
+import { extractJsonObject } from './validation.js';
+import type { NutritionResult, FoodItem } from './types.js';
+
+const API_URL = process.env.MIMO_API_URL ?? '';
+const API_KEY = process.env.MIMO_API_KEY ?? '';
 const MODEL = process.env.MIMO_MODEL || 'mimo-v2.5';
 
 // 启动时校验关键环境变量（测试环境跳过以方便 mock）
 if (process.env.NODE_ENV !== 'test' && (!API_URL || !API_KEY)) {
   throw new Error('MIMO_API_URL / MIMO_API_KEY 环境变量未设置');
 }
-
-import crypto from 'crypto';
-import logger from './logger.js';
-import { extractJsonObject } from './validation.js';
 
 const FOOD_ANALYSIS_PROMPT = `你是一位专业的营养师和食品识别专家。请识别这张图片中的食物，并估算营养成分。
 
@@ -45,22 +46,25 @@ const FOOD_ANALYSIS_PROMPT = `你是一位专业的营养师和食品识别专�
 - 不要输出 JSON 以外的任何内容`;
 
 // 结果缓存
-const analysisCache = new Map();
+const analysisCache = new Map<string, NutritionResult>();
 const CACHE_MAX_SIZE = 50;
 
-function getCacheKey(base64Image) {
+function getCacheKey(base64Image: string): string {
   return crypto.createHash('sha256').update(base64Image).digest('hex');
 }
 
-function normalizeResult(result) {
-  const foods = Array.isArray(result.foods) ? result.foods.map(food => ({
-    name: String(food.name || ''),
-    portion: String(food.portion || ''),
-    calories: Math.max(0, Math.round(Number(food.calories) || 0)),
-    protein: Math.max(0, Math.round(Number(food.protein) || 0)),
-    carbs: Math.max(0, Math.round(Number(food.carbs) || 0)),
-    fat: Math.max(0, Math.round(Number(food.fat) || 0))
-  })) : [];
+function normalizeResult(result: Record<string, unknown>): NutritionResult {
+  const foods: FoodItem[] = Array.isArray(result.foods) ? (result.foods as unknown[]).map(food => {
+    const f = food as Record<string, unknown>;
+    return {
+      name: String(f.name ?? ''),
+      portion: String(f.portion ?? ''),
+      calories: Math.max(0, Math.round(Number(f.calories) || 0)),
+      protein: Math.max(0, Math.round(Number(f.protein) || 0)),
+      carbs: Math.max(0, Math.round(Number(f.carbs) || 0)),
+      fat: Math.max(0, Math.round(Number(f.fat) || 0))
+    };
+  }) : [];
 
   const totalCalories = foods.reduce((sum, f) => sum + f.calories, 0);
   const totalProtein = foods.reduce((sum, f) => sum + f.protein, 0);
@@ -69,20 +73,20 @@ function normalizeResult(result) {
 
   return {
     foods,
-    totalCalories: Math.round(result.totalCalories || totalCalories),
-    totalProtein: Math.round(result.totalProtein || totalProtein),
-    totalCarbs: Math.round(result.totalCarbs || totalCarbs),
-    totalFat: Math.round(result.totalFat || totalFat),
-    tips: String(result.tips || '').substring(0, 100)
+    totalCalories: Math.round(Number(result.totalCalories) || totalCalories),
+    totalProtein: Math.round(Number(result.totalProtein) || totalProtein),
+    totalCarbs: Math.round(Number(result.totalCarbs) || totalCarbs),
+    totalFat: Math.round(Number(result.totalFat) || totalFat),
+    tips: String(result.tips ?? '').substring(0, 100)
   };
 }
 
-export async function analyzeFood(base64Image) {
+export async function analyzeFood(base64Image: string): Promise<NutritionResult> {
   // 检查缓存
   const cacheKey = getCacheKey(base64Image);
   if (analysisCache.has(cacheKey)) {
     logger.debug('使用食物识别缓存');
-    return analysisCache.get(cacheKey);
+    return analysisCache.get(cacheKey)!;
   }
 
   // 设置超时时间为 60 秒
@@ -121,7 +125,7 @@ export async function analyzeFood(base64Image) {
       throw new Error(`MiMo API 错误: ${response.status} ${err}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as { choices?: Array<{ message?: { content?: string } }> };
     const content = data.choices?.[0]?.message?.content;
 
     if (!content) {
@@ -133,7 +137,7 @@ export async function analyzeFood(base64Image) {
 
     // 存入缓存
     if (analysisCache.size >= CACHE_MAX_SIZE) {
-      const firstKey = analysisCache.keys().next().value;
+      const firstKey = analysisCache.keys().next().value as string;
       analysisCache.delete(firstKey);
     }
     analysisCache.set(cacheKey, normalizedResult);
@@ -141,7 +145,8 @@ export async function analyzeFood(base64Image) {
     return normalizedResult;
   } catch (error) {
     clearTimeout(timeoutId);
-    if (error.name === 'AbortError') {
+    const e = error as Error;
+    if (e.name === 'AbortError') {
       throw new Error('AI API 请求超时，请稍后重试');
     }
     throw error;

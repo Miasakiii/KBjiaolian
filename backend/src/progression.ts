@@ -3,11 +3,54 @@
  * 分析用户历史训练记录，自动调整训练强度
  */
 
+// === 内部类型 ===
+
+interface ExerciseHistoryEntry {
+  date: number;
+  weight: number;
+  reps: number;
+  sets: number;
+  rating: number | undefined;
+}
+
+interface ExercisePerformance {
+  sessions: number;
+  maxWeight: number;
+  maxReps: number;
+  maxSets: number;
+  lastWeight: number;
+  lastReps: number;
+  lastSets: number;
+  lastDate: number;
+  history: ExerciseHistoryEntry[];
+}
+
+export interface ProgressionSuggestion {
+  exerciseName: string;
+  sessions: number;
+  previousWeight: number;
+  previousReps: number;
+  previousSets: number;
+  weight: number;
+  reps: string;
+  sets: number;
+  reason: string;
+  adjustment: 'increase' | 'decrease' | 'maintain' | 'new';
+}
+
+export interface ProgressionSummaryItem {
+  exercise: string;
+  emoji: string;
+  message: string;
+  adjustment: string;
+  previous: string;
+}
+
 /**
  * 解析 reps/sets/weight 字符串为数字。
  * 支持 "8-12" → 10（均值）、"3组" → 3、"10kg" → 10。
  */
-function parseRangeNum(value) {
+function parseRangeNum(value: unknown): number {
   if (typeof value === 'number' && Number.isFinite(value)) return value;
   if (typeof value !== 'string') return 0;
   const trimmed = value.trim();
@@ -32,17 +75,17 @@ function parseRangeNum(value) {
 
 /**
  * 从历史训练记录中提取每个动作的表现数据
- * @param {Array} workoutRecords - 训练记录列表
- * @returns {Object} 动作名称 -> 表现数据
  */
-export function extractExercisePerformance(workoutRecords) {
-  const performance = {};
+export function extractExercisePerformance(
+  workoutRecords: Array<Record<string, unknown>>
+): Record<string, ExercisePerformance> {
+  const performance: Record<string, ExercisePerformance> = {};
 
   for (const record of workoutRecords) {
-    const exercises = Array.isArray(record.exercises) ? record.exercises : [];
+    const exercises = Array.isArray(record.exercises) ? record.exercises as Array<Record<string, unknown>> : [];
 
     for (const exercise of exercises) {
-      const name = exercise.name || exercise.exercise;
+      const name = (exercise.name || exercise.exercise) as string | undefined;
       if (!name) continue;
 
       if (!performance[name]) {
@@ -71,7 +114,7 @@ export function extractExercisePerformance(workoutRecords) {
       perf.maxSets = Math.max(perf.maxSets, sets);
 
       // 记录最近一次的数据
-      const recordDate = record.created_at || record.startTime || 0;
+      const recordDate = (record.created_at || record.startTime || 0) as number;
       if (recordDate > perf.lastDate) {
         perf.lastDate = recordDate;
         perf.lastWeight = weight;
@@ -84,7 +127,7 @@ export function extractExercisePerformance(workoutRecords) {
         weight,
         reps,
         sets,
-        rating: record.rating,
+        rating: record.rating as number | undefined,
       });
     }
   }
@@ -95,22 +138,16 @@ export function extractExercisePerformance(workoutRecords) {
 /**
  * 计算渐进式超负荷建议
  * 基于历史数据，为每个动作生成下一步的训练参数
- *
- * 策略：
- * 1. 如果上次完成顺利（rating >= 4），增加重量 5-10% 或增加 1-2 次
- * 2. 如果上次困难（rating <= 2），保持或减少 5%
- * 3. 如果没有历史数据，使用默认起点
- *
- * @param {Object} performance - extractExercisePerformance 的输出
- * @param {Object} userProfile - 用户经验水平
- * @returns {Object} 动作名称 -> 建议参数
  */
-export function calculateProgression(performance, userProfile = {}) {
+export function calculateProgression(
+  performance: Record<string, ExercisePerformance>,
+  userProfile: { experience?: string } = {}
+): Record<string, ProgressionSuggestion> {
   const { experience = 'beginner' } = userProfile;
-  const suggestions = {};
+  const suggestions: Record<string, ProgressionSuggestion> = {};
 
   // 根据经验水平调整增量
-  const incrementMap = {
+  const incrementMap: Record<string, { weightPercent: number; repIncrease: number; setsIncrease: number }> = {
     beginner: { weightPercent: 0.05, repIncrease: 2, setsIncrease: 0 },
     intermediate: { weightPercent: 0.075, repIncrease: 1, setsIncrease: 0 },
     advanced: { weightPercent: 0.10, repIncrease: 1, setsIncrease: 1 },
@@ -128,12 +165,17 @@ export function calculateProgression(performance, userProfile = {}) {
       ? recentHistory.reduce((sum, h) => sum + (h.rating || 3), 0) / recentHistory.length
       : 3;
 
-    const suggestion = {
+    const suggestion: ProgressionSuggestion = {
       exerciseName,
       sessions: perf.sessions,
       previousWeight: perf.lastWeight,
       previousReps: perf.lastReps,
       previousSets: perf.lastSets,
+      weight: 0,
+      reps: '',
+      sets: 0,
+      reason: '',
+      adjustment: 'maintain',
     };
 
     if (perf.sessions === 1) {
@@ -146,7 +188,7 @@ export function calculateProgression(performance, userProfile = {}) {
     } else if (avgRating >= 4) {
       // 表现优秀：增加强度
       const newWeight = perf.lastWeight > 0
-        ? Math.round(perf.lastWeight * (1 + increment.weightPercent) / 0.5) * 0.5  // 四舍五入到 0.5kg
+        ? Math.round(perf.lastWeight * (1 + increment.weightPercent) / 0.5) * 0.5
         : 0;
       const newReps = perf.lastReps + increment.repIncrease;
 
@@ -175,6 +217,9 @@ export function calculateProgression(performance, userProfile = {}) {
       suggestion.adjustment = 'maintain';
     }
 
+    // suppress unused variable warning
+    void lastRating;
+
     suggestions[exerciseName] = suggestion;
   }
 
@@ -183,12 +228,8 @@ export function calculateProgression(performance, userProfile = {}) {
 
 /**
  * 生成渐进式超负荷的 Prompt 补充内容
- * 将历史数据注入到训练方案生成的 Prompt 中
- *
- * @param {Object} progression - calculateProgression 的输出
- * @returns {string} Prompt 补充文本
  */
-export function buildProgressionPrompt(progression) {
+export function buildProgressionPrompt(progression: Record<string, ProgressionSuggestion>): string {
   const entries = Object.entries(progression);
   if (entries.length === 0) return '';
 
@@ -219,14 +260,11 @@ ${lines.join('\n')}
 
 /**
  * 生成训练建议摘要（用于前端展示）
- * @param {Object} progression - calculateProgression 的输出
- * @returns {Array} 建议列表
  */
-export function getProgressionSummary(progression) {
-  const summary = [];
+export function getProgressionSummary(progression: Record<string, ProgressionSuggestion>): ProgressionSummaryItem[] {
+  const summary: ProgressionSummaryItem[] = [];
 
   for (const [name, s] of Object.entries(progression)) {
-    // 包含 new 状态（首次训练）的建议
     const emoji = s.adjustment === 'increase' ? '📈'
       : s.adjustment === 'decrease' ? '📉'
       : s.adjustment === 'new' ? '🆕'
@@ -242,7 +280,7 @@ export function getProgressionSummary(progression) {
 
   // 按调整类型排序：增加 > 保持 > 降低 > 新
   summary.sort((a, b) => {
-    const order = { increase: 0, maintain: 1, decrease: 2, new: 3 };
+    const order: Record<string, number> = { increase: 0, maintain: 1, decrease: 2, new: 3 };
     return (order[a.adjustment] ?? 1) - (order[b.adjustment] ?? 1);
   });
 

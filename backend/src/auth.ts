@@ -4,13 +4,15 @@ import crypto from 'crypto';
 import db from './database.js';
 import logger from './logger.js';
 import { sendVerificationEmail } from './email.js';
+import type { Request, Response, NextFunction } from 'express';
+import type { UserRow, VerificationCodeRow, AppError } from './types.js';
 
 // JWT_SECRET 必须从环境变量读取，不允许硬编码后备值（安全要求）
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET: string = process.env.JWT_SECRET ?? '';
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET 环境变量未设置。请在 .env 文件中配置安全的密钥。');
 }
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
+const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || '7d';
 
 // 验证码配置
 const CODE_LENGTH = 6;
@@ -18,12 +20,12 @@ const CODE_EXPIRE_MS = 5 * 60 * 1000; // 5 分钟
 const CODE_COOLDOWN_MS = 60 * 1000; // 60 秒冷却
 
 // 验证邮箱格式（RFC 5322 简化版）
-function isValidEmail(email) {
+function isValidEmail(email: string): boolean {
   return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/.test(email);
 }
 
 // 验证密码强度：6-100 字符，且必须同时包含字母和数字
-function isValidPassword(password) {
+function isValidPassword(password: string): boolean {
   if (typeof password !== 'string' || password.length < 6 || password.length > 100) {
     return false;
   }
@@ -34,25 +36,25 @@ function isValidPassword(password) {
 }
 
 // 生成 JWT Token
-function generateToken(userId) {
-  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+function generateToken(userId: string): string {
+  return jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN as any });
 }
 
 // 生成用户 ID（使用 crypto.randomUUID 避免可预测与碰撞）
-function generateUserId() {
+function generateUserId(): string {
   return crypto.randomUUID();
 }
 
 // 生成 6 位数字验证码
-function generateCode() {
+function generateCode(): string {
   return crypto.randomInt(100000, 999999).toString();
 }
 
 // 预编译 SQL 语句
 const stmts = {
-  findUserByEmail: db.prepare('SELECT * FROM users WHERE email = ?'),
-  findUserById: db.prepare('SELECT * FROM users WHERE id = ?'),
-  findUserByOpenId: db.prepare('SELECT * FROM users WHERE open_id = ?'),
+  findUserByEmail: db.prepare<unknown[], UserRow>('SELECT * FROM users WHERE email = ?'),
+  findUserById: db.prepare<unknown[], UserRow>('SELECT * FROM users WHERE id = ?'),
+  findUserByOpenId: db.prepare<unknown[], UserRow>('SELECT * FROM users WHERE open_id = ?'),
   createUser: db.prepare('INSERT INTO users (id, email, password, nickname) VALUES (?, ?, ?, ?)'),
   createWechatUser: db.prepare('INSERT INTO users (id, open_id, nickname, plan, email, password) VALUES (?, ?, ?, ?, ?, ?)'),
   updateUserOpenId: db.prepare('UPDATE users SET open_id = ?, updated_at = ? WHERE id = ?'),
@@ -65,14 +67,14 @@ const stmts = {
   // 验证码相关
   insertCode: db.prepare('INSERT INTO verification_codes (email, code, type, expires_at) VALUES (?, ?, ?, ?)'),
   // 查找当前有效的验证码记录（不校验 code 值，在 JS 层比对以防爆破）
-  findActiveCode: db.prepare(`
+  findActiveCode: db.prepare<unknown[], VerificationCodeRow>(`
     SELECT * FROM verification_codes
     WHERE email = ? AND type = ? AND used = 0 AND expires_at > ?
     ORDER BY created_at DESC LIMIT 1
   `),
   incrementAttempts: db.prepare('UPDATE verification_codes SET attempts = attempts + 1 WHERE id = ?'),
   markCodeUsed: db.prepare('UPDATE verification_codes SET used = 1 WHERE id = ?'),
-  findRecentCode: db.prepare(`
+  findRecentCode: db.prepare<unknown[], VerificationCodeRow>(`
     SELECT * FROM verification_codes
     WHERE email = ? AND type = ? AND created_at > ?
     ORDER BY created_at DESC LIMIT 1
@@ -81,7 +83,7 @@ const stmts = {
 };
 
 // === 发送验证码 ===
-export async function sendVerificationCode(req, res) {
+export async function sendVerificationCode(req: Request, res: Response) {
   try {
     const { email, type = 'register' } = req.body;
 
@@ -136,7 +138,7 @@ export async function sendVerificationCode(req, res) {
 // === 验证验证码（不立即标记已用，由调用方在动作成功后调用 markCodeUsed） ===
 const MAX_CODE_ATTEMPTS = 5;
 
-export function verifyCode(email, code, type = 'register') {
+export function verifyCode(email: string, code: string, type: 'register' | 'reset' = 'register') {
   const normalizedEmail = email.toLowerCase().trim();
   const record = stmts.findActiveCode.get(normalizedEmail, type, Date.now());
 
@@ -166,13 +168,13 @@ export function verifyCode(email, code, type = 'register') {
 }
 
 // 标记验证码已用
-export function markCodeUsed(codeId) {
+export function markCodeUsed(codeId: number): void {
   if (!codeId) return;
   stmts.markCodeUsed.run(codeId);
 }
 
 // === 注册（需要验证码）===
-export async function register(req, res) {
+export async function register(req: Request, res: Response) {
   try {
     const { email, password, nickname, code } = req.body;
 
@@ -209,7 +211,7 @@ export async function register(req, res) {
       stmts.createUser.run(userId, normalizedEmail, hashedPassword, userNickname);
 
       // 注册成功后才标记验证码已用
-      markCodeUsed(codeResult.codeId);
+      markCodeUsed(codeResult.codeId!);
 
       // 生成 token
       const token = generateToken(userId);
@@ -224,7 +226,7 @@ export async function register(req, res) {
       });
     } catch (err) {
       // 注册过程失败，不标记验证码已用，用户可重试
-      if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      if ((err as any).code === 'SQLITE_CONSTRAINT_UNIQUE') {
         return res.status(409).json({ error: '该邮箱已注册' });
       }
       throw err;
@@ -239,7 +241,7 @@ export async function register(req, res) {
 // 预生成的固定 bcrypt 哈希，用于不存在用户时的时序攻击防御
 const DUMMY_HASH = '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
 
-export async function login(req, res) {
+export async function login(req: Request, res: Response) {
   try {
     const { email, password } = req.body;
 
@@ -274,10 +276,10 @@ export async function login(req, res) {
 }
 
 // === 微信小程序登录（wx.login → code2Session → 换 token）===
-const WECHAT_APPID = process.env.WECHAT_APPID;
-const WECHAT_APPSECRET = process.env.WECHAT_APPSECRET;
+const WECHAT_APPID: string = process.env.WECHAT_APPID ?? '';
+const WECHAT_APPSECRET: string = process.env.WECHAT_APPSECRET ?? '';
 
-export async function wechatLogin(req, res) {
+export async function wechatLogin(req: Request, res: Response) {
   try {
     const { code } = req.body;
 
@@ -309,7 +311,7 @@ export async function wechatLogin(req, res) {
         return res.status(502).json({ error: '无法连接微信登录服务，请稍后重试' });
       }
 
-      const wechatData = await wechatRes.json();
+      const wechatData = await wechatRes.json() as Record<string, any>;
 
       if (wechatData.errcode) {
         logger.error({ errcode: wechatData.errcode, errmsg: wechatData.errmsg }, '微信 code2Session 错误');
@@ -336,6 +338,10 @@ export async function wechatLogin(req, res) {
       user = stmts.findUserByOpenId.get(openid);
     }
 
+    if (!user) {
+      return res.status(500).json({ error: '创建用户失败' });
+    }
+
     // 生成 JWT
     const token = generateToken(user.id);
 
@@ -355,7 +361,7 @@ export async function wechatLogin(req, res) {
 }
 
 // === 获取当前用户信息 ===
-export function getProfile(req, res) {
+export function getProfile(req: Request, res: Response) {
   try {
     const user = stmts.findUserById.get(req.userId);
     if (!user) {
@@ -377,7 +383,7 @@ export function getProfile(req, res) {
 }
 
 // === 忘记密码 — 发送重置验证码 ===
-export async function forgotPassword(req, res) {
+export async function forgotPassword(req: Request, res: Response) {
   try {
     const { email } = req.body;
 
@@ -424,7 +430,7 @@ export async function forgotPassword(req, res) {
 }
 
 // === 重置密码（需要验证码）===
-export async function resetPassword(req, res) {
+export async function resetPassword(req: Request, res: Response) {
   try {
     const { email, code, newPassword } = req.body;
 
@@ -454,7 +460,7 @@ export async function resetPassword(req, res) {
       stmts.updatePassword.run(hashedPassword, Date.now(), user.id);
 
       // 重置成功后才标记验证码已用
-      markCodeUsed(codeResult.codeId);
+      markCodeUsed(codeResult.codeId!);
 
       res.json({ message: '密码重置成功，请使用新密码登录' });
     } catch (err) {
@@ -468,8 +474,8 @@ export async function resetPassword(req, res) {
 }
 
 // === JWT 认证中间件 ===
-export function authMiddleware(req, res, next) {
-  const authHeader = req.get('Authorization') || req.headers['authorization'] || req.headers['Authorizaton'];
+export function authMiddleware(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.get('Authorization') || (req.headers['authorization'] as string | undefined) || (req.headers['Authorizaton'] as string | undefined);
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: '请先登录' });
@@ -478,12 +484,13 @@ export function authMiddleware(req, res, next) {
   const token = authHeader.substring(7);
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string };
     req.userId = decoded.userId;
     next();
     } catch (err) {
-      logger.warn({ err: { name: err.name, message: err.message } }, '[authMiddleware] JWT 校验失败');
-      if (err.name === 'TokenExpiredError') {
+      const e = err as Error;
+      logger.warn({ err: { name: e.name, message: e.message } }, '[authMiddleware] JWT 校验失败');
+      if (e.name === 'TokenExpiredError') {
         return res.status(401).json({ error: '登录已过期，请重新登录' });
       }
       return res.status(401).json({ error: '无效的认证信息' });

@@ -1,4 +1,5 @@
 import express from 'express';
+import type { Express } from 'express';
 import logger from './logger.js';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
@@ -45,6 +46,7 @@ import {
   isValidChatHistory,
   sanitizeString,
 } from './validation.js';
+import type { AppError, PlanConfig, PlanParams, AnalysisResult } from './types.js';
 
 // 全局兜底未处理的 Promise rejection 与未捕获异常，避免进程崩溃
 process.on('unhandledRejection', (reason) => {
@@ -59,14 +61,14 @@ setInterval(() => {
   try { closeExpiredOrders(); } catch (err) { logger.error({ err }, '清理过期订单失败'); }
 }, 5 * 60 * 1000).unref();
 
-export function createApp() {
+export function createApp(): Express {
   const app = express();
 
   // 信任反向代理（Nginx / Docker 网络），以便正确获取客户端 IP
   app.set('trust proxy', 1);
 
   // CORS：从环境变量读取，支持逗号分隔多域名；生产环境未配置则禁用跨域
-  let corsOrigin;
+  let corsOrigin: string[] | boolean;
   if (process.env.CORS_ORIGIN) {
     corsOrigin = process.env.CORS_ORIGIN.split(',').map(s => s.trim());
   } else if (process.env.NODE_ENV === 'production') {
@@ -105,8 +107,8 @@ export function createApp() {
     standardHeaders: true,
     legacyHeaders: false,
     // 使用 userId 限流，避免 IPv6 警告
-    validate: { ipKeyGeneratorFallback: false },
-    keyGenerator: (req) => req.userId || req.ip,
+    validate: { keyGeneratorIpFallback: false },
+    keyGenerator: (req) => req.userId || req.ip || '',
   });
 
   app.use(generalLimiter);
@@ -131,7 +133,7 @@ export function createApp() {
   // 配额查询
   app.get('/api/quota', authMiddleware, (req, res) => {
     try {
-      const quota = getQuotaStatus(req.userId);
+      const quota = getQuotaStatus(req.userId!);
       res.json(quota);
     } catch (err) {
       logger.error({ err }, '查询配额失败');
@@ -148,11 +150,11 @@ export function createApp() {
   app.post('/api/orders', authMiddleware, (req, res) => {
     try {
       const { plan } = req.body;
-      if (!plan || !PLANS[plan] || plan === 'free') {
+      if (!plan || !(PLANS as Record<string, PlanConfig>)[plan] || plan === 'free') {
         return res.status(400).json({ error: '请选择有效的套餐' });
       }
 
-      const order = createOrder(req.userId, plan);
+      const order = createOrder(req.userId!, plan);
 
       res.json({
         order: {
@@ -160,14 +162,14 @@ export function createApp() {
           plan: order.plan,
           amount: order.amount,
           amountYuan: (order.amount / 100).toFixed(2),
-          planName: PLANS[order.plan]?.name,
+          planName: (PLANS as Record<string, PlanConfig>)[order.plan]?.name,
           status: order.status,
         },
       });
     } catch (err) {
       logger.error({ err }, '创建订单失败');
-      if (err.statusCode) {
-        return res.status(err.statusCode).json({ error: err.message });
+      if ((err as AppError).statusCode) {
+        return res.status((err as AppError).statusCode ?? 500).json({ error: (err as AppError).message });
       }
       res.status(500).json({ error: '创建订单失败' });
     }
@@ -177,9 +179,9 @@ export function createApp() {
   app.post('/api/orders/:id/pay', authMiddleware, async (req, res) => {
     try {
       const { platform, openid } = req.body;
-      const order = getOrder(req.params.id);
+      const order = getOrder(req.params.id as string);
 
-      if (!order || order.user_id !== req.userId) {
+      if (!order || order.user_id !== req.userId!) {
         return res.status(404).json({ error: '订单不存在' });
       }
       if (order.status !== 'pending') {
@@ -193,8 +195,8 @@ export function createApp() {
       res.json({ payment: paymentParams });
     } catch (err) {
       logger.error({ err }, '获取支付参数失败');
-      if (err.statusCode) {
-        return res.status(err.statusCode).json({ error: err.message });
+      if ((err as AppError).statusCode) {
+        return res.status((err as AppError).statusCode ?? 500).json({ error: (err as AppError).message });
       }
       res.status(500).json({ error: '获取支付参数失败' });
     }
@@ -203,8 +205,8 @@ export function createApp() {
   // 查询订单状态
   app.get('/api/orders/:id', authMiddleware, (req, res) => {
     try {
-      const order = getOrder(req.params.id);
-      if (!order || order.user_id !== req.userId) {
+      const order = getOrder(req.params.id as string);
+      if (!order || order.user_id !== req.userId!) {
         return res.status(404).json({ error: '订单不存在' });
       }
       res.json({
@@ -212,7 +214,7 @@ export function createApp() {
         plan: order.plan,
         amount: order.amount,
         amountYuan: (order.amount / 100).toFixed(2),
-        planName: PLANS[order.plan]?.name,
+        planName: (PLANS as Record<string, PlanConfig>)[order.plan]?.name,
         status: order.status,
         paid_at: order.paid_at,
         created_at: order.created_at,
@@ -226,13 +228,13 @@ export function createApp() {
   // 用户订单列表
   app.get('/api/orders', authMiddleware, (req, res) => {
     try {
-      const orders = getUserOrders(req.userId);
+      const orders = getUserOrders(req.userId!);
       res.json(orders.map(o => ({
         id: o.id,
         plan: o.plan,
         amount: o.amount,
         amountYuan: (o.amount / 100).toFixed(2),
-        planName: PLANS[o.plan]?.name,
+        planName: (PLANS as Record<string, PlanConfig>)[o.plan]?.name,
         status: o.status,
         paid_at: o.paid_at,
         created_at: o.created_at,
@@ -247,8 +249,8 @@ export function createApp() {
   if (process.env.NODE_ENV !== 'production') {
     app.post('/api/payment/mock-pay/:orderId', authMiddleware, (req, res) => {
       try {
-        const order = getOrder(req.params.orderId);
-        if (!order || order.user_id !== req.userId) {
+        const order = getOrder(req.params.orderId as string);
+        if (!order || order.user_id !== req.userId!) {
           return res.status(404).json({ error: '订单不存在' });
         }
         if (order.status !== 'pending') {
@@ -267,8 +269,8 @@ export function createApp() {
         });
       } catch (err) {
         logger.error({ err }, '模拟支付失败');
-        if (err.statusCode) {
-          return res.status(err.statusCode).json({ error: err.message });
+        if ((err as AppError).statusCode) {
+          return res.status((err as AppError).statusCode ?? 500).json({ error: (err as AppError).message });
         }
         res.status(500).json({ error: '支付失败' });
       }
@@ -281,7 +283,7 @@ export function createApp() {
       const bodyStr = req.body.toString('utf8');
 
       // 验证签名
-      if (!verifyCallbackSignature(req.headers, bodyStr)) {
+      if (!verifyCallbackSignature(req.headers as Record<string, string | undefined>, bodyStr)) {
         logger.error('微信支付回调签名验证失败');
         return res.status(401).json({ code: 'FAIL', message: '签名验证失败' });
       }
@@ -292,7 +294,7 @@ export function createApp() {
       if (notification.event_type === 'TRANSACTION.SUCCESS') {
         // 解密支付结果
         const result = decryptNotification(notification.resource);
-        const { out_trade_no, transaction_id, trade_state, amount } = result;
+        const { out_trade_no, transaction_id, trade_state, amount } = result as { out_trade_no: string; transaction_id: string; trade_state: string; amount?: { total?: number } };
 
         logger.info({ out_trade_no, transaction_id, trade_state }, '微信支付通知');
 
@@ -331,12 +333,12 @@ export function createApp() {
       }
 
       // 预占配额，避免并发请求绕过配额（TOCTOU）
-      let usageId;
+      let usageId: number | null = null;
       try {
-        usageId = reserveQuota(req.userId, 'analyze');
+        usageId = reserveQuota(req.userId!, 'analyze');
       } catch (err) {
-        if (err.quotaExceeded) {
-          return res.status(429).json({ error: err.message, quotaExceeded: true });
+        if ((err as AppError).quotaExceeded) {
+          return res.status(429).json({ error: (err as AppError).message, quotaExceeded: true });
         }
         throw err;
       }
@@ -363,14 +365,14 @@ export function createApp() {
         return res.status(400).json({ error: '请提供两次分析记录的 ID' });
       }
 
-      const beforeRecord = getAnalysisRecordById(req.userId, beforeId);
-      const afterRecord = getAnalysisRecordById(req.userId, afterId);
+      const beforeRecord = getAnalysisRecordById(req.userId!, beforeId);
+      const afterRecord = getAnalysisRecordById(req.userId!, afterId);
 
       if (!beforeRecord || !afterRecord) {
         return res.status(404).json({ error: '分析记录不存在' });
       }
 
-      const safeParse = (s, fallback) => {
+      const safeParse = (s: string | null, fallback: unknown) => {
         try { return JSON.parse(s ?? JSON.stringify(fallback)); } catch { return fallback; }
       };
 
@@ -385,7 +387,7 @@ export function createApp() {
         radar: safeParse(afterRecord.radar, {}),
       };
 
-      const comparison = await compareAnalysis(beforeResult, afterResult);
+      const comparison = await compareAnalysis(beforeResult as AnalysisResult, afterResult as AnalysisResult);
       res.json({
         ...comparison,
         beforeDate: beforeRecord.created_at,
@@ -406,19 +408,20 @@ export function createApp() {
         return res.status(400).json({ error: '请提供体态分析结果' });
       }
 
-      const params = {};
-      params.goal = isValidGoal(goal) ? goal : 'posture_fix';
-      params.experience = isValidExperience(experience) ? experience : 'beginner';
-      params.equipment = isValidEquipment(equipment) ? equipment : 'bodyweight';
-      params.daysPerWeek = isValidDaysPerWeek(daysPerWeek) ? Number(daysPerWeek) : 4;
-      params.sessionDuration = isValidSessionDuration(sessionDuration) ? Number(sessionDuration) : 60;
+      const params: PlanParams = {
+        goal: isValidGoal(goal) ? goal : 'posture_fix',
+        experience: isValidExperience(experience) ? experience : 'beginner',
+        equipment: isValidEquipment(equipment) ? equipment : 'bodyweight',
+        daysPerWeek: isValidDaysPerWeek(daysPerWeek) ? Number(daysPerWeek) : 4,
+        sessionDuration: isValidSessionDuration(sessionDuration) ? Number(sessionDuration) : 60,
+      };
 
       let usageId;
       try {
-        usageId = reserveQuota(req.userId, 'plan');
+        usageId = reserveQuota(req.userId!, 'plan');
       } catch (err) {
-        if (err.quotaExceeded) {
-          return res.status(429).json({ error: err.message, quotaExceeded: true });
+        if ((err as AppError).quotaExceeded) {
+          return res.status(429).json({ error: (err as AppError).message, quotaExceeded: true });
         }
         throw err;
       }
@@ -445,26 +448,27 @@ export function createApp() {
         return res.status(400).json({ error: '请提供体态分析结果' });
       }
 
-      const workoutHistory = getWorkoutRecordsRaw(req.userId, 20);
+      const workoutHistory = getWorkoutRecordsRaw(req.userId!, 20);
 
       const performance = extractExercisePerformance(workoutHistory);
       const progression = calculateProgression(performance, { experience });
       const progressionPrompt = buildProgressionPrompt(progression);
       const progressionSummary = getProgressionSummary(progression);
 
-      const params = {};
-      params.goal = isValidGoal(goal) ? goal : 'posture_fix';
-      params.experience = isValidExperience(experience) ? experience : 'beginner';
-      params.equipment = isValidEquipment(equipment) ? equipment : 'bodyweight';
-      params.daysPerWeek = isValidDaysPerWeek(daysPerWeek) ? Number(daysPerWeek) : 4;
-      params.sessionDuration = isValidSessionDuration(sessionDuration) ? Number(sessionDuration) : 60;
+      const params: PlanParams = {
+        goal: isValidGoal(goal) ? goal : 'posture_fix',
+        experience: isValidExperience(experience) ? experience : 'beginner',
+        equipment: isValidEquipment(equipment) ? equipment : 'bodyweight',
+        daysPerWeek: isValidDaysPerWeek(daysPerWeek) ? Number(daysPerWeek) : 4,
+        sessionDuration: isValidSessionDuration(sessionDuration) ? Number(sessionDuration) : 60,
+      };
 
       let usageId;
       try {
-        usageId = reserveQuota(req.userId, 'plan');
+        usageId = reserveQuota(req.userId!, 'plan');
       } catch (err) {
-        if (err.quotaExceeded) {
-          return res.status(429).json({ error: err.message, quotaExceeded: true });
+        if ((err as AppError).quotaExceeded) {
+          return res.status(429).json({ error: (err as AppError).message, quotaExceeded: true });
         }
         throw err;
       }
@@ -490,8 +494,8 @@ export function createApp() {
   // 获取训练建议（不生成方案，只看渐进式建议）
   app.get('/api/plan/progression', authMiddleware, (req, res) => {
     try {
-      const experience = isValidExperience(req.query.experience) ? req.query.experience : 'beginner';
-      const workoutHistory = getWorkoutRecordsRaw(req.userId, 20);
+      const experience = isValidExperience(req.query.experience) ? String(req.query.experience) : 'beginner';
+      const workoutHistory = getWorkoutRecordsRaw(req.userId!, 20);
 
       const performance = extractExercisePerformance(workoutHistory);
       const progression = calculateProgression(performance, { experience });
@@ -522,10 +526,10 @@ export function createApp() {
 
       let usageId;
       try {
-        usageId = reserveQuota(req.userId, 'nutrition');
+        usageId = reserveQuota(req.userId!, 'nutrition');
       } catch (err) {
-        if (err.quotaExceeded) {
-          return res.status(429).json({ error: err.message, quotaExceeded: true });
+        if ((err as AppError).quotaExceeded) {
+          return res.status(429).json({ error: (err as AppError).message, quotaExceeded: true });
         }
         throw err;
       }
@@ -561,19 +565,19 @@ export function createApp() {
       // 保存用户消息
       let usageId;
       try {
-        usageId = reserveQuota(req.userId, 'chat');
+        usageId = reserveQuota(req.userId!, 'chat');
       } catch (err) {
-        if (err.quotaExceeded) {
-          return res.status(429).json({ error: err.message, quotaExceeded: true });
+        if ((err as AppError).quotaExceeded) {
+          return res.status(429).json({ error: (err as AppError).message, quotaExceeded: true });
         }
         throw err;
       }
 
-      saveChatMessage(req.userId, 'user', message);
+      saveChatMessage(req.userId!, 'user', message);
 
       try {
         const reply = await sendMessage(message, history || []);
-        saveChatMessage(req.userId, 'assistant', reply);
+        saveChatMessage(req.userId!, 'assistant', reply);
         res.json({ reply });
       } catch (err) {
         releaseQuota(usageId);
@@ -604,15 +608,15 @@ export function createApp() {
 
       // 预占配额
       try {
-        usageId = reserveQuota(req.userId, 'chat');
+        usageId = reserveQuota(req.userId!, 'chat');
       } catch (err) {
-        if (err.quotaExceeded) {
-          return res.status(429).json({ error: err.message, quotaExceeded: true });
+        if ((err as AppError).quotaExceeded) {
+          return res.status(429).json({ error: (err as AppError).message, quotaExceeded: true });
         }
         throw err;
       }
 
-      saveChatMessage(req.userId, 'user', message);
+      saveChatMessage(req.userId!, 'user', message);
 
       res.setHeader('Content-Type', 'text/event-stream');
       res.setHeader('Cache-Control', 'no-cache');
@@ -631,7 +635,7 @@ export function createApp() {
             const { done, value } = await reader.read();
             if (done) break;
 
-            const chunk = decoder.decode(value);
+            const chunk = decoder.decode(value!);
             const lines = chunk.split('\n').filter(line => line.trim() !== '');
 
             for (const line of lines) {
@@ -661,7 +665,7 @@ export function createApp() {
 
       // 保存完整的 AI 回复
       if (fullReply) {
-        saveChatMessage(req.userId, 'assistant', fullReply);
+        saveChatMessage(req.userId!, 'assistant', fullReply);
       }
 
       res.end();

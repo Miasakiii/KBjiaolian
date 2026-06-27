@@ -3,18 +3,18 @@ import logger from './logger.js';
 
 const apiKey = process.env.RESEND_API_KEY;
 const FROM = process.env.MAIL_FROM || 'KB教练 <noreply@kbcoach.app>';
-const resend = apiKey ? new Resend(apiKey) : null;
+const resend: Resend | null = apiKey ? new Resend(apiKey) : null;
 
 /**
  * 发送验证码邮件
  * - 开发模式（无 RESEND_API_KEY 或非 production）：打印到控制台
  * - 生产模式：通过 Resend 真实发送 HTML 邮件
- *
- * @param {string} to - 收件人邮箱
- * @param {string} code - 6 位验证码
- * @param {'register'|'reset'} type - 注册 / 重置密码
  */
-export async function sendVerificationEmail(to, code, type) {
+export async function sendVerificationEmail(
+  to: string,
+  code: string,
+  type: 'register' | 'reset'
+): Promise<{ dev?: boolean }> {
   // 开发模式 fallback
   if (!resend || process.env.NODE_ENV !== 'production') {
     logger.info({ to, code, type: type === 'register' ? '注册' : '重置密码' }, '📧 验证码（开发模式）');
@@ -40,12 +40,13 @@ export async function sendVerificationEmail(to, code, type) {
   }
 
   logger.info({ to, type }, '验证码已发送');
+  return {};
 }
 
 /**
  * 构建验证码邮件 HTML（内联样式，邮件客户端兼容）
  */
-function buildEmailHtml(code, type) {
+function buildEmailHtml(code: string, type: 'register' | 'reset'): string {
   const title = type === 'register' ? '注册验证码' : '重置密码验证码';
   const intro = type === 'register'
     ? '感谢注册 KB 教练！请使用以下验证码完成注册：'
