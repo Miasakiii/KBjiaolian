@@ -213,10 +213,20 @@ class _RadarChartPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2;
     if (dashed) {
-      // 简单虚线: 用 dashPath 效果近似,这里用细密点替代完整 dashPath 依赖
-      paint.strokeCap = StrokeCap.round;
+      final dashedPath = Path();
+      final pathMetrics = path.computeMetrics();
+      for (final metric in pathMetrics) {
+        double distance = 0;
+        while (distance < metric.length) {
+          final double length = min(4.0, metric.length - distance);
+          dashedPath.addPath(metric.extractPath(distance, distance + length), Offset.zero);
+          distance += 7.0; // 4px dash + 3px gap
+        }
+      }
+      canvas.drawPath(dashedPath, paint);
+    } else {
+      canvas.drawPath(path, paint);
     }
-    canvas.drawPath(path, paint);
   }
 
   void _drawPoints(Canvas canvas, Offset center, double radius) {

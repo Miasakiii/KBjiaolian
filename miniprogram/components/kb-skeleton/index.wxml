@@ -1,0 +1,35 @@
+<!--
+  kb-skeleton 分析结果页骨架屏
+  结构: 圆形评分区 + 雷达图占位 + 3 条文本行
+-->
+<view class="kb-skeleton card-flat">
+
+  <!-- 顶部: 圆形评分区 -->
+  <view class="kb-skeleton__header flex-col flex-center">
+    <!-- 大圆: 模拟 kb-score 评分环 -->
+    <view class="skeleton skeleton-circle kb-skeleton__score-ring"></view>
+    <!-- 分数数字占位 -->
+    <view class="skeleton skeleton-text kb-skeleton__score-num"></view>
+    <!-- 评级标签占位 -->
+    <view class="skeleton skeleton-text kb-skeleton__score-label"></view>
+  </view>
+
+  <!-- 分割线 -->
+  <view class="divider"></view>
+
+  <!-- 中部: 雷达图占位区 -->
+  <view class="kb-skeleton__chart">
+    <view class="skeleton skeleton-rect kb-skeleton__chart-placeholder"></view>
+  </view>
+
+  <!-- 分割线 -->
+  <view class="divider"></view>
+
+  <!-- 底部: 3 条文本行占位 -->
+  <view class="kb-skeleton__lines">
+    <view class="skeleton skeleton-text"></view>
+    <view class="skeleton skeleton-text" style="width: 80%;"></view>
+    <view class="skeleton skeleton-text"></view>
+  </view>
+
+</view>

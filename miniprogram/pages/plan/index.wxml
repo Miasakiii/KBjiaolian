@@ -2,7 +2,7 @@
 <view class="page-container">
   <view class="login-prompt" wx:if="{{!isLoggedIn}}">
     <view class="login-icon-wrap">
-      <image src="/assets/icons/st-info.svg" mode="aspectFit" class="login-icon-img" />
+      <image src="/assets/icons/ic-user.svg" mode="aspectFit" class="login-icon-img" />
     </view>
     <text class="lp-text">登录后可使用训练方案</text>
     <button class="btn-primary lp-btn" bindtap="onTapLogin">去登录</button>
@@ -37,6 +37,52 @@
         </view>
 
         <button class="btn-primary" bindtap="onGenerate" loading="{{generating}}">{{generating ? '生成中...' : '生成训练方案'}}</button>
+        <view class="prog-btn-row">
+        <image src="/assets/icons/ic-brain.svg" mode="aspectFit" class="prog-btn-icon" />
+        <button class="btn-outline prog-btn" bindtap="onLoadProgression" loading="{{loadingProgression}}">{{loadingProgression ? '分析中...' : '智能推荐（基于训练历史）'}}</button>
+      </view>
+        <button class="btn-outline prog-btn" bindtap="onShareToMoments">分享到朋友圈</button>
+      </view>
+
+      <!-- 渐进式超负荷建议 -->
+      <view class="prog-panel card-flat animate-fade-in" wx:if="{{showProgression && progressionSuggestions.length > 0}}">
+        <view class="prog-header">
+          <view class="prog-title-row">
+            <image src="/assets/icons/ic-chart.svg" mode="aspectFit" class="prog-title-icon" />
+            <text class="prog-title">渐进式超负荷建议</text>
+          </view>
+          <view class="prog-close" bindtap="onCloseProgression">
+            <image src="/assets/icons/st-close.svg" mode="aspectFit" class="prog-close-icon" />
+          </view>
+        </view>
+        <view class="prog-summary">
+          <text class="prog-stat">已分析 {{progressionTotalSessions}} 次训练 · {{progressionExerciseCount}} 个动作</text>
+        </view>
+        <view class="prog-list">
+          <view class="prog-item" wx:for="{{progressionSuggestions}}" wx:key="exercise">
+            <view class="prog-indicator prog-ind-{{item.adjustment}}">
+              <text class="prog-arrow">{{item.adjustment === 'increase' ? '↑' : item.adjustment === 'decrease' ? '↓' : item.adjustment === 'new' ? '✦' : '→'}}</text>
+            </view>
+            <view class="prog-detail">
+              <text class="prog-exercise">{{item.exercise}}</text>
+              <text class="prog-prev">上次：{{item.previous}}</text>
+              <text class="prog-reason">{{item.message}}</text>
+            </view>
+            <view class="prog-badge prog-badge-{{item.adjustment}}">
+              <text>{{item.adjustment === 'increase' ? '增加' : item.adjustment === 'decrease' ? '降低' : item.adjustment === 'new' ? '新' : '保持'}}</text>
+            </view>
+          </view>
+        </view>
+        <view class="prog-actions">
+          <button class="btn-primary" bindtap="onProgressiveGenerate" loading="{{generating}}">{{generating ? '生成中...' : '根据建议生成渐进式方案'}}</button>
+        </view>
+      </view>
+
+      <!-- 无训练历史提示 -->
+      <view class="prog-empty card-flat animate-fade-in" wx:if="{{showProgression && progressionSuggestions.length === 0}}">
+        <image src="/assets/icons/ic-dumbbell.svg" mode="aspectFit" class="prog-empty-icon" />
+        <text class="prog-empty-text">暂无训练历史数据</text>
+        <text class="prog-empty-desc">先生成方案开始训练，积累历史后可获得智能调整建议</text>
       </view>
     </view>
 
@@ -73,6 +119,8 @@
 
       <view class="plan-actions">
         <button class="btn-primary" bindtap="onSavePlan">保存方案</button>
+        <button class="btn-outline" open-type="share">分享给好友</button>
+        <button class="btn-outline" bindtap="onShareToMoments">分享到朋友圈</button>
         <button class="btn-outline" bindtap="onRegenerate">重新生成</button>
       </view>
     </view>

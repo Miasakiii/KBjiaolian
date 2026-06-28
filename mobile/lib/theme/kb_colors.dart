@@ -36,4 +36,15 @@ class KbColors {
 
   // 危险(退出等破坏性操作)
   static const danger = Color(0xFFEF4444);
+
+  // 暗色模式
+  static const darkBg = Color(0xFF0C1210);
+  static const darkSurface = Color(0xFF151F1D);
+  static const darkSurface2 = Color(0xFF1A2825);
+  static const darkText1 = Color(0xFFE2E8E4);
+  static const darkText2 = Color(0xFF94A3B8);
+  static const darkText3 = Color(0xFF5A6B66);
+  static const darkLine = Color(0xFF233530);
+  static const darkLineSoft = Color(0xFF1A2825);
+  static const darkBrandSoft = Color(0xFF042F2E);
 }

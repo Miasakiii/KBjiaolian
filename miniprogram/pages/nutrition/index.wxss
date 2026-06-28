@@ -1,0 +1,64 @@
+/* pages/nutrition/index.wxss - 营养识别页 */
+.page-container { min-height: 100vh; background: var(--bg); padding: 0 var(--sp-4) env(safe-area-inset-bottom); }
+
+/* 未登录提示 */
+.login-prompt { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120rpx 40rpx; }
+.lp-icon { width: 96rpx; height: 96rpx; opacity: 0.4; margin-bottom: var(--sp-3); }
+.lp-text { font-size: var(--fs-body); color: var(--text-3); margin-bottom: var(--sp-4); }
+.lp-btn { width: 60%; }
+
+/* 餐次选择 */
+.meal-chips { display: flex; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.meal-chip { flex: 1; text-align: center; padding: var(--sp-2) 0; border-radius: var(--radius-sm); background: var(--surface); border: 2rpx solid var(--line-soft); transition: all 0.2s; }
+.meal-chip-active { background: var(--brand-soft); border-color: var(--brand); }
+.meal-chip-text { font-size: var(--fs-body); font-weight: 400; color: var(--text-2); }
+.meal-chip-active .meal-chip-text { color: var(--brand); font-weight: 600; }
+
+/* 拍照区域 */
+.photo-hero { margin: 0 0 var(--sp-3); }
+.photo-placeholder { display: flex; flex-direction: column; align-items: center; padding: var(--sp-5) 0; }
+.photo-icon { width: 80rpx; height: 80rpx; opacity: 0.5; margin-bottom: var(--sp-2); }
+.photo-desc { font-size: var(--fs-body); color: var(--text-2); }
+.photo-actions { display: flex; flex-direction: column; gap: var(--sp-2); margin-top: var(--sp-3); }
+
+/* 图片预览 */
+.preview-wrap { margin: var(--sp-3) 0; border-radius: var(--radius-lg); overflow: hidden; }
+.preview-image { width: 100%; }
+
+/* loading */
+.loading-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 120rpx 0; }
+.loading-spinner { width: 64rpx; height: 64rpx; border: 4rpx solid var(--line-soft); border-top-color: var(--brand); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: var(--sp-3); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: var(--fs-body); color: var(--text-2); }
+.loading-sub { font-size: var(--fs-caption); color: var(--text-3); margin-top: var(--sp-1); }
+
+/* 食物列表 */
+.food-list { display: flex; flex-direction: column; }
+.food-item { display: flex; align-items: center; justify-content: space-between; padding: var(--sp-2) 0; border-bottom: 1rpx solid var(--line-soft); }
+.food-item:last-child { border-bottom: none; }
+.food-info { flex: 1; }
+.food-name { font-size: var(--fs-body); font-weight: 600; color: var(--text-1); display: block; }
+.food-portion { font-size: var(--fs-caption); color: var(--text-2); display: block; margin-top: 4rpx; }
+.food-cal { font-size: var(--fs-body); font-weight: 600; color: var(--brand); }
+
+/* 营养汇总四格 */
+.nutrition-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: var(--sp-2); }
+.nutrition-cell { display: flex; flex-direction: column; align-items: center; background: var(--surface); border-radius: var(--radius-sm); padding: var(--sp-2); border: 1rpx solid var(--line-soft); }
+.nutrition-value { font-size: var(--fs-h2); font-weight: 600; color: var(--text-1); }
+.nutrition-unit { font-size: var(--fs-label); color: var(--text-3); }
+.nutrition-label { font-size: var(--fs-caption); color: var(--text-2); margin-top: 4rpx; }
+
+/* 饮食建议 */
+.tips-card { }
+.tips-text { font-size: var(--fs-body); color: var(--text-2); line-height: 1.7; }
+
+/* 操作按钮 */
+.result-actions { display: flex; flex-direction: column; gap: var(--sp-2); margin: var(--sp-4) 0; }
+
+/* 今日汇总 */
+.today-summary { }
+.today-row { display: flex; justify-content: space-around; }
+.today-cell { display: flex; flex-direction: column; align-items: center; }
+.today-value { font-size: var(--fs-h2); font-weight: 600; }
+.today-label { font-size: var(--fs-caption); color: var(--text-2); margin-top: 4rpx; }
+.today-count { font-size: var(--fs-caption); color: var(--text-3); text-align: center; margin-top: var(--sp-2); display: block; }

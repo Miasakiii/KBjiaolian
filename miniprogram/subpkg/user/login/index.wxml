@@ -2,14 +2,14 @@
 <view class="login-page">
   <view class="login-top">
     <view class="login-logo">
-      <image src="/assets/icons/tab-exercises.svg" class="login-logo-icon" mode="aspectFit" />
+      <image src="/assets/logo/kb-logo-v1.svg" class="login-logo-icon" mode="aspectFit" />
     </view>
     <text class="login-title">KB 教练</text>
     <text class="login-tagline">Know Your Body</text>
     <text class="login-subtitle">AI 驱动的体态评估与康复矫正。拍一张照，看见自己的身体。</text>
 
     <button class="btn-primary login-wx-btn" bindtap="onWxLogin">
-      <image src="/assets/icons/tab-chat.svg" class="login-wx-icon" mode="aspectFit" />
+      <image src="/assets/icons/ic-wechat.svg" class="login-wx-icon" mode="aspectFit" />
       微信一键登录
     </button>
   </view>
@@ -40,5 +40,10 @@
     <button class="btn-outline login-email-btn" bindtap="onEmailLogin">邮箱登录</button>
   </view>
 
-  <text class="login-terms">登录即同意《用户协议》与《隐私政策》</text>
+  <view class="login-terms">
+    <text>登录即同意</text>
+    <text class="login-terms-link" bindtap="onViewAgreement">《用户协议》</text>
+    <text>与</text>
+    <text class="login-terms-link" bindtap="onViewPrivacy">《隐私政策》</text>
+  </view>
 </view>

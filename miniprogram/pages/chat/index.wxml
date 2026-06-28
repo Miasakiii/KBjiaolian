@@ -2,7 +2,7 @@
 <view class="page-container chat-page">
   <view class="login-prompt" wx:if="{{!isLoggedIn}}">
     <view class="login-icon-wrap">
-      <image src="/assets/icons/st-info.svg" mode="aspectFit" class="login-icon-img" />
+      <image src="/assets/icons/ic-user.svg" mode="aspectFit" class="login-icon-img" />
     </view>
     <text class="lp-text">登录后可使用 AI 对话</text>
     <button class="btn-primary lp-btn" bindtap="onTapLogin">去登录</button>
@@ -31,7 +31,7 @@
           <view class="msg-time">{{item.time}}</view>
         </view>
         <view class="msg-avatar msg-avatar-user" wx:if="{{item.role === 'user'}}">
-          <image src="/assets/icons/st-info.svg" mode="aspectFit" class="msg-avatar-icon" />
+          <image src="/assets/icons/ic-user.svg" mode="aspectFit" class="msg-avatar-icon" />
         </view>
       </view>
 

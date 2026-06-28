@@ -27,10 +27,18 @@ page {
   --data-core: #5b7a8c;
   --data-shoulder: #b08968;
 
-  /* dark 预留占位 (不适配, spec §3.1) */
-  --bg-dark: ;
-  --surface-dark: ;
-  --text-1-dark: ;
+  /* dark 预留占位 (spec §3.1) — 值已填充, 可用 @media (prefers-color-scheme: dark) 或系统切换 */
+  --bg-dark: #0c1210;
+  --surface-dark: #151f1d;
+  --surface-2-dark: #1a2825;
+  --text-1-dark: #e2e8e4;
+  --text-2-dark: #94a3b8;
+  --text-3-dark: #5a6b66;
+  --line-dark: #233530;
+  --line-soft-dark: #1a2825;
+  --brand-soft-dark: #042f2e;
+  --shadow-dark: 0 2rpx 12rpx rgba(0, 0, 0, 0.2);
+  --shadow-brand-dark: 0 4rpx 16rpx rgba(15, 118, 110, 0.25);
 
   /* ====== 字号阶梯 (spec §3.2) ====== */
   --fs-display: 64rpx;
@@ -192,3 +200,72 @@ view, text, image { box-sizing: border-box; }
 .animate-delay-1 { animation-delay: 0.06s; }
 .animate-delay-2 { animation-delay: 0.12s; }
 .animate-delay-3 { animation-delay: 0.18s; }
+
+/* ====== Toast / Snackbar 反馈 (spec §5) ====== */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.toast {
+  position: fixed;
+  top: 120rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: var(--brand);
+  color: #ffffff;
+  font-size: var(--fs-body);
+  font-weight: 500;
+  padding: 16rpx 40rpx;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-brand);
+  white-space: nowrap;
+  pointer-events: none;
+  animation: toast-in 300ms ease-out both;
+}
+
+.toast-success {
+  background: var(--brand);
+}
+
+.toast-error {
+  background: #EF4444;
+}
+
+.toast-warn {
+  background: var(--accent-warn);
+}
+
+/* ====== 骨架屏 shimmer 工具类 ====== */
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: var(--line-soft);
+  background-image: linear-gradient(
+    90deg,
+    var(--line-soft) 25%,
+    rgba(255, 255, 255, 0.5) 50%,
+    var(--line-soft) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+.skeleton-text {
+  height: 28rpx;
+  margin-bottom: var(--sp-2);
+  border-radius: 8rpx;
+}
+.skeleton-text:last-child {
+  margin-bottom: 0;
+  width: 60%;
+}
+.skeleton-circle {
+  border-radius: 50%;
+}
+.skeleton-rect {
+  border-radius: var(--radius-sm);
+}

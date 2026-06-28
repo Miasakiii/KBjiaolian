@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <!-- KB教练品牌标识 V1 — 字母标 + 融合体态轮廓 -->
+  <defs>
+    <linearGradient id="brandGrad" x1="0" y1="0" x2="512" y2="512">
+      <stop offset="0%" stop-color="#14b8a6"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 主容器圆角方块 -->
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="url(#brandGrad)"/>
+
+  <!-- K 字母 — 左侧 -->
+  <path d="M120 130 L120 382 L148 382 L148 272 L232 382 L268 382 L172 260 L258 130 L224 130 L148 242 L148 130 Z"
+        fill="white" fill-rule="evenodd"/>
+
+  <!-- B 字母 — 右侧（脊柱隐喻：竖线 + 两个圆弧关节） -->
+  <path d="M280 130 L280 382 L308 382 L308 130 Z" fill="white"/>
+  <path d="M308 130 L376 130 Q416 130 416 178 Q416 220 380 226 L380 230 Q420 236 420 282 Q420 336 376 336 L308 336 Z
+           M308 156 L372 156 Q392 156 392 178 Q392 200 372 200 L308 200 Z
+           M308 264 L372 264 Q396 264 396 286 Q396 310 372 310 L308 310 Z"
+        fill="white" fill-rule="evenodd"/>
+
+  <!-- 体态脊柱线 — 贯穿 K 和 B 之间 -->
+  <line x1="268" y1="130" x2="280" y2="382" stroke="rgba(255,255,255,0.35)" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- 人体轮廓暗示 — 右上角微弱肩线 -->
+  <path d="M340 96 Q380 92 410 108" stroke="rgba(255,255,255,0.25)" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- 头部圆点 — 脊柱顶部 -->
+  <circle cx="274" cy="106" r="12" fill="rgba(255,255,255,0.2)"/>
+</svg>

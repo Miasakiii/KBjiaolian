@@ -1,0 +1,2 @@
+/* subpkg/user/agreement/index.wxss - 用户协议复用隐私政策样式 */
+@import "/subpkg/user/privacy/index.wxss";
