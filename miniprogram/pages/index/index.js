@@ -20,6 +20,7 @@ Page({
       { key: 'plan', icon: '/assets/icons/tab-plan.svg', text: '训练方案' },
       { key: 'chat', icon: '/assets/icons/tab-chat.svg', text: 'AI 对话' },
       { key: 'exercises', icon: '/assets/icons/tab-exercises.svg', text: '动作库' },
+      { key: 'nutrition', icon: '/assets/icons/pat-breathing.svg', text: '营养识别' },
     ],
     today: '',
     // 配额数据
@@ -90,8 +91,12 @@ Page({
   onTapQuick(e) {
     const key = e.currentTarget.dataset.key;
     if (!this.checkAuth()) return;
-    const map = { analyze: '/pages/analyze/index', plan: '/pages/plan/index', chat: '/pages/chat/index', exercises: '/pages/exercises/index' };
-    wx.switchTab({ url: map[key] });
+    const tabMap = { analyze: '/pages/analyze/index', plan: '/pages/plan/index', chat: '/pages/chat/index', exercises: '/pages/exercises/index' };
+    if (tabMap[key]) {
+      wx.switchTab({ url: tabMap[key] });
+    } else if (key === 'nutrition') {
+      wx.navigateTo({ url: '/pages/nutrition/index' });
+    }
   },
   // 空态 CTA 跳转分析
   onTapAnalyze() {

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useRef } from 'react';
 import {
@@ -80,14 +80,12 @@ const faqs = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{backgroundColor:'#f6f8f7'}}>
       {/* ── Nav ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-neutral-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-sm shadow-primary-500/20">
-              <Dumbbell size={18} className="text-white" />
-            </div>
+            <img src="/logo.svg" alt="KB教练" className="w-9 h-9 rounded-xl shadow-sm shadow-primary-500/20" />
             <span className="font-bold text-neutral-900 text-lg">KB教练</span>
           </div>
           <div className="flex items-center gap-6">
@@ -362,13 +360,13 @@ export default function HomePage() {
                 </div>
                 <h2 className="text-2xl font-bold mb-3">立即下载 KB教练</h2>
                 <p className="text-primary-100 mb-8 text-sm">Android 客户端，安装即用，无需注册即可体验基础功能</p>
-                <a
-                  href="/api/download/app"
-                  className="inline-flex items-center gap-3 px-10 py-4 bg-white text-primary-700 font-bold rounded-2xl text-lg hover:bg-primary-50 active:scale-[0.98] transition-all shadow-lg"
+                <button
+                  onClick={() => alert('APK 下载即将上线，敬请期待！')}
+                  className="inline-flex items-center gap-3 px-10 py-4 bg-white text-primary-700 font-bold rounded-2xl text-lg hover:bg-primary-50 active:scale-[0.98] transition-all shadow-lg cursor-pointer"
                 >
                   <Download size={20} />
                   下载 APK 安装包
-                </a>
+                </button>
                 <div className="mt-6 flex items-center justify-center gap-6 text-sm text-primary-100">
                   <div className="flex items-center gap-1.5">
                     <Shield size={13} />
@@ -413,9 +411,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-                <Dumbbell size={16} className="text-white" />
-              </div>
+              <img src="/logo.svg" alt="KB教练" className="w-8 h-8 rounded-lg brightness-0 invert" />
               <span className="text-white font-bold">KB教练</span>
             </div>
             <div className="flex gap-8 text-sm">

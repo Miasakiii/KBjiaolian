@@ -1,0 +1,52 @@
+<!--subpkg/history/progress/index.wxml - 进度趋势-->
+<view class="page-container">
+  <!-- 加载态 -->
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <view class="loading-dot"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 空态 -->
+  <kb-empty wx:elif="{{!hasData}}" icon="/assets/icons/tab-analyze.svg" text="暂无分析记录" cta="去分析" bind:cta="onGoAnalyze" />
+
+  <!-- 内容区 -->
+  <block wx:else>
+    <!-- 统计卡片 -->
+    <view class="section-title">数据统计</view>
+    <view class="stat-row animate-fade-in">
+      <view class="stat-card card-flat">
+        <text class="stat-label">最高分</text>
+        <text class="stat-value text-brand">{{maxScore}}</text>
+      </view>
+      <view class="stat-card card-flat">
+        <text class="stat-label">最低分</text>
+        <text class="stat-value text-warn">{{minScore}}</text>
+      </view>
+      <view class="stat-card card-flat">
+        <text class="stat-label">平均分</text>
+        <text class="stat-value text-brand">{{avgScore}}</text>
+      </view>
+    </view>
+
+    <!-- 趋势折线图 -->
+    <view class="section-title">体态评分趋势</view>
+    <view class="chart-wrap card-flat animate-fade-in animate-delay-1">
+      <canvas id="trendChart" type="2d" class="trend-canvas"></canvas>
+      <text class="chart-count">共 {{list.length}} 条记录</text>
+    </view>
+
+    <!-- 历史记录列表 -->
+    <view class="section-title">历史记录</view>
+    <view class="record-list animate-fade-in animate-delay-2">
+      <view class="record-card card-flat ah-card" wx:for="{{list}}" wx:key="id" bindtap="onTapRecord" data-id="{{item.id}}">
+        <view class="rc-header">
+          <text class="rc-date">{{item.dateStr}}</text>
+          <text class="rc-score {{item.score >= 80 ? 'text-brand' : 'text-warn'}}">{{item.score}}分</text>
+        </view>
+        <view class="rc-dims">
+          <text class="rc-dim" wx:for="{{item.dimLabels}}" wx:key="*this" wx:for-item="dim">{{dim}}</text>
+        </view>
+      </view>
+    </view>
+  </block>
+</view>

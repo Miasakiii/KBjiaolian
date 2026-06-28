@@ -4,7 +4,7 @@
   <view class="search-bar">
     <view class="search-input-wrap">
       <view class="search-icon-wrap">
-        <image src="/assets/icons/st-info.svg" mode="aspectFit" class="search-icon-img" />
+        <image src="/assets/icons/ic-search.svg" mode="aspectFit" class="search-icon-img" />
       </view>
       <input class="search-input" value="{{keyword}}" bindinput="onSearchInput" placeholder="搜索动作..." confirm-type="search" bindconfirm="onSearch" />
     </view>

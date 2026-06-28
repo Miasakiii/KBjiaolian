@@ -53,11 +53,20 @@ Page({
 
       const payment = payRes.payment;
 
-      // 如果是 mock 模式（有 mockPayUrl），直接调用 mock 支付
-      if (payment.mockPayUrl) {
+      // mock 支付分支：仅开发版/体验版可用，正式版强制走真实微信支付
+      // 防止后端误配 NODE_ENV 导致生产环境白嫖 Pro 套餐
+      const envVersion = wx.getAccountInfoSync().miniProgram.envVersion;
+      const isDevEnv = envVersion === 'develop' || envVersion === 'trial';
+
+      if (isDevEnv && payment.mockPayUrl) {
         await request({ url: payment.mockPayUrl.replace('/api', ''), method: 'POST' });
         this._onPaySuccess(order.id);
         return;
+      }
+
+      // 正式版或无 mockPayUrl：走真实微信支付
+      if (!payment.timeStamp || !payment.paySign) {
+        throw new Error('支付参数不完整，请联系客服');
       }
 
       // Step 3: 调用微信支付
@@ -98,5 +107,15 @@ Page({
     setTimeout(() => {
       wx.navigateBack({ delta: 2 });
     }, 1500);
+  },
+
+  // 跳转用户协议
+  onViewAgreement() {
+    wx.navigateTo({ url: '/subpkg/user/agreement/index' });
+  },
+
+  // 跳转隐私政策
+  onViewPrivacy() {
+    wx.navigateTo({ url: '/subpkg/user/privacy/index' });
   },
 });

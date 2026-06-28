@@ -20,6 +20,16 @@ Page({
   onEmailInput(e) { this.setData({ email: e.detail.value }); },
   onPwdInput(e) { this.setData({ password: e.detail.value }); },
 
+  // 跳转用户协议
+  onViewAgreement() {
+    wx.navigateTo({ url: '/subpkg/user/agreement/index' });
+  },
+
+  // 跳转隐私政策
+  onViewPrivacy() {
+    wx.navigateTo({ url: '/subpkg/user/privacy/index' });
+  },
+
   async onEmailLogin() {
     const { email, password } = this.data;
     if (!email || !password) { wx.showToast({ title: '请输入邮箱和密码', icon: 'none' }); return; }

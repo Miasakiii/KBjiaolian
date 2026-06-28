@@ -16,8 +16,9 @@
 .pm-check { display: flex; align-items: center; justify-content: center; }
 .pm-check-icon { width: 32rpx; height: 32rpx; }
 
-.pay-notice { padding: var(--sp-2) 0; }
+.pay-notice { padding: var(--sp-2) 0; display: flex; flex-wrap: wrap; align-items: center; }
 .pn-text { font-size: var(--fs-label); color: var(--text-3); }
+.pn-link { font-size: var(--fs-label); color: var(--brand); }
 
 .pay-footer { position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4) calc(var(--sp-3) + env(safe-area-inset-bottom)); background: var(--surface); border-top: 1rpx solid var(--line-soft); }
 .pf-total { display: flex; flex-direction: column; }

@@ -1,0 +1,90 @@
+<!--subpkg/user/privacy/index.wxml - 隐私政策-->
+<view class="legal-page">
+  <view class="legal-header">
+    <text class="legal-title">KB 教练隐私政策</text>
+    <text class="legal-update">更新日期：{{updateDate}}</text>
+  </view>
+
+  <view class="legal-intro">
+    <text>本政策说明 KB 教练（以下简称"我们"）如何收集、使用、存储和保护您的个人信息。使用本服务即表示您同意本政策所述内容。</text>
+  </view>
+
+  <view class="legal-section">
+    <text class="legal-section-title">一、我们收集的信息</text>
+    <view class="legal-block">
+      <text class="legal-block-title">1. 您主动提供的信息</text>
+      <text class="legal-text">• 注册信息：邮箱地址（用于账号注册与登录）</text>
+      <text class="legal-text">• 个人资料：昵称、性别、年龄、身高、体重（用于训练方案个性化）</text>
+      <text class="legal-text">• 训练目标：目标体重、体脂率、每周训练天数</text>
+    </view>
+    <view class="legal-block">
+      <text class="legal-block-title">2. 您上传的内容</text>
+      <text class="legal-text">• 体态照片：用于 AI 体态分析，分析完成后可删除</text>
+      <text class="legal-text">• 饮食照片：用于 AI 营养识别，识别结果保存到您的历史记录</text>
+    </view>
+    <view class="legal-block">
+      <text class="legal-block-title">3. 自动收集的信息</text>
+      <text class="legal-text">• 微信授权信息：openid（用于一键登录与支付）</text>
+      <text class="legal-text">• 设备信息：设备型号、操作系统版本（用于兼容性适配）</text>
+      <text class="legal-text">• 使用日志：功能使用记录、崩溃日志（用于服务优化）</text>
+    </view>
+  </view>
+
+  <view class="legal-section">
+    <text class="legal-section-title">二、我们如何使用信息</text>
+    <text class="legal-text">• 提供 AI 体态分析、训练方案生成、营养识别等核心功能</text>
+    <text class="legal-text">• 个性化推荐训练内容与进度调整</text>
+    <text class="legal-text">• 处理订单与支付（微信支付）</text>
+    <text class="legal-text">• 通过邮箱或订阅消息向您发送服务通知</text>
+    <text class="legal-text">• 改进产品功能与用户体验</text>
+  </view>
+
+  <view class="legal-section">
+    <text class="legal-section-title">三、信息存储与保护</text>
+    <view class="legal-block">
+      <text class="legal-text">• 您的信息存储于位于中国的安全服务器，采用加密传输（HTTPS）与加密存储</text>
+      <text class="legal-text">• 数据库每日自动备份，保留 7 天</text>
+      <text class="legal-text">• 仅授权技术人员可在必要时访问，并受严格审计</text>
+      <text class="legal-text">• 我们不会将您的个人信息出售或交易给第三方</text>
+    </view>
+  </view>
+
+  <view class="legal-section">
+    <text class="legal-section-title">四、信息共享</text>
+    <text class="legal-text">除以下情形外，我们不会共享您的个人信息：</text>
+    <text class="legal-text">• 获得您的明确同意</text>
+    <text class="legal-text">• 为完成支付，向微信支付服务商传输必要订单信息</text>
+    <text class="legal-text">• 为调用 AI 分析能力，向大模型服务商传输照片与文本（仅处理用，不留存）</text>
+    <text class="legal-text">• 法律法规要求或行政、司法机关依法要求</text>
+  </view>
+
+  <view class="legal-section">
+    <text class="legal-section-title">五、您的权利</text>
+    <text class="legal-text">• 查询权：您可在"个人中心"查看您的资料与历史记录</text>
+    <text class="legal-text">• 更正权：您可修改昵称、性别、年龄等个人资料</text>
+    <text class="legal-text">• 删除权：您可删除分析记录、训练记录、饮食记录</text>
+    <text class="legal-text">• 注销权：您可联系客服注销账号，我们将删除您的全部信息</text>
+    <text class="legal-text">• 撤回同意权：您可在微信设置中撤回授权</text>
+  </view>
+
+  <view class="legal-section">
+    <text class="legal-section-title">六、未成年人保护</text>
+    <text class="legal-text">本服务面向 16 岁以上用户。未成年人应在监护人指导下使用，并在使用前阅读本政策。如发现未成年人在未获同意下使用本服务，请联系我们删除其信息。</text>
+  </view>
+
+  <view class="legal-section">
+    <text class="legal-section-title">七、政策更新</text>
+    <text class="legal-text">本政策可能适时修订。重大变更时我们将通过小程序内通知或邮箱告知您。继续使用即视为同意修订后的政策。</text>
+  </view>
+
+  <view class="legal-section">
+    <text class="legal-section-title">八、联系我们</text>
+    <text class="legal-text">如有任何关于本政策或个人信息的问题，请通过以下方式联系我们：</text>
+    <text class="legal-text">• 邮箱：support@kbcoach.com</text>
+    <text class="legal-text">• 微信客服：通过"个人中心 - 关于我们"联系</text>
+  </view>
+
+  <view class="legal-footer">
+    <text class="legal-footer-text">© 2026 KB 教练. 保留所有权利.</text>
+  </view>
+</view>

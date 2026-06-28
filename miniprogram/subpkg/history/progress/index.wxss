@@ -1,0 +1,27 @@
+/* subpkg/history/progress/index.wxss */
+
+/* 加载态 */
+.loading-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: 200rpx; }
+.loading-dot { width: 40rpx; height: 40rpx; border-radius: 50%; background: var(--brand); animation: pulse 1s ease-in-out infinite; }
+.loading-text { margin-top: var(--sp-2); font-size: var(--fs-caption); color: var(--text-3); }
+@keyframes pulse { 0%,100% { opacity: 0.4; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1); } }
+
+/* 统计卡片行 */
+.stat-row { display: flex; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.stat-card { flex: 1; display: flex; flex-direction: column; align-items: center; padding: var(--sp-3) var(--sp-2); }
+.stat-label { font-size: var(--fs-label); color: var(--text-3); margin-bottom: var(--sp-1); }
+.stat-value { font-size: var(--fs-h2); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* 趋势图 */
+.chart-wrap { padding: var(--sp-3); margin-bottom: var(--sp-3); }
+.trend-canvas { width: 100%; height: 360rpx; }
+.chart-count { display: block; text-align: right; font-size: var(--fs-label); color: var(--text-3); margin-top: var(--sp-1); }
+
+/* 历史记录列表 */
+.record-list { padding-bottom: var(--sp-5); }
+.record-card { display: flex; flex-direction: column; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.rc-header { display: flex; justify-content: space-between; align-items: center; }
+.rc-date { font-size: var(--fs-body); font-weight: 600; color: var(--text-1); }
+.rc-score { font-size: var(--fs-h2); font-weight: 600; font-variant-numeric: tabular-nums; }
+.rc-dims { display: flex; flex-wrap: wrap; gap: var(--sp-1); }
+.rc-dim { font-size: var(--fs-label); color: var(--text-2); background: var(--surface-2); padding: 4rpx 16rpx; border-radius: 20rpx; }

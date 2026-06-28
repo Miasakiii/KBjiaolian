@@ -9,9 +9,25 @@ App({
     token: '',
 
     // API 基础地址
-    // 本地开发：http://localhost:3003/api（🚀 端口需与 backend/.env 的 PORT 一致）
-    // 生产环境：https://kb.wctgrzpj.cn/api
-    apiBase: 'http://localhost:3003/api',
+    // 自动按运行环境切换：develop/trial → 本地，release → 生产
+    // 本地开发如需切换端口，改这里即可（🚀 端口需与 backend/.env 的 PORT 一致）
+    apiBase: (() => {
+      try {
+        const env = wx.getAccountInfoSync().miniProgram.envVersion;
+        // release = 正式版, trial = 体验版, develop = 开发版
+        return env === 'release'
+          ? 'https://kb.wctgrzpj.cn/api'
+          : 'http://localhost:3003/api';
+      } catch (e) {
+        // 兜底：默认生产域名，避免本地配置遗漏导致线上白屏
+        return 'https://kb.wctgrzpj.cn/api';
+      }
+    })(),
+
+    // 训练偏好（设置页可修改，与 Flutter 端默认值保持一致）
+    equipment: 'bodyweight',       // bodyweight | dumbbell | gym
+    daysPerWeek: 4,                // 3~6
+    sessionDuration: 60,           // 分钟
 
     // 品牌色（与 Web 端保持一致）
     themeColor: '#0f766e',
@@ -19,7 +35,30 @@ App({
   },
 
   onLaunch(options) {
-    console.log('[App] onLaunch', options);
+    // 版本更新检查（发版后自动拉取新版本并重启）
+    if (wx.canIUse('getUpdateManager')) {
+      const updateManager = wx.getUpdateManager();
+      updateManager.onCheckForUpdate((res) => {
+        if (res.hasUpdate) {
+          console.info('[App] 检测到新版本，开始下载...');
+        }
+      });
+      updateManager.onUpdateReady(() => {
+        wx.showModal({
+          title: '更新提示',
+          content: '新版本已就绪，是否重启应用？',
+          success: (res) => {
+            if (res.confirm) {
+              updateManager.applyUpdate();
+            }
+          },
+        });
+      });
+      updateManager.onUpdateFailed(() => {
+        wx.showToast({ title: '新版本下载失败，请检查网络', icon: 'none' });
+      });
+    }
+
     // 读取本地缓存的 token
     const token = wx.getStorageSync('token');
     const user = wx.getStorageSync('user');
@@ -31,11 +70,11 @@ App({
   },
 
   onShow(options) {
-    console.log('[App] onShow', options);
+    // 静默处理，不再打印敏感的启动参数
   },
 
   onHide() {
-    console.log('[App] onHide');
+    // 静默处理
   },
 
   // 全局登录方法（页面可直接调用）

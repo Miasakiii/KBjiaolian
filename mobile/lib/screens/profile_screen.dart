@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../services/export_service.dart';
 import '../services/storage_service.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -58,6 +59,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         'height': double.tryParse(_heightController.text),
         'weight': double.tryParse(_weightController.text),
       });
+
+      // 个人资料变更后清除导出缓存，避免下次导出包含旧数据
+      await ExportService.clearExportCache();
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
