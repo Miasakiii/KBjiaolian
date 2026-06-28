@@ -82,9 +82,6 @@
       ]
     }
   ],
-  "requiredPrivateInfos": [
-    "chooseMedia"
-  ],
   "preloadRule": {
     "pages/index/index": {
       "packages": ["subpkg/user"]
