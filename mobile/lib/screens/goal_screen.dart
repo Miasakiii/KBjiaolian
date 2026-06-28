@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/storage_service.dart';
+import '../theme/kb_colors.dart';
 
 class GoalScreen extends StatefulWidget {
   const GoalScreen({super.key});
@@ -99,7 +100,7 @@ class _GoalScreenState extends State<GoalScreen> {
             child: ElevatedButton(
               onPressed: _save,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: KbColors.brand,
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -108,7 +109,7 @@ class _GoalScreenState extends State<GoalScreen> {
               ),
               child: const Text(
                 '保存目标',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -137,14 +138,14 @@ class _GoalScreenState extends State<GoalScreen> {
           children: [
             Text(
               label,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
             ),
             Text(
               '$displayValue $unit',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.green.shade700,
+                fontWeight: FontWeight.w600,
+                color: KbColors.brand600,
               ),
             ),
           ],
@@ -154,7 +155,7 @@ class _GoalScreenState extends State<GoalScreen> {
           min: min,
           max: max,
           divisions: ((max - min) * (decimals == 0 ? 1 : 10)).round(),
-          activeColor: Colors.green,
+          activeColor: KbColors.brand,
           onChanged: onChanged,
         ),
       ],

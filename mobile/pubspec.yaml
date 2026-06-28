@@ -12,6 +12,7 @@ dependencies:
 
   # UI 组件
   cupertino_icons: ^1.0.6
+  flutter_svg: ^2.0.9
 
   # 网络请求
   http: ^1.1.0
@@ -45,3 +46,4 @@ flutter:
   assets:
     - assets/icons/
     - assets/images/
+    - assets/logo/

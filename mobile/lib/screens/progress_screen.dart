@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/analysis_provider.dart';
+import '../theme/kb_colors.dart';
 
 class ProgressScreen extends StatelessWidget {
   const ProgressScreen({super.key});
@@ -59,8 +60,8 @@ class ProgressScreen extends StatelessWidget {
                 Text(
                   '体态评分趋势',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF166534),
+                    fontWeight: FontWeight.w600,
+                    color: KbColors.brand,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -72,7 +73,7 @@ class ProgressScreen extends StatelessWidget {
                 Text(
                   '共 ${scores.length} 条记录',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey,
+                    color: KbColors.text3,
                   ),
                 ),
               ],
@@ -88,23 +89,23 @@ class ProgressScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
+          const Icon(
             Icons.show_chart,
             size: 80,
-            color: Colors.green.shade200,
+            color: KbColors.text3,
           ),
           const SizedBox(height: 16),
           Text(
             '暂无分析记录',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Colors.grey,
+              color: KbColors.text3,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             '完成一次体态分析后，这里将展示你的进步趋势',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.grey.shade400,
+              color: KbColors.text3,
             ),
             textAlign: TextAlign.center,
           ),
@@ -114,7 +115,7 @@ class ProgressScreen extends StatelessWidget {
             icon: const Icon(Icons.camera_alt_outlined),
             label: const Text('去分析'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF16a34a),
+              backgroundColor: KbColors.brand,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
@@ -139,7 +140,7 @@ class ProgressScreen extends StatelessWidget {
             icon: Icons.trending_up,
             label: '最高分',
             value: '$maxScore',
-            color: const Color(0xFF16a34a),
+            color: KbColors.brand,
           ),
         ),
         const SizedBox(width: 12),
@@ -148,7 +149,7 @@ class ProgressScreen extends StatelessWidget {
             icon: Icons.trending_down,
             label: '最低分',
             value: '$minScore',
-            color: Colors.orange,
+            color: KbColors.accentWarn,
           ),
         ),
         const SizedBox(width: 12),
@@ -157,7 +158,7 @@ class ProgressScreen extends StatelessWidget {
             icon: Icons.insights,
             label: '平均分',
             value: avgScore.toStringAsFixed(1),
-            color: Colors.blue,
+            color: KbColors.brand,
           ),
         ),
       ],
@@ -190,7 +191,7 @@ class _StatCard extends StatelessWidget {
             Text(
               value,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w600,
                 color: color,
               ),
             ),
@@ -198,7 +199,7 @@ class _StatCard extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey.shade600,
+                color: KbColors.text2,
               ),
             ),
           ],
@@ -246,23 +247,23 @@ class _LineChartPainter extends CustomPainter {
     final chartHeight = size.height;
 
     final gridPaint = Paint()
-      ..color = Colors.grey.shade200
+      ..color = KbColors.lineSoft
       ..strokeWidth = 1;
 
     final linePaint = Paint()
-      ..color = const Color(0xFF16a34a)
+      ..color = KbColors.brand
       ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    final dotPaint = Paint()..color = const Color(0xFF16a34a);
+    final dotPaint = Paint()..color = KbColors.brand;
 
     final dotBorderPaint = Paint()
       ..color = Colors.white
       ..style = PaintingStyle.fill;
 
-    final textStyle = TextStyle(
-      color: Colors.grey.shade500,
+    const textStyle = TextStyle(
+      color: KbColors.text3,
       fontSize: 10,
     );
 
@@ -311,8 +312,8 @@ class _LineChartPainter extends CustomPainter {
       canvas.drawCircle(point, 3.5, dotPaint);
     }
 
-    final dateStyle = TextStyle(
-      color: Colors.grey.shade400,
+    const dateStyle = TextStyle(
+      color: KbColors.text3,
       fontSize: 9,
     );
 

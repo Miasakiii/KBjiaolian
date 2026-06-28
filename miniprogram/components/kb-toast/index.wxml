@@ -1,0 +1,1 @@
+<view class="toast toast-{{type}}" wx:if="{{visible}}">{{message}}</view>

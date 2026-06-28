@@ -1,16 +1,18 @@
 <!--pages/index/index.wxml - 首页/仪表盘-->
 <view class="page-container">
-  <!-- 未登录态：宣传 Banner -->
+  <!-- 未登录态：极简留白（spec §7.4） -->
   <block wx:if="{{!isLoggedIn}}">
-    <view class="hero-banner animate-fade-in">
-      <view class="hero-content">
-        <view class="hero-logo">
-          <text class="hero-logo-text">KB</text>
-        </view>
-        <text class="hero-title">拍一张照，Know Your Body</text>
-        <text class="hero-subtitle">AI 驱动的体态评估与康复矫正专家</text>
-        <button class="btn-primary hero-btn" bindtap="onTapLogin">微信一键登录</button>
+    <view class="hero-minimal animate-fade-in">
+      <view class="hero-minimal-logo">
+        <image class="hero-logo-img" src="/assets/logo/kb-logo-v1.svg" mode="aspectFit" />
       </view>
+      <text class="hero-minimal-title">KB 教练</text>
+      <text class="hero-minimal-tagline">Know Your Body</text>
+      <text class="hero-minimal-desc">AI 驱动的体态评估与康复矫正。拍一张照，看见自己的身体。</text>
+      <button class="btn-primary hero-minimal-btn" bindtap="onTapLogin">
+        <image src="/assets/icons/ic-wechat.svg" mode="aspectFit" class="hero-minimal-btn-icon" />
+        微信一键登录
+      </button>
     </view>
     <view class="features-grid">
       <view class="feature-card tap-scale animate-fade-in animate-delay-{{index + 1}}" wx:for="{{features}}" wx:key="key" bindtap="onTapLogin">

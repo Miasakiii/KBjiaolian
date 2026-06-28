@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "进度趋势",
+  "usingComponents": {
+    "kb-empty": "/components/kb-empty/index"
+  }
+}

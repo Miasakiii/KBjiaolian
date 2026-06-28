@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/analysis_provider.dart';
+import '../theme/kb_colors.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -54,20 +55,20 @@ class HistoryScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.history, size: 64, color: Colors.grey.shade300),
+                  const Icon(Icons.history, size: 64, color: KbColors.line),
                   const SizedBox(height: 16),
-                  Text(
+                  const Text(
                     '暂无分析记录',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      color: Colors.grey.shade600,
+                      color: KbColors.text2,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
+                  const Text(
                     '完成体态分析后可查看历史',
-                    style: TextStyle(color: Colors.grey.shade500),
+                    style: TextStyle(color: KbColors.text3),
                   ),
                   const SizedBox(height: 16),
                   TextButton(
@@ -100,7 +101,7 @@ class HistoryScreen extends StatelessWidget {
                       '$score',
                       style: TextStyle(
                         color: _getScoreColor(score),
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
@@ -125,9 +126,9 @@ class HistoryScreen extends StatelessWidget {
   }
 
   Color _getScoreColor(int score) {
-    if (score >= 80) return Colors.green;
-    if (score >= 60) return Colors.orange;
-    return Colors.red;
+    if (score >= 80) return KbColors.brand;
+    if (score >= 60) return KbColors.accentWarn;
+    return KbColors.accentWarn;
   }
 
   void _showDetail(BuildContext context, Map<String, dynamic> result) {
@@ -151,7 +152,7 @@ class HistoryScreen extends StatelessWidget {
                     width: 40,
                     height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade300,
+                      color: KbColors.line,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -166,15 +167,15 @@ class HistoryScreen extends StatelessWidget {
                         '${result['score']}',
                         style: TextStyle(
                           fontSize: 64,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                           color: _getScoreColor(result['score']),
                         ),
                       ),
-                      Text(
+                      const Text(
                         '体态评分',
                         style: TextStyle(
                           fontSize: 18,
-                          color: Colors.grey.shade600,
+                          color: KbColors.text2,
                         ),
                       ),
                     ],
@@ -187,7 +188,7 @@ class HistoryScreen extends StatelessWidget {
                   Text(
                     '分析总结',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -200,7 +201,7 @@ class HistoryScreen extends StatelessWidget {
                   Text(
                     '体态问题',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -212,7 +213,7 @@ class HistoryScreen extends StatelessWidget {
                         .map((issue) {
                       return Chip(
                         label: Text(issue['name']?.toString() ?? ''),
-                        backgroundColor: Colors.orange.shade50,
+                        backgroundColor: KbColors.brandSoft,
                       );
                     }).toList(),
                   ),

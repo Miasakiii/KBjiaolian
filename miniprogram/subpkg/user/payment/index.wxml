@@ -19,7 +19,10 @@
   </view>
 
   <view class="pay-notice">
-    <text class="pn-text">支付即表示同意《用户协议》和《隐私政策》</text>
+    <text class="pn-text">支付即表示同意</text>
+    <text class="pn-link" bindtap="onViewAgreement">《用户协议》</text>
+    <text class="pn-text">和</text>
+    <text class="pn-link" bindtap="onViewPrivacy">《隐私政策》</text>
   </view>
 
   <view class="pay-footer safe-bottom">

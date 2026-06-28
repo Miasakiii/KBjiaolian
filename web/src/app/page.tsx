@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useRef } from 'react';
 import {
@@ -80,14 +80,12 @@ const faqs = [
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{backgroundColor:'#f6f8f7'}}>
       {/* ── Nav ── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-neutral-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-emerald-500 rounded-xl flex items-center justify-center shadow-sm shadow-primary-500/20">
-              <Dumbbell size={18} className="text-white" />
-            </div>
+            <img src="/logo.svg" alt="KB教练" className="w-9 h-9 rounded-xl shadow-sm shadow-primary-500/20" />
             <span className="font-bold text-neutral-900 text-lg">KB教练</span>
           </div>
           <div className="flex items-center gap-6">
@@ -104,7 +102,7 @@ export default function HomePage() {
       <section className="relative overflow-hidden pt-28 pb-24 bg-gradient-to-b from-primary-50/60 to-white">
         {/* 背景装饰 */}
         <div className="absolute top-20 right-0 w-96 h-96 bg-primary-200/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-72 h-72 bg-emerald-100/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-72 h-72 bg-primary-100/20 rounded-full blur-3xl" />
 
         <div className="max-w-6xl mx-auto px-6 relative">
           <div className="grid md:grid-cols-2 gap-16 items-center">
@@ -117,7 +115,7 @@ export default function HomePage() {
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-neutral-900 mb-6">
                 拍一张照
                 <br />
-                <span className="bg-gradient-to-r from-primary-600 to-emerald-500 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-primary-600 to-primary-600 bg-clip-text text-transparent">
                   Know Your Body
                 </span>
               </h1>
@@ -154,7 +152,7 @@ export default function HomePage() {
                     </div>
                     {/* 内容区 */}
                     <div className="flex-1 px-5 pt-6">
-                      <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-emerald-500 rounded-xl flex items-center justify-center mb-4 shadow-sm shadow-primary-500/20">
+                      <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center mb-4 shadow-sm shadow-primary-500/20">
                         <Dumbbell size={20} className="text-white" />
                       </div>
                       <div className="text-sm font-bold text-neutral-900 mb-1">今日体态评分</div>
@@ -187,7 +185,7 @@ export default function HomePage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               {stats.map(s => (
                 <div key={s.label} className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-600 to-emerald-500 bg-clip-text text-transparent mb-2">{s.value}</div>
+                  <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary-600 to-primary-600 bg-clip-text text-transparent mb-2">{s.value}</div>
                   <div className="text-sm text-neutral-400">{s.label}</div>
                 </div>
               ))}
@@ -274,7 +272,7 @@ export default function HomePage() {
                   </div>
                   <p className="text-neutral-600 text-sm leading-relaxed mb-6">"{t.text}"</p>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-emerald-500 rounded-full flex items-center justify-center text-sm font-bold text-white">
+                    <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center text-sm font-bold text-white">
                       {t.initial}
                     </div>
                     <div>
@@ -283,7 +281,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   {/* 底部装饰 */}
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500/10 to-emerald-500/10" />
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500/10 to-primary-600/10" />
                 </div>
               ))}
             </div>
@@ -306,7 +304,7 @@ export default function HomePage() {
                   key={i}
                   className={`rounded-2xl p-8 relative transition-all hover:-translate-y-1 ${
                     p.highlight
-                      ? 'bg-white border-2 border-primary-500 glow-green'
+                      ? 'bg-white border-2 border-primary-500 glow-brand'
                       : 'bg-white border border-neutral-200'
                   }`}
                 >
@@ -351,7 +349,7 @@ export default function HomePage() {
       <section id="download" className="py-24 bg-white">
         <div className="max-w-2xl mx-auto px-6">
           <RevealSection>
-            <div className="bg-gradient-to-br from-primary-500 to-emerald-500 rounded-3xl p-12 text-center text-white relative overflow-hidden">
+            <div className="bg-gradient-to-br from-primary-500 to-primary-600 rounded-3xl p-12 text-center text-white relative overflow-hidden">
               {/* 背景装饰 */}
               <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
               <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -362,13 +360,13 @@ export default function HomePage() {
                 </div>
                 <h2 className="text-2xl font-bold mb-3">立即下载 KB教练</h2>
                 <p className="text-primary-100 mb-8 text-sm">Android 客户端，安装即用，无需注册即可体验基础功能</p>
-                <a
-                  href="/api/download/app"
-                  className="inline-flex items-center gap-3 px-10 py-4 bg-white text-primary-700 font-bold rounded-2xl text-lg hover:bg-primary-50 active:scale-[0.98] transition-all shadow-lg"
+                <button
+                  onClick={() => alert('APK 下载即将上线，敬请期待！')}
+                  className="inline-flex items-center gap-3 px-10 py-4 bg-white text-primary-700 font-bold rounded-2xl text-lg hover:bg-primary-50 active:scale-[0.98] transition-all shadow-lg cursor-pointer"
                 >
                   <Download size={20} />
                   下载 APK 安装包
-                </a>
+                </button>
                 <div className="mt-6 flex items-center justify-center gap-6 text-sm text-primary-100">
                   <div className="flex items-center gap-1.5">
                     <Shield size={13} />
@@ -413,9 +411,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-                <Dumbbell size={16} className="text-white" />
-              </div>
+              <img src="/logo.svg" alt="KB教练" className="w-8 h-8 rounded-lg brightness-0 invert" />
               <span className="text-white font-bold">KB教练</span>
             </div>
             <div className="flex gap-8 text-sm">

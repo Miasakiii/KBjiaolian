@@ -1,0 +1,130 @@
+<!--pages/nutrition/index.wxml - 营养识别页-->
+<view class="page-container">
+  <!-- 未登录提示 -->
+  <view class="login-prompt" wx:if="{{!isLoggedIn}}">
+    <image class="lp-icon" src="/assets/icons/ic-user.svg" mode="aspectFit" />
+    <text class="lp-text">登录后可使用营养识别</text>
+    <button class="btn-primary lp-btn" bindtap="onTapLogin">去登录</button>
+  </view>
+
+  <block wx:else>
+    <!-- 餐次选择 -->
+    <view class="section-title">选择餐次</view>
+    <view class="meal-chips">
+      <view
+        class="meal-chip {{mealType === item.key ? 'meal-chip-active' : ''}}"
+        wx:for="{{mealTypes}}" wx:key="key"
+        bindtap="onSelectMeal" data-key="{{item.key}}">
+        <text class="meal-chip-text">{{item.label}}</text>
+      </view>
+    </view>
+
+    <!-- 拍照/选图区域 -->
+    <view wx:if="{{step === 'idle'}}">
+      <view class="photo-hero card">
+        <view class="photo-placeholder">
+          <image class="photo-icon" src="/assets/icons/pat-breathing.svg" mode="aspectFit" />
+          <text class="photo-desc">拍照识别食物营养</text>
+        </view>
+        <view class="photo-actions">
+          <button class="btn-primary" bindtap="onChooseCamera">拍照</button>
+          <button class="btn-outline" bindtap="onChooseAlbum">从相册选择</button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 图片预览 -->
+    <view wx:if="{{imagePreview && step !== 'idle'}}" class="preview-wrap">
+      <image class="preview-image" src="{{imagePreview}}" mode="widthFix" />
+    </view>
+
+    <!-- 上传中 -->
+    <view class="loading-wrap" wx:if="{{step === 'uploading'}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">正在上传图片...</text>
+    </view>
+
+    <!-- 分析中 -->
+    <view class="loading-wrap" wx:if="{{step === 'analyzing'}}">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">AI 正在识别食物...</text>
+      <text class="loading-sub">通常需要 5-15 秒</text>
+    </view>
+
+    <!-- 分析结果 -->
+    <view wx:if="{{step === 'result' && result}}">
+      <!-- 食物列表 -->
+      <view class="section-title">识别结果</view>
+      <view class="card-flat food-list animate-fade-in">
+        <view class="food-item" wx:for="{{result.foods}}" wx:key="name">
+          <view class="food-info">
+            <text class="food-name">{{item.name}}</text>
+            <text class="food-portion">{{item.portion}}</text>
+          </view>
+          <text class="food-cal">{{item.calories}} kcal</text>
+        </view>
+      </view>
+
+      <!-- 营养汇总卡片 -->
+      <view class="section-title">营养汇总</view>
+      <view class="nutrition-grid animate-fade-in animate-delay-1">
+        <view class="nutrition-cell">
+          <text class="nutrition-value">{{result.totalCalories}}</text>
+          <text class="nutrition-unit">kcal</text>
+          <text class="nutrition-label">热量</text>
+        </view>
+        <view class="nutrition-cell">
+          <text class="nutrition-value">{{result.totalProtein}}</text>
+          <text class="nutrition-unit">g</text>
+          <text class="nutrition-label">蛋白质</text>
+        </view>
+        <view class="nutrition-cell">
+          <text class="nutrition-value">{{result.totalCarbs}}</text>
+          <text class="nutrition-unit">g</text>
+          <text class="nutrition-label">碳水</text>
+        </view>
+        <view class="nutrition-cell">
+          <text class="nutrition-value">{{result.totalFat}}</text>
+          <text class="nutrition-unit">g</text>
+          <text class="nutrition-label">脂肪</text>
+        </view>
+      </view>
+
+      <!-- AI 饮食建议 -->
+      <view wx:if="{{result.tips}}" class="section-title">饮食建议</view>
+      <view wx:if="{{result.tips}}" class="card-flat tips-card animate-fade-in animate-delay-2">
+        <text class="tips-text">{{result.tips}}</text>
+      </view>
+
+      <!-- 操作按钮 -->
+      <view class="result-actions">
+        <button class="btn-primary" bindtap="onChooseCamera">继续识别</button>
+        <button class="btn-outline" bindtap="onTapRetake">重新拍照</button>
+      </view>
+    </view>
+
+    <!-- 今日营养汇总 -->
+    <view class="section-title" wx:if="{{todayNutrition}}">今日营养汇总</view>
+    <view class="card-flat today-summary animate-fade-in" wx:if="{{todayNutrition}}">
+      <view class="today-row">
+        <view class="today-cell">
+          <text class="today-value text-brand">{{todayNutrition.calories}}</text>
+          <text class="today-label">热量 kcal</text>
+        </view>
+        <view class="today-cell">
+          <text class="today-value text-brand">{{todayNutrition.protein}}</text>
+          <text class="today-label">蛋白质 g</text>
+        </view>
+        <view class="today-cell">
+          <text class="today-value text-brand">{{todayNutrition.carbs}}</text>
+          <text class="today-label">碳水 g</text>
+        </view>
+        <view class="today-cell">
+          <text class="today-value text-brand">{{todayNutrition.fat}}</text>
+          <text class="today-label">脂肪 g</text>
+        </view>
+      </view>
+      <text class="today-count">今日共 {{todayNutrition.count}} 条记录</text>
+    </view>
+  </block>
+</view>

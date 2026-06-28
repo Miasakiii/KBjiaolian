@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/analysis_provider.dart';
 import '../services/api_service.dart';
+import '../theme/kb_colors.dart';
 
 class CompareScreen extends StatefulWidget {
   const CompareScreen({super.key});
@@ -36,14 +37,14 @@ class _CompareScreenState extends State<CompareScreen> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: KbColors.line,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 16),
               Text(
                 isBefore ? '选择"之前"的记录' : '选择"之后"的记录',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 8),
               Expanded(
@@ -73,7 +74,7 @@ class _CompareScreenState extends State<CompareScreen> {
                                 '$score',
                                 style: TextStyle(
                                   color: _getScoreColor(score),
-                                  fontWeight: FontWeight.bold,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
@@ -133,9 +134,8 @@ class _CompareScreenState extends State<CompareScreen> {
   }
 
   Color _getScoreColor(int score) {
-    if (score >= 80) return Colors.green;
-    if (score >= 60) return Colors.orange;
-    return Colors.red;
+    if (score >= 80) return KbColors.brand;
+    return KbColors.accentWarn;
   }
 
   @override
@@ -214,7 +214,7 @@ class _CompareScreenState extends State<CompareScreen> {
                 decoration: BoxDecoration(
                   color: record != null
                       ? _getScoreColor(score).withValues(alpha: 0.1)
-                      : Colors.grey.shade100,
+                      : KbColors.surface2,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Center(
@@ -223,11 +223,11 @@ class _CompareScreenState extends State<CompareScreen> {
                           '$score',
                           style: TextStyle(
                             fontSize: 20,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                             color: _getScoreColor(score),
                           ),
                         )
-                      : Icon(Icons.add, color: Colors.grey.shade400),
+                      : const Icon(Icons.add, color: KbColors.text3),
                 ),
               ),
               const SizedBox(width: 16),
@@ -237,10 +237,10 @@ class _CompareScreenState extends State<CompareScreen> {
                   children: [
                     Text(
                       label,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade500,
-                        fontWeight: FontWeight.w500,
+                        color: KbColors.text3,
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -253,13 +253,13 @@ class _CompareScreenState extends State<CompareScreen> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: record != null ? null : Colors.grey.shade400,
+                        color: record != null ? null : KbColors.text3,
                       ),
                     ),
                   ],
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.grey.shade400),
+              const Icon(Icons.chevron_right, color: KbColors.text3),
             ],
           ),
         ),
@@ -281,14 +281,14 @@ class _CompareScreenState extends State<CompareScreen> {
             style: Theme.of(context)
                 .textTheme
                 .titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
+                ?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: KbColors.brandSoft,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(summary),
@@ -301,7 +301,7 @@ class _CompareScreenState extends State<CompareScreen> {
             style: Theme.of(context)
                 .textTheme
                 .titleMedium
-                ?.copyWith(fontWeight: FontWeight.bold),
+                ?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           ...changesList.whereType<Map>().map((change) {
@@ -323,10 +323,10 @@ class _CompareScreenState extends State<CompareScreen> {
                             : Icons.remove,
                     size: 20,
                     color: isPositive
-                        ? Colors.green
+                        ? KbColors.brand
                         : isNegative
-                            ? Colors.red
-                            : Colors.grey,
+                            ? KbColors.accentWarn
+                            : KbColors.text3,
                   ),
                   const SizedBox(width: 8),
                   Expanded(child: Text(text)),

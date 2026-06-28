@@ -4,13 +4,16 @@
     "pages/analyze/index",
     "pages/plan/index",
     "pages/chat/index",
-    "pages/exercises/index"
+    "pages/exercises/index",
+    "pages/nutrition/index"
   ],
   "usingComponents": {
     "kb-empty": "/components/kb-empty/index",
     "kb-quota": "/components/kb-quota/index",
     "kb-score": "/components/kb-score/index",
-    "kb-radar": "/components/kb-radar/index"
+    "kb-radar": "/components/kb-radar/index",
+    "kb-skeleton": "/components/kb-skeleton/index",
+    "kb-toast": "/components/kb-toast/index"
   },
   "window": {
     "backgroundTextStyle": "dark",
@@ -64,7 +67,9 @@
         "login/index",
         "profile/index",
         "pricing/index",
-        "payment/index"
+        "payment/index",
+        "agreement/index",
+        "privacy/index"
       ]
     },
     {
@@ -72,9 +77,13 @@
       "pages": [
         "analysis/index",
         "compare/index",
-        "workouts/index"
+        "workouts/index",
+        "progress/index"
       ]
     }
+  ],
+  "requiredPrivateInfos": [
+    "chooseMedia"
   ],
   "preloadRule": {
     "pages/index/index": {

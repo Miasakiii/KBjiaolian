@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/kb_colors.dart';
 
 class PrivacyScreen extends StatelessWidget {
   const PrivacyScreen({super.key});
@@ -17,14 +18,14 @@ class PrivacyScreen extends StatelessWidget {
             Text(
               '隐私政策',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
             ),
             const SizedBox(height: 8),
             Text(
               '最后更新日期：2025年6月',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey,
+                    color: KbColors.text3,
                   ),
             ),
             const SizedBox(height: 24),
@@ -113,7 +114,7 @@ class PrivacyScreen extends StatelessWidget {
           Text(
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w600,
                 ),
           ),
           const SizedBox(height: 8),
