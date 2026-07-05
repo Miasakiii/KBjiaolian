@@ -126,17 +126,30 @@ export function getUserPlan(userId: string): PlanId {
 }
 
 /**
- * 中国时区下的"今日 0 点"对应的 UTC 毫秒数
+ * 中国时区（UTC+8）下的"今日 0 点"对应的 UTC 毫秒数
  * 解决 Railway/Docker 默认 UTC 时区导致"今日"边界错误的问题
+ *
+ * 中国不实行夏令时，UTC+8 全年固定偏移；这里用 Intl.DateTimeFormat 显式
+ * 取 Asia/Shanghai 时区的"年/月/日"，再合成对应的 UTC 毫秒数，
+ * 比手动偏移更直观，且未来若需切换时区只需改 timeZone 字段。
  */
 function getTodayStartMs(): number {
   const now = new Date();
-  // 转换到中国时区 (UTC+8)
-  const cnOffset = 8 * 3600000;
-  const utcMs = now.getTime() + now.getTimezoneOffset() * 60000;
-  const cnDate = new Date(utcMs + cnOffset);
-  cnDate.setHours(0, 0, 0, 0);
-  return cnDate.getTime() - cnOffset;
+  // 取中国时区当日的年/月/日（local 时间）
+  const fmt = new Intl.DateTimeFormat('zh-CN', {
+    timeZone: 'Asia/Shanghai',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  });
+  const parts = fmt.formatToParts(now);
+  const get = (type: string): string =>
+    (parts.find((p) => p.type === type)?.value ?? '0');
+  const year = Number(get('year'));
+  const month = Number(get('month'));
+  const day = Number(get('day'));
+  // 中国时区当日 0 点对应的 UTC 毫秒数 = Date.UTC(年,月-1,日,0,0,0) - 8h
+  return Date.UTC(year, month - 1, day, 0, 0, 0) - 8 * 3600000;
 }
 
 /**

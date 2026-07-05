@@ -23,6 +23,8 @@ dependencies:
 
   # 本地存储
   shared_preferences: ^2.2.2
+  # 敏感数据（JWT token 等）安全存储：iOS Keychain / Android Keystore
+  flutter_secure_storage: ^9.2.2
 
   # 状态管理
   provider: ^6.1.1

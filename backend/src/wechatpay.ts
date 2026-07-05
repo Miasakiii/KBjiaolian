@@ -24,7 +24,11 @@ const config = {
   get notifyUrl(): string { return process.env.WECHATPAY_NOTIFY_URL ?? ''; },
   get miniAppId(): string { return process.env.WECHAT_APPID ?? ''; },
   get appAppId(): string { return process.env.WECHAT_OPENPLATFORM_APPID ?? ''; },
-  get isMock(): boolean { return process.env.MOCK_WECHAT_PAY === 'true'; },
+  get isMock(): boolean {
+    // 生产环境强制禁用 Mock 支付，即使误配置 MOCK_WECHAT_PAY=true 也不会生效
+    if (process.env.NODE_ENV === 'production') return false;
+    return process.env.MOCK_WECHAT_PAY === 'true';
+  },
 };
 
 let _privateKey: crypto.KeyObject | null = null;
@@ -52,6 +56,138 @@ export function isWechatPayConfigured(): boolean {
     && !!config.serialNo
     && !!config.apiV3Key
     && !!config.notifyUrl;
+}
+
+// ========== 平台证书管理 ==========
+
+interface PlatformCert {
+  publicKey: crypto.KeyObject;
+  expireAt: number; // 证书过期时间（毫秒戳）
+}
+
+// 平台证书缓存：serial -> PlatformCert
+const _platformCertCache = new Map<string, PlatformCert>();
+// 最近一次拉取平台证书的时间，防止短时间内重复请求
+let _platformCertFetchAt = 0;
+const PLATFORM_CERT_REFRESH_INTERVAL_MS = 12 * 60 * 60 * 1000; // 12 小时
+const PLATFORM_CERT_PREEXPIRE_MS = 60 * 60 * 1000; // 证书过期前 1 小时视为需刷新
+
+/**
+ * AEAD_AES_256_GCM 通用解密：既用于回调解密，也用于平台证书下载解密
+ * @param key - 32 字节 APIv3 密钥
+ * @param nonce - 随机串
+ * @param associatedData - 附加数据
+ * @param ciphertext - Base64 密文（末尾 16 字节为 GCM tag）
+ * @returns 解密后的 Buffer
+ */
+function decryptAes256Gcm(
+  key: Buffer,
+  nonce: string,
+  associatedData: string,
+  ciphertext: string,
+): Buffer {
+  const nonceBuf = Buffer.from(nonce, 'utf8');
+  const aad = Buffer.from(associatedData || '', 'utf8');
+  const ciphertextBuf = Buffer.from(ciphertext, 'base64');
+
+  // AEAD_AES_256_GCM: 密文末尾 16 字节是 tag
+  const encryptedData = ciphertextBuf.subarray(0, ciphertextBuf.length - 16);
+  const authTag = ciphertextBuf.subarray(ciphertextBuf.length - 16);
+
+  const decipher = crypto.createDecipheriv('aes-256-gcm', key, nonceBuf);
+  decipher.setAAD(aad);
+  decipher.setAuthTag(authTag);
+
+  return Buffer.concat([
+    decipher.update(encryptedData),
+    decipher.final(),
+  ]);
+}
+
+/**
+ * 拉取并解析微信支付平台证书，更新内存缓存。
+ * 失败时不清空已有缓存（避免因网络抖动丢失可用证书）。
+ */
+async function refreshPlatformCertificates(): Promise<void> {
+  const now = Date.now();
+  // 防止并发/短时间内重复请求证书接口
+  if (now - _platformCertFetchAt < PLATFORM_CERT_REFRESH_INTERVAL_MS && _platformCertCache.size > 0) {
+    return;
+  }
+  _platformCertFetchAt = now;
+
+  const data = await requestApi('GET', '/v3/certificates', null);
+  const certs = Array.isArray(data.data) ? data.data : [];
+
+  for (const cert of certs) {
+    try {
+      const serialNo = cert.serial_no as string;
+      const enc = cert.encrypt_certificate as {
+        algorithm: string;
+        nonce: string;
+        associated_data: string;
+        ciphertext: string;
+      };
+      if (enc.algorithm !== 'AEAD_AES_256_GCM') continue;
+
+      const key = Buffer.from(config.apiV3Key, 'utf8');
+      const decryptedPem = decryptAes256Gcm(
+        key,
+        enc.nonce,
+        enc.associated_data,
+        enc.ciphertext,
+      ).toString('utf8');
+
+      const x509 = new crypto.X509Certificate(decryptedPem);
+      const publicKey = x509.publicKey;
+      // X509Certificate.validTo 在 Node.js 中是 RFC 日期字符串，需手动解析
+      const expireAt = Date.parse(x509.validTo);
+      if (!Number.isFinite(expireAt)) {
+        logger.error({ validTo: x509.validTo }, '微信支付平台证书过期时间解析失败');
+        continue;
+      }
+
+      _platformCertCache.set(serialNo, { publicKey, expireAt });
+    } catch (err) {
+      logger.error({ err }, '解析微信支付平台证书失败');
+    }
+  }
+
+  if (_platformCertCache.size === 0) {
+    logger.error('刷新微信支付平台证书后缓存仍为空');
+  }
+}
+
+/**
+ * 根据 serial 获取平台证书公钥。
+ * 缓存缺失或临近过期时自动刷新；刷新失败时降级使用旧缓存，仍不可用则返回 null（fail-closed）。
+ */
+async function getPlatformPublicKey(serial: string): Promise<crypto.KeyObject | null> {
+  const now = Date.now();
+  const cached = _platformCertCache.get(serial);
+
+  // 缓存命中且未临近过期
+  if (cached && cached.expireAt - now > PLATFORM_CERT_PREEXPIRE_MS) {
+    return cached.publicKey;
+  }
+
+  // 缓存缺失或即将过期，尝试刷新
+  try {
+    await refreshPlatformCertificates();
+  } catch (err) {
+    logger.error({ err }, '拉取微信支付平台证书失败');
+    // 若旧缓存仍可用（未真正过期），降级使用
+    if (cached && cached.expireAt - now > 0) {
+      return cached.publicKey;
+    }
+    return null;
+  }
+
+  const refreshed = _platformCertCache.get(serial);
+  if (refreshed && refreshed.expireAt - now > 0) {
+    return refreshed.publicKey;
+  }
+  return null;
 }
 
 // ========== 签名 / 验签 ==========
@@ -103,12 +239,12 @@ export function createAuthorizationHeader(method: string, urlPath: string, body:
 }
 
 /**
- * 验证微信回调签名
+ * 验证微信回调签名（使用微信支付平台证书公钥）
  * @param headers - 请求头
  * @param body - 原始请求体（字符串）
- * @returns 签名是否有效
+ * @returns 签名是否有效；无法获取平台证书时返回 false（fail-closed）
  */
-export function verifyCallbackSignature(headers: Record<string, string | undefined>, body: string): boolean {
+export async function verifyCallbackSignature(headers: Record<string, string | undefined>, body: string): Promise<boolean> {
   const timestamp = headers['wechatpay-timestamp'];
   const nonce = headers['wechatpay-nonce'];
   const signature = headers['wechatpay-signature'];
@@ -122,10 +258,14 @@ export function verifyCallbackSignature(headers: Record<string, string | undefin
   // 构造验签串
   const message = `${timestamp}\n${nonce}\n${body}\n`;
 
-  // 用商户证书公钥验签（开发阶段）
-  // 生产环境应使用微信支付平台证书公钥（需先下载平台证书）
+  // 使用微信支付平台证书公钥验签（不再使用商户私钥导出的公钥）
+  const publicKey = await getPlatformPublicKey(serial);
+  if (!publicKey) {
+    logger.error({ serial }, '无法获取微信支付平台证书，拒绝回调（fail-closed）');
+    return false;
+  }
+
   try {
-    const publicKey = crypto.createPublicKey(getPrivateKey().export({ format: 'pem', type: 'pkcs1' }));
     const verifier = crypto.createVerify('RSA-SHA256');
     verifier.update(message);
     return verifier.verify(publicKey, signature, 'base64');
@@ -158,24 +298,26 @@ export function decryptNotification(resource: NotificationResource): Record<stri
   }
 
   const key = Buffer.from(config.apiV3Key, 'utf8');
-  const nonceBuf = Buffer.from(nonce, 'utf8');
-  const aad = Buffer.from(associated_data || '', 'utf8');
-  const ciphertextBuf = Buffer.from(ciphertext, 'base64');
-
-  // AEAD_AES_256_GCM: 密文末尾 16 字节是 tag
-  const encryptedData = ciphertextBuf.subarray(0, ciphertextBuf.length - 16);
-  const authTag = ciphertextBuf.subarray(ciphertextBuf.length - 16);
-
-  const decipher = crypto.createDecipheriv('aes-256-gcm', key, nonceBuf);
-  decipher.setAAD(aad);
-  decipher.setAuthTag(authTag);
-
-  const decrypted = Buffer.concat([
-    decipher.update(encryptedData),
-    decipher.final(),
-  ]);
+  const decrypted = decryptAes256Gcm(key, nonce, associated_data || '', ciphertext);
 
   return JSON.parse(decrypted.toString('utf8'));
+}
+
+// ========== 测试辅助（仅用于 jest 测试）==========
+
+/**
+ * 为测试注入平台证书缓存（绕过 /v3/certificates 网络拉取）
+ */
+export function _setPlatformCertForTest(serial: string, publicKey: crypto.KeyObject): void {
+  _platformCertCache.set(serial, { publicKey, expireAt: Date.now() + 365 * 24 * 60 * 60 * 1000 });
+}
+
+/**
+ * 清空测试中的平台证书缓存
+ */
+export function _clearPlatformCertsForTest(): void {
+  _platformCertCache.clear();
+  _platformCertFetchAt = 0;
 }
 
 // ========== 统一下单 ==========

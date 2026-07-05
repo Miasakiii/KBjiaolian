@@ -14,6 +14,10 @@ services:
       - ./backend/data:/app/data
       - ./backend/logs:/app/logs
       - ./backend/certs:/app/certs:ro
+    # 只读根文件系统：写入仅落在挂载的 data/logs 卷与 tmpfs
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m
     environment:
       - NODE_ENV=production
       - PORT=3003
@@ -30,6 +34,8 @@ services:
       - WECHATPAY_PRIVATE_KEY_PATH=/app/certs/apiclient_key.pem
       - WECHATPAY_NOTIFY_URL=${WECHATPAY_NOTIFY_URL}
       - MOCK_WECHAT_PAY=${MOCK_WECHAT_PAY:-true}
+      # 生产环境强制禁用微信登录 Mock 模式（即便误配置也不生效）
+      - MOCK_WECHAT_LOGIN=false
     networks:
       - kb-coach-network
     healthcheck:
@@ -51,6 +57,10 @@ services:
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"
+    # 只读根文件系统：Next.js 仅需写 /tmp（cache）
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m
     environment:
       - NEXT_PUBLIC_APP_NAME=${NEXT_PUBLIC_APP_NAME:-KB教练}
     networks:

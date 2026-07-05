@@ -12,6 +12,44 @@ const JWT_SECRET: string = process.env.JWT_SECRET ?? '';
 if (!JWT_SECRET) {
   throw new Error('JWT_SECRET 环境变量未设置。请在 .env 文件中配置安全的密钥。');
 }
+
+// JWT_SECRET 强度校验
+const isProduction = process.env.NODE_ENV === 'production';
+const secretLengthOk = JWT_SECRET.length >= 32;
+const secretHasUpper = /[A-Z]/.test(JWT_SECRET);
+const secretHasLower = /[a-z]/.test(JWT_SECRET);
+const secretHasDigit = /\d/.test(JWT_SECRET);
+const secretHasSpecial = /[^a-zA-Z0-9]/.test(JWT_SECRET);
+const secretComplexityOk = secretHasUpper && secretHasLower && secretHasDigit && secretHasSpecial;
+const WEAK_SECRET_PLACEHOLDERS = [
+  'your-super-secret-jwt-key-change-this-in-production',
+  'change-this',
+  'your-secret',
+  'example',
+];
+const secretLooksLikePlaceholder = WEAK_SECRET_PLACEHOLDERS.some((p) =>
+  JWT_SECRET.toLowerCase().includes(p),
+);
+
+if (isProduction) {
+  if (!secretLengthOk) {
+    throw new Error('生产环境 JWT_SECRET 长度必须至少 32 个字符，请使用随机生成的强密钥。');
+  }
+  if (!secretComplexityOk) {
+    throw new Error(
+      '生产环境 JWT_SECRET 必须同时包含大写字母、小写字母、数字和特殊字符，请使用随机生成的强密钥。',
+    );
+  }
+  if (secretLooksLikePlaceholder) {
+    throw new Error('生产环境 JWT_SECRET 疑似占位符，请替换为随机生成的强密钥。');
+  }
+  logger.info('JWT_SECRET 强度校验通过');
+} else if (!secretLengthOk || secretLooksLikePlaceholder) {
+  logger.warn(
+    'JWT_SECRET 强度不足：建议长度 ≥32 字符且使用随机密钥，生产环境将强制校验复杂度与长度。',
+  );
+}
+
 const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || '7d';
 
 // 验证码配置
@@ -24,15 +62,49 @@ function isValidEmail(email: string): boolean {
   return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/.test(email);
 }
 
-// 验证密码强度：6-100 字符，且必须同时包含字母和数字
+// 验证密码强度
+// - 非生产环境：6-100 字符，必须包含字母和数字（保持测试兼容）
+// - 生产环境：8-100 字符，必须包含大小写字母、数字、特殊字符，且不在弱密码黑名单
+const WEAK_PASSWORDS = new Set([
+  'password', 'password1',
+  '12345678', '123456789', '1234567890',
+  'qwerty123', 'abc12345', 'letmein1',
+  'iloveyou1', 'admin123', 'welcome1',
+]);
+
 function isValidPassword(password: string): boolean {
   if (typeof password !== 'string' || password.length < 6 || password.length > 100) {
     return false;
   }
-  // 至少包含一个字母和一个数字
+
+  // 弱密码黑名单（所有环境都拒绝）
+  if (WEAK_PASSWORDS.has(password.toLowerCase())) {
+    return false;
+  }
+
   const hasLetter = /[a-zA-Z]/.test(password);
   const hasDigit = /\d/.test(password);
-  return hasLetter && hasDigit;
+  const basicOk = hasLetter && hasDigit;
+
+  if (!basicOk) return false;
+
+  // 生产环境额外要求：长度 ≥8 + 大小写 + 数字 + 特殊字符
+  if (process.env.NODE_ENV === 'production') {
+    if (password.length < 8) return false;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasSpecial = /[^a-zA-Z0-9]/.test(password);
+    return hasUpper && hasLower && hasSpecial;
+  }
+
+  return true;
+}
+
+function passwordRuleHint(): string {
+  if (process.env.NODE_ENV === 'production') {
+    return '密码需要 8-100 个字符，且必须包含大小写字母、数字和特殊字符';
+  }
+  return '密码需要 6-100 个字符，且必须包含字母和数字';
 }
 
 // 生成 JWT Token
@@ -186,7 +258,7 @@ export async function register(req: Request, res: Response) {
       return res.status(400).json({ error: '邮箱格式不正确' });
     }
     if (!isValidPassword(password)) {
-      return res.status(400).json({ error: '密码需要 6-100 个字符，且必须包含字母和数字' });
+      return res.status(400).json({ error: passwordRuleHint() });
     }
 
     // 验证码校验（不立即标记已用）
@@ -278,6 +350,8 @@ export async function login(req: Request, res: Response) {
 // === 微信小程序登录（wx.login → code2Session → 换 token）===
 const WECHAT_APPID: string = process.env.WECHAT_APPID ?? '';
 const WECHAT_APPSECRET: string = process.env.WECHAT_APPSECRET ?? '';
+// 生产环境强制禁用 Mock 微信登录，避免误配置导致绕过真实认证
+const isWechatLoginMockAllowed = process.env.NODE_ENV !== 'production';
 
 export async function wechatLogin(req: Request, res: Response) {
   try {
@@ -289,7 +363,8 @@ export async function wechatLogin(req: Request, res: Response) {
 
     // ===== 本地开发 Mock 模式 =====
     // 在 .env 中配置 MOCK_WECHAT_LOGIN=true 即可跳过真实微信 API 调用
-    const isMock = process.env.MOCK_WECHAT_LOGIN === 'true';
+    // 生产环境强制关闭，即使误配置 MOCK_WECHAT_LOGIN=true 也不会生效
+    const isMock = isWechatLoginMockAllowed && process.env.MOCK_WECHAT_LOGIN === 'true';
     let openid;
 
     if (isMock) {
@@ -439,7 +514,7 @@ export async function resetPassword(req: Request, res: Response) {
     }
 
     if (!isValidPassword(newPassword)) {
-      return res.status(400).json({ error: '密码需要 6-100 个字符，且必须包含字母和数字' });
+      return res.status(400).json({ error: passwordRuleHint() });
     }
 
     const normalizedEmail = email.toLowerCase().trim();

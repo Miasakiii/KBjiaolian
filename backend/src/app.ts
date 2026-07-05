@@ -111,12 +111,56 @@ export function createApp(): Express {
     keyGenerator: (req) => req.userId || req.ip || '',
   });
 
+  // CSP 违规报告端点限流：浏览器可能短时间内提交大量报告，
+  // 单独限流以避免日志洪泛影响其他日志可读性。
+  const cspReportLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 30,
+    message: { error: 'CSP 报告过于频繁' },
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+
   app.use(generalLimiter);
 
   // === 公开端点 ===
 
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // CSP 违规报告收集端点（由 nginx report-uri 转发过来）。
+  // 浏览器以 POST application/json 或 application/csp-report 提交，
+  // 服务端只做记录与采样，不返回任何业务数据。
+  app.post('/api/csp-report', cspReportLimiter, express.json({ type: ['application/json', 'application/csp-report'], limit: '64kb' }), (req, res) => {
+    try {
+      const body = req.body as { 'csp-report'?: Record<string, unknown> } | null;
+      const report = body?.['csp-report'];
+
+      // 仅记录关键字段，避免泄露 cookie/Authorization 等敏感信息
+      if (report && typeof report === 'object') {
+        const sanitized = {
+          'document-uri': report['document-uri'],
+          'referrer': report['referrer'],
+          'violated-directive': report['violated-directive'],
+          'effective-directive': report['effective-directive'],
+          'original-policy': report['original-policy'],
+          'blocked-uri': report['blocked-uri'],
+          'line-number': report['line-number'],
+          'column-number': report['column-number'],
+          'source-file': report['source-file'],
+          'status-code': report['status-code'],
+          'script-sample': report['script-sample'],
+        };
+        logger.warn({ csp: sanitized }, 'CSP 违规报告');
+      } else {
+        logger.warn({ body: String(req.body).slice(0, 256) }, 'CSP 报告格式异常');
+      }
+    } catch (err) {
+      logger.error({ err }, '处理 CSP 报告失败');
+    }
+    // 浏览器不关心返回内容，使用 204 No Content 减少带宽
+    res.status(204).end();
   });
 
   app.post('/api/auth/register', authLimiter, register);
@@ -278,12 +322,12 @@ export function createApp(): Express {
   }
 
   // 微信支付回调（生产环境）
-  app.post('/api/payment/wechat/notify', express.raw({ type: 'application/json' }), (req, res) => {
+  app.post('/api/payment/wechat/notify', express.raw({ type: 'application/json' }), async (req, res) => {
     try {
       const bodyStr = req.body.toString('utf8');
 
-      // 验证签名
-      if (!verifyCallbackSignature(req.headers as Record<string, string | undefined>, bodyStr)) {
+      // 验证签名（平台证书异步拉取，fail-closed）
+      if (!(await verifyCallbackSignature(req.headers as Record<string, string | undefined>, bodyStr))) {
         logger.error('微信支付回调签名验证失败');
         return res.status(401).json({ code: 'FAIL', message: '签名验证失败' });
       }
