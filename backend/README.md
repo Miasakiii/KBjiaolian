@@ -76,6 +76,7 @@ backend/
 | POST | `/api/auth/forgot-password` | 发送重置验证码 | 10/min |
 | POST | `/api/auth/reset-password` | 重置密码（需验证码） | 10/min |
 | GET | `/api/plans` | 所有套餐信息 | 60/min |
+| POST | `/api/csp-report` | CSP 违规报告收集（仅记录，返回 204） | 30/min |
 
 ### 需认证端点（Bearer JWT）
 | 方法 | 路径 | 说明 | 限流 |
@@ -171,10 +172,12 @@ try {
 |---|---|
 | `createJsapiOrder` | 统一下单（JSAPI），返回 `wx.requestPayment` 参数 |
 | `createAppOrder` | 统一下单（APP），返回微信 SDK 参数 |
-| `verifyCallbackSignature` | 验证回调签名（RSA-SHA256） |
+| `verifyCallbackSignature` | 异步验签：自动拉取/缓存微信支付平台证书，fail-closed |
 | `decryptNotification` | 解密回调通知（AEAD_AES_256_GCM） |
 | `queryOrder` | 查询订单状态 |
 | `closeOrder` | 关闭订单 |
+
+> 平台证书管理：启动后按需从 `https://api.mch.weixin.qq.com/v3/certificates` 拉取，使用 APIv3 密钥解密后缓存 12 小时；证书临近过期 1 小时自动刷新；网络抖动时降级使用旧缓存，缓存全空时拒绝回调（fail-closed，返回 401）。
 
 **支付流程：**
 ```

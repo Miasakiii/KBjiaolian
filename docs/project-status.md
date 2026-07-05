@@ -172,6 +172,72 @@ KB教练是一个 AI 驱动的健身康复应用，帮助用户进行体态评�
 
 ---
 
+### ✅ P1 安全加固（2026-07-05）
+
+清除 P0 加固后剩余的 P1 安全项：
+
+**1. JWT_SECRET 强度校验（`backend/src/auth.ts`）**
+- 启动时强校验：生产环境长度 ≥32 + 大小写+数字+特殊字符四类齐全 + 占位符黑名单
+- 非生产环境仅告警，不阻断启动
+- 与既有 `JWT_SECRET` 缺失 fail-fast 叠加，防止误用弱密钥
+
+**2. 微信支付回调验签升级（`backend/src/wechatpay.ts` + `app.ts`）**
+- `verifyCallbackSignature` 改为 async：从 `GET /v3/certificates` 异步拉取微信支付平台证书
+- AEAD_AES_256_GCM 解密平台证书，X509 解析公钥与过期时间，缓存 12 小时
+- 证书临近过期 1 小时自动刷新；网络抖动降级使用旧缓存；缓存全空时返回 401（fail-closed）
+- `app.ts` 微信回调端点改为 async + await 验签
+- 修正 `X509Certificate.validTo`（string）解析为 `Date.parse()`
+
+**3. CSP 头部强化 + 违规报告收集（`nginx/` + `backend/src/app.ts`）**
+- `default-src 'self'`，收紧 `script-src`/`style-src`/`img-src`/`connect-src`/`object-src`/`base-uri`/`form-action`/`frame-ancestors`
+- 新增 `report-uri /api/csp-report`，CSP 违规上报到后端
+- 后端 `POST /api/csp-report`：单独限流 30/min，仅记录关键字段（脱敏），返回 204
+- nginx（kb-wctgrzpj.cn.conf + nginx.conf）新增 `/api/csp-report` 反代路由
+
+**4. Flutter Android 网络安全配置（`mobile/android/app/src/main/AndroidManifest.xml` + 新建 `res/xml/network_security_config.xml`）**
+- 全局禁用明文 HTTP（`cleartextTrafficPermitted="false"`）
+- 仅 `10.0.2.2` / `localhost` / `127.0.0.1` 开发调试地址豁免明文
+- 生产 API 必须部署为 HTTPS
+
+**5. Docker 容器只读文件系统（`docker-compose.yml`）**
+- backend / web 容器均启用 `read_only: true`
+- 写入仅落在挂载卷（data/logs/certs）与 tmpfs（/tmp）
+- 限制容器被攻破后的横向移动与持久化
+
+**6. 生产环境强制禁用 Mock 模式（`backend/src/auth.ts` + `wechatpay.ts` + `docker-compose.yml`）**
+- 微信登录 Mock：`NODE_ENV === 'production'` 时即便配置 `MOCK_WECHAT_LOGIN=true` 也不生效
+- 微信支付 Mock：`config.isMock` getter 在生产环境强制返回 false
+- docker-compose 显式注入 `MOCK_WECHAT_LOGIN=false`
+
+**7. 密码强度增强（`backend/src/auth.ts`）**
+- 弱密码黑名单（password / 12345678 / qwerty123 / admin123 等）
+- 生产环境额外要求：长度 ≥8 + 大小写 + 数字 + 特殊字符四类齐全
+- 错误提示根据环境动态生成（`passwordRuleHint()`）
+
+**8. 时区处理优化（`backend/src/subscription.ts`）**
+- `getTodayStartMs` 改用 `Intl.DateTimeFormat` + `Asia/Shanghai` 显式取中国时区当日 0 点
+- 替代原手动时区偏移计算，逻辑更直观，时区切换仅需改 `timeZone` 字段
+- 中国无 DST，行为零变化
+
+**9. Flutter Token 安全存储（`mobile/pubspec.yaml` + `mobile/lib/services/api_service.dart`）**
+- 新增 `flutter_secure_storage: ^9.2.2` 依赖
+- JWT Token 从 SharedPreferences（明文）迁移到 FlutterSecureStorage（iOS Keychain / Android Keystore）
+- iOS 设置 `first_unlock` 可访问性，Android 启用 `encryptedSharedPreferences`
+
+**10. 依赖漏洞修复（`web/package.json` + `backend/package.json`）**
+- 后端 `npm audit`：0 漏洞
+- Web 端 Next.js 14.2.18 → 15.5.20 升级，消除全部 critical/high 漏洞（含 Server Actions DoS、Middleware Bypass、Cache Poisoning、SSRF、XSS 等 14 项 advisory）
+- postcss 升级到 ^8.5.10
+- 残留 1 个 postcss moderate（Next.js 内部 bundle 依赖，无法在不降级 Next 的情况下消除，影响路径仅在 CSS 处理，风险极低）
+
+**不实施项说明：**
+- Nginx HTTP/2 Server Push（#13）：Chrome 自 2022 年起移除对 `Link: rel=preload` Server Push 的支持，Next.js 14+ 也已不再生成推送头，实施无收益。
+- Token 改 httpOnly cookie：Web 端已精简为纯营销页（无认证流程），小程序/Flutter 用平台安全存储，不适用。
+
+**验证：** TypeScript 类型检查通过 + 11 个测试套件（auth/auth-comprehensive/orders/validation/subscription/data-comprehensive/analyze/plan/nutrition/chat/progression）全部通过；`routes.test.ts` 因 better-sqlite3 原生模块未编译失败，属预先存在的环境问题，与本次修改无关（详见 backend/README.md 已知问题）。
+
+---
+
 ### ✅ P0 安全加固（2026-06-26）
 
 修复 4 个 P0 安全问题，清除生产上线阻塞项：
@@ -261,13 +327,23 @@ KB教练是一个 AI 驱动的健身康复应用，帮助用户进行体态评�
 - 全站主色调从灰色系迁移至绿色系（primary-500: `#22c55e`）
 
 - 安全发现：
-- ~~JWT Secret 弱可预测值~~ ✅ 已修复（从环境变量读取，缺失即抛错）
-- Token 存 localStorage（XSS 风险）— P1 待处理（改 httpOnly cookie）
-- ~~微信支付回调未验证签名~~ ✅ 已修复（2026-06-22）
+- ~~JWT Secret 弱可预测值~~ ✅ 已修复（从环境变量读取，缺失即抛错 + 2026-07-05 启动强度校验）
+- Token 存 localStorage（XSS 风险）— 不适用（Web 端已精简为纯营销页，无认证流程；小程序/Flutter 用平台安全存储）
+- ~~微信支付回调未验证签名~~ ✅ 已修复（2026-06-22，2026-07-05 升级为平台证书异步拉取 + fail-closed）
 - ~~验证码无尝试次数限制~~ ✅ 已修复（2026-06-26，5 次锁定）
 - ~~authMiddleware 打印完整 headers~~ ✅ 已修复（2026-06-26，删除日志泄露）
 - ~~验证码仅 console.log~~ ✅ 已修复（2026-06-26，接入 Resend 邮件服务）
 - ~~数据库无备份/checkpoint~~ ✅ 已修复（2026-06-26，WAL checkpoint + 每日备份）
+- ~~CSP 头部过宽（unsafe-inline 全开）~~ ✅ 已修复（2026-07-05，收紧 + report-uri 收集）
+- ~~Flutter Android 允许明文 HTTP~~ ✅ 已修复（2026-07-05，network_security_config 默认禁用明文）
+- ~~Docker 端口不一致（Dockerfile 3001 vs compose 3003）~~ ✅ 已修复（Dockerfile 已统一 EXPOSE 3003）
+- ~~验证码无尝试次数限制~~ → 同上（2026-06-26 已修复）
+- ~~Flutter Token 明文 SharedPreferences~~ ✅ 已修复（2026-07-05，迁移到 flutter_secure_storage）
+- ~~密码强度不足（仅 6 位字母+数字）~~ ✅ 已修复（2026-07-05，生产强制 8 位 + 四类齐全 + 弱密码黑名单）
+- ~~生产环境可能误启用 Mock 微信登录/支付~~ ✅ 已修复（2026-07-05，生产环境强制禁用）
+- ~~Docker 容器可写文件系统~~ ✅ 已修复（2026-07-05，read_only + tmpfs）
+- ~~时区手动偏移计算可读性差~~ ✅ 已修复（2026-07-05，Intl.DateTimeFormat + Asia/Shanghai）
+- ~~Next.js 14 多个 critical/high 漏洞~~ ✅ 已修复（2026-07-05，升级到 15.5.20）
 
 ---
 
