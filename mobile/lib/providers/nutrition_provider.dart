@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import '../models/nutrition_record.dart';
 import '../services/api_service.dart';
 import '../services/storage_service.dart';
-import '../services/cloud_storage_service.dart';
 
 class NutritionProvider extends ChangeNotifier {
   Map<String, dynamic>? _currentAnalysis;
@@ -22,25 +21,11 @@ class NutritionProvider extends ChangeNotifier {
   }
 
   Future<void> _loadRecords() async {
-    // 先加载本地数据
+    // 个人版：仅本地存储
     final rawRecords = StorageService.getNutritionRecords();
     _records = rawRecords
         .map((e) => NutritionRecord.fromJson(e as Map<String, dynamic>))
         .toList();
-
-    // 如果已登录，尝试从云端加载
-    try {
-      if (await ApiService.isAuthenticated()) {
-        final cloudRecords = await CloudStorageService.getNutritionRecords();
-        if (cloudRecords.isNotEmpty) {
-          _records = cloudRecords
-              .map((e) => NutritionRecord.fromJson(e as Map<String, dynamic>))
-              .toList();
-        }
-      }
-    } catch (e) {
-      debugPrint('云端加载饮食记录失败: $e');
-    }
 
     notifyListeners();
   }
@@ -63,9 +48,6 @@ class NutritionProvider extends ChangeNotifier {
 
       // 保存到本地
       await StorageService.saveNutritionRecord(record);
-
-      // 保存到云端
-      await CloudStorageService.saveNutritionRecord(record);
 
       final rawRecords = StorageService.getNutritionRecords();
       _records = rawRecords

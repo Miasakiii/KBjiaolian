@@ -43,25 +43,12 @@ class ChatProvider extends ChangeNotifier {
       role: 'assistant',
       content: '你好！我是 KB教练 💪\n\n**我可以帮你：**\n- 🏋️ 训练动作和计划\n- 🍎 营养和饮食建议\n- 🧘 体态改善指导\n- ⚠️ 运动安全提醒\n\n有什么想问的？',
       timestamp: DateTime.now(),
-    ));
+    ),);
   }
 
-  // 加载聊天历史（从云端）
+  // 个人版：聊天历史仅存内存（可选后续接本地持久化）
   Future<void> loadHistory() async {
-    try {
-      if (await ApiService.isAuthenticated()) {
-        final history = await ApiService.authenticatedGetList('/data/chat');
-        if (history.isNotEmpty) {
-          _messages.clear();
-          for (final msg in history) {
-            _messages.add(ChatMessage.fromJson(msg));
-          }
-          notifyListeners();
-        }
-      }
-    } catch (e) {
-      debugPrint('加载聊天历史失败: $e');
-    }
+    // 个人版无云端历史，保留空实现兼容 ChatScreen initState 调用
   }
 
   Future<void> sendMessage(String content) async {
@@ -72,7 +59,7 @@ class ChatProvider extends ChangeNotifier {
       role: 'user',
       content: content,
       timestamp: DateTime.now(),
-    ));
+    ),);
     notifyListeners();
 
     _isLoading = true;
@@ -90,20 +77,50 @@ class ChatProvider extends ChangeNotifier {
         }
       }
 
-      final reply = await ApiService.sendMessage(content, history);
-
-      _messages.add(ChatMessage(
+      // 流式响应：先插入一个空的 assistant 消息，逐块追加内容
+      final assistantMsg = ChatMessage(
         role: 'assistant',
-        content: reply,
+        content: '',
         timestamp: DateTime.now(),
-      ));
+      );
+      _messages.add(assistantMsg);
+      final assistantIdx = _messages.length - 1;
+      notifyListeners();
+
+      final stream = ApiService.sendMessageStream(content, history);
+      await for (final delta in stream) {
+        // 不可变替换：重建消息对象触发 UI 更新
+        _messages[assistantIdx] = ChatMessage(
+          role: 'assistant',
+          content: _messages[assistantIdx].content + delta,
+          timestamp: _messages[assistantIdx].timestamp,
+        );
+        notifyListeners();
+      }
+
+      // 若流式失败返回空，兜底用非流式
+      if (_messages[assistantIdx].content.isEmpty) {
+        final reply = await ApiService.sendMessage(content, history);
+        _messages[assistantIdx] = ChatMessage(
+          role: 'assistant',
+          content: reply,
+          timestamp: _messages[assistantIdx].timestamp,
+        );
+        notifyListeners();
+      }
     } catch (e) {
       _error = e.toString();
+      // 移除可能残留的空 assistant 占位
+      if (_messages.isNotEmpty &&
+          _messages.last.role == 'assistant' &&
+          _messages.last.content.isEmpty) {
+        _messages.removeLast();
+      }
       _messages.add(ChatMessage(
         role: 'assistant',
         content: '抱歉，出现了问题。请稍后重试。',
         timestamp: DateTime.now(),
-      ));
+      ),);
       debugPrint('对话失败: $e');
     } finally {
       _isLoading = false;
@@ -117,17 +134,9 @@ class ChatProvider extends ChangeNotifier {
       role: 'assistant',
       content: '你好！我是 KB教练 💪\n\n**我可以帮你：**\n- 🏋️ 训练动作和计划\n- 🍎 营养和饮食建议\n- 🧘 体态改善指导\n- ⚠️ 运动安全提醒\n\n有什么想问的？',
       timestamp: DateTime.now(),
-    ));
+    ),);
     notifyListeners();
-
-    // 同步清空云端聊天历史
-    try {
-      if (await ApiService.isAuthenticated()) {
-        await ApiService.authenticatedDelete('/data/chat');
-      }
-    } catch (e) {
-      debugPrint('清空云端聊天历史失败: $e');
-    }
+    // 个人版：无云端历史，仅清内存
   }
 
   void clearError() {

@@ -27,6 +27,8 @@ class _NutritionScreenState extends State<NutritionScreen> {
       );
 
       if (image != null) {
+        // 在 await 后使用 context 前先检查 mounted
+        if (!mounted) return;
         final provider = context.read<NutritionProvider>();
         await provider.analyzeFood(File(image.path), _selectedMeal);
 

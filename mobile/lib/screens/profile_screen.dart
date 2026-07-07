@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/auth_provider.dart';
 import '../services/export_service.dart';
 import '../services/storage_service.dart';
 
@@ -52,13 +55,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _saving = true);
 
     try {
-      await StorageService.saveProfile({
+      final profileData = {
         'nickname': _nicknameController.text.trim(),
         'gender': _gender,
         'age': int.tryParse(_ageController.text),
         'height': double.tryParse(_heightController.text),
         'weight': double.tryParse(_weightController.text),
-      });
+      };
+
+      await StorageService.saveProfile(profileData);
+
+      // 同步更新 AuthProvider，让首页昵称实时刷新
+      if (mounted) {
+        context.read<AuthProvider>().updateProfile(profileData);
+      }
 
       // 个人资料变更后清除导出缓存，避免下次导出包含旧数据
       await ExportService.clearExportCache();
@@ -67,7 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('个人资料已保存')),
       );
-      Navigator.pop(context);
+      context.pop();
     } finally {
       if (mounted) setState(() => _saving = false);
     }

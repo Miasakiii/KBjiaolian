@@ -82,7 +82,7 @@ class ScoreWidget extends StatelessWidget {
   }
 
   Widget _label() => Text(label,
-      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: KbColors.text3, letterSpacing: 0.5));
+      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: KbColors.text3, letterSpacing: 0.5),);
 
   Widget _ring(double v) {
     return SizedBox(

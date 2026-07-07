@@ -85,11 +85,13 @@ export function extractExercisePerformance(
     const exercises = Array.isArray(record.exercises) ? record.exercises as Array<Record<string, unknown>> : [];
 
     for (const exercise of exercises) {
-      const name = (exercise.name || exercise.exercise) as string | undefined;
-      if (!name) continue;
+      // 优先用 exerciseId 作为跟踪 key（精确匹配动作库），回退到 name（向后兼容老方案）
+      const key = (exercise.exerciseId as string | undefined)
+        ?? (exercise.name || exercise.exercise) as string | undefined;
+      if (!key) continue;
 
-      if (!performance[name]) {
-        performance[name] = {
+      if (!performance[key]) {
+        performance[key] = {
           sessions: 0,
           maxWeight: 0,
           maxReps: 0,
@@ -102,7 +104,7 @@ export function extractExercisePerformance(
         };
       }
 
-      const perf = performance[name];
+      const perf = performance[key];
       perf.sessions++;
 
       const weight = parseRangeNum(exercise.weight);

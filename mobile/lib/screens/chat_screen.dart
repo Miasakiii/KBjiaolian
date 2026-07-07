@@ -1,4 +1,5 @@
 ﻿import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/chat_provider.dart';
@@ -307,11 +308,57 @@ class _MessageBubble extends StatelessWidget {
               ),
               const SizedBox(height: 8),
             ],
-            Text(
-              message.content,
-              style: TextStyle(
-                color: isUser ? Colors.white : KbColors.text1,
-                height: 1.5,
+            MarkdownBody(
+              data: message.content,
+              selectable: true,
+              styleSheet: MarkdownStyleSheet(
+                p: TextStyle(
+                  color: isUser ? Colors.white : KbColors.text1,
+                  height: 1.5,
+                  fontSize: 15,
+                ),
+                strong: TextStyle(
+                  color: isUser ? Colors.white : KbColors.brand,
+                  fontWeight: FontWeight.w600,
+                ),
+                h2: TextStyle(
+                  color: isUser ? Colors.white : KbColors.text1,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+                h3: TextStyle(
+                  color: isUser ? Colors.white : KbColors.text1,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+                listBullet: TextStyle(
+                  color: isUser ? Colors.white70 : KbColors.text2,
+                ),
+                listIndent: 20,
+                a: TextStyle(
+                  color: isUser ? Colors.white : KbColors.brand,
+                  decoration: TextDecoration.underline,
+                ),
+                code: TextStyle(
+                  color: isUser ? Colors.white : KbColors.brand,
+                  backgroundColor: isUser
+                      ? Colors.white24
+                      : KbColors.brandSoft,
+                  fontSize: 13,
+                ),
+                codeblockDecoration: BoxDecoration(
+                  color: isUser ? Colors.white24 : KbColors.brandSoft,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                blockquoteDecoration: BoxDecoration(
+                  color: isUser ? Colors.white12 : KbColors.surface2,
+                  border: Border(
+                    left: BorderSide(
+                      color: isUser ? Colors.white54 : KbColors.brand,
+                      width: 3,
+                    ),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 4),

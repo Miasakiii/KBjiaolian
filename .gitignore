@@ -12,11 +12,6 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# === Next.js ===
-web/.next/
-web/out/
-web/.vercel
-
 # === Flutter ===
 mobile/.dart_tool/
 mobile/.packages
@@ -67,23 +62,16 @@ tmp/
 temp/
 .tmp/
 
-# === Docker 数据 ===
+# === 本地数据 ===
 backend/data/*.db
 backend/data/*.db-wal
 backend/data/*.db-shm
 backend/data/backups/
-backend/certs/
-nginx/ssl/
-nginx/logs/
+backend/data/exercises.json
 
 # === 测试覆盖率 ===
 coverage/
 .nyc_output/
-
-# === Playwright E2E ===
-web/test-results/
-web/playwright-report/
-web/blob-report/
 
 # === Claude Code ===
 .claude/
@@ -91,8 +79,13 @@ web/blob-report/
 .workbuddy/
 .worktrees/
 
-# === 部署文档（个人使用，不推送）===
-docs/CLOUD_DEPLOY.md
+# === 规划文档（开发过程文档，不推送）===
+docs/superpowers/
+
+# === 签名密钥（敏感，不推送）===
+*.jks
+*.keystore
+key.properties
 
 # === Flutter SDK（不要上传）===
 flutter-sdk/

@@ -1,1 +1,0 @@
-<canvas type="2d" id="{{canvasId}}" class="kb-radar-canvas" style="width:{{size}}px;height:{{size}}px"></canvas>

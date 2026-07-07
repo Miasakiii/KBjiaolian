@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/training_plan.dart';
 import '../models/workout_record.dart';
-import '../services/api_service.dart';
 import '../services/storage_service.dart';
-import '../services/cloud_storage_service.dart';
 
 class WorkoutProvider extends ChangeNotifier {
   List<WorkoutRecord> _records = [];
@@ -22,25 +20,11 @@ class WorkoutProvider extends ChangeNotifier {
   }
 
   Future<void> _loadRecords() async {
-    // 先加载本地数据
+    // 个人版：仅本地存储
     final rawRecords = StorageService.getWorkoutRecords();
     _records = rawRecords
         .map((e) => WorkoutRecord.fromJson(e as Map<String, dynamic>))
         .toList();
-
-    // 如果已登录，尝试从云端加载
-    try {
-      if (await ApiService.isAuthenticated()) {
-        final cloudRecords = await CloudStorageService.getWorkoutRecords();
-        if (cloudRecords.isNotEmpty) {
-          _records = cloudRecords
-              .map((e) => WorkoutRecord.fromJson(e as Map<String, dynamic>))
-              .toList();
-        }
-      }
-    } catch (e) {
-      debugPrint('云端加载训练记录失败: $e');
-    }
 
     notifyListeners();
   }
@@ -113,9 +97,6 @@ class WorkoutProvider extends ChangeNotifier {
     // 保存到本地
     await StorageService.saveWorkoutRecord(record);
 
-    // 保存到云端
-    await CloudStorageService.saveWorkoutRecord(record);
-
     final rawRecords = StorageService.getWorkoutRecords();
     _records = rawRecords
         .map((e) => WorkoutRecord.fromJson(e as Map<String, dynamic>))
@@ -135,6 +116,16 @@ class WorkoutProvider extends ChangeNotifier {
   }
 
   int get totalWorkouts => _records.length;
+
+  /// 今日是否已完成训练
+  bool get hasWorkoutToday {
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    return _records.any((r) {
+      final date = DateTime.tryParse(r.createdAt);
+      return date != null && date.isAfter(todayStart);
+    });
+  }
 
   int get thisWeekWorkouts {
     final now = DateTime.now();

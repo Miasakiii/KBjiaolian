@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/training_plan.dart';
 import '../services/api_service.dart';
 import '../services/storage_service.dart';
-import '../services/cloud_storage_service.dart';
 
 class PlanProvider extends ChangeNotifier {
   TrainingPlan? _currentPlan;
@@ -23,25 +22,11 @@ class PlanProvider extends ChangeNotifier {
   }
 
   Future<void> _loadPlans() async {
-    // 先加载本地数据
+    // 个人版：仅本地存储
     final rawPlans = StorageService.getPlans();
     _plans = rawPlans
         .map((e) => TrainingPlan.fromJson(e as Map<String, dynamic>))
         .toList();
-
-    // 如果已登录，尝试从云端加载
-    try {
-      if (await ApiService.isAuthenticated()) {
-        final cloudPlans = await CloudStorageService.getPlans();
-        if (cloudPlans.isNotEmpty) {
-          _plans = cloudPlans
-              .map((e) => TrainingPlan.fromJson(e as Map<String, dynamic>))
-              .toList();
-        }
-      }
-    } catch (e) {
-      debugPrint('云端加载训练方案失败: $e');
-    }
 
     if (_plans.isNotEmpty) {
       _currentPlan = _plans.first;
@@ -75,9 +60,6 @@ class PlanProvider extends ChangeNotifier {
 
       // 保存到本地
       await StorageService.savePlan(result);
-
-      // 保存到云端
-      await CloudStorageService.savePlan(result);
 
       final rawPlans = StorageService.getPlans();
       _plans = rawPlans
@@ -117,7 +99,6 @@ class PlanProvider extends ChangeNotifier {
       _currentPlan = TrainingPlan.fromJson(result);
 
       await StorageService.savePlan(result);
-      await CloudStorageService.savePlan(result);
 
       final rawPlans = StorageService.getPlans();
       _plans = rawPlans

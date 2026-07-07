@@ -10,7 +10,8 @@
     "test": "node --experimental-vm-modules node_modules/.bin/jest --forceExit --detectOpenHandles",
     "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch --forceExit --detectOpenHandles",
     "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --forceExit --detectOpenHandles",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "fetch-exercises": "node -e \"const fs=require('fs');const https=require('https');const f=fs.createWriteStream('data/exercises.json');https.get('https://raw.githubusercontent.com/hasaneyldrm/exercises-dataset/main/data/exercises.json',r=>{r.pipe(f);f.on('finish',()=>{f.close();console.log('Downloaded exercises.json to data/exercises.json ('+fs.statSync('data/exercises.json').size+' bytes)');});}).on('error',e=>{console.error('Download failed:',e.message);process.exit(1);});\""
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

@@ -13,6 +13,7 @@ dependencies:
   # UI 组件
   cupertino_icons: ^1.0.6
   flutter_svg: ^2.0.9
+  flutter_markdown: ^0.7.4+3
 
   # 网络请求
   http: ^1.1.0
@@ -23,8 +24,6 @@ dependencies:
 
   # 本地存储
   shared_preferences: ^2.2.2
-  # 敏感数据（JWT token 等）安全存储：iOS Keychain / Android Keystore
-  flutter_secure_storage: ^9.2.2
 
   # 状态管理
   provider: ^6.1.1
@@ -38,14 +37,25 @@ dependencies:
   path_provider: ^2.1.1
   share_plus: ^10.0.0
 
+  # 个人版：无 Firebase、无微信支付（已移除 firebase_core/firebase_crashlytics/fluwx）
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.1
+  flutter_launcher_icons: ^0.14.4
+
+# 个人版 APP 图标（基于 kb-logo-v3-badge 1024×1024）
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/logo/kb-logo-v3-badge.jpg"
+  min_sdk_android: 21
+  adaptive_icon_background: "#0f766e"
+  adaptive_icon_foreground: "assets/logo/kb-logo-v3-badge.jpg"
 
 flutter:
   uses-material-design: true
   assets:
-    - assets/icons/
-    - assets/images/
     - assets/logo/
+    - assets/exercises.json

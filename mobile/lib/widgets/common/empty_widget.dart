@@ -24,7 +24,7 @@ class EmptyWidget extends StatelessWidget {
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(
-            horizontal: KbSpacing.sp5, vertical: KbSpacing.sp6),
+            horizontal: KbSpacing.sp5, vertical: KbSpacing.sp6,),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -32,7 +32,7 @@ class EmptyWidget extends StatelessWidget {
             const SizedBox(height: KbSpacing.sp3),
             Text(text,
                 style: const TextStyle(
-                    fontSize: 12, color: KbColors.text3)),
+                    fontSize: 12, color: KbColors.text3,),),
             if (cta != null) ...[
               const SizedBox(height: KbSpacing.sp3),
               ElevatedButton(
@@ -49,7 +49,7 @@ class EmptyWidget extends StatelessWidget {
                 ),
                 child: Text(cta!,
                     style: const TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w600)),
+                        fontSize: 14, fontWeight: FontWeight.w600,),),
               ),
             ],
           ],

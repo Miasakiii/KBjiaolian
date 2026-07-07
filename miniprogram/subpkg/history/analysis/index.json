@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "分析历史",
-  "usingComponents": {
-    "kb-empty": "/components/kb-empty/index"
-  }
-}

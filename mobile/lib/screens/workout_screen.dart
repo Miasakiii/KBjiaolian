@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -439,7 +439,7 @@ class _ActiveWorkoutState extends State<_ActiveWorkout> {
   void _showFinishDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('训练完成！'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -464,13 +464,38 @@ class _ActiveWorkoutState extends State<_ActiveWorkout> {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('取消'),
           ),
           ElevatedButton(
-            onPressed: () {
-              widget.provider.finishWorkout(rating: _rating);
-              Navigator.pop(context);
+            onPressed: () async {
+              final workout = widget.provider.currentWorkout;
+              final startTime = widget.provider.startTime;
+              if (workout == null || startTime == null) {
+                Navigator.pop(dialogContext);
+                return;
+              }
+              final duration = DateTime.now().difference(startTime).inMinutes;
+              final exercises = (workout['exercises'] as List?) ?? const [];
+              int totalSets = 0;
+              for (final ex in exercises) {
+                if (ex is Map) {
+                  totalSets += (ex['completedSets'] as List?)
+                          ?.where((s) => s is Map && s['completed'] == true)
+                          .length ??
+                      0;
+                }
+              }
+              await widget.provider.finishWorkout(rating: _rating);
+              if (!mounted) return;
+              if (!dialogContext.mounted) return;
+              Navigator.pop(dialogContext); // 关 Dialog
+              context.go('/workout/complete', extra: {
+                'duration': duration,
+                'exercises': exercises.length,
+                'sets': totalSets,
+                'rating': _rating,
+              },);
             },
             child: const Text('保存'),
           ),

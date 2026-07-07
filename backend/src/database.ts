@@ -29,8 +29,6 @@ db.exec(`
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     nickname TEXT,
-    plan TEXT NOT NULL DEFAULT 'free' CHECK (plan IN ('free', 'pro_monthly', 'pro_yearly')),
-    plan_expires_at INTEGER,
     created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
     updated_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000)
   );
@@ -112,20 +110,6 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
 
-  -- 订单表
-  CREATE TABLE IF NOT EXISTS orders (
-    id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL,
-    plan TEXT NOT NULL CHECK (plan IN ('pro_monthly', 'pro_yearly')),
-    amount INTEGER NOT NULL,  -- 金额（分）
-    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'paid', 'failed', 'refunded')),
-    payment_method TEXT DEFAULT 'wechat',
-    trade_no TEXT,  -- 微信支付交易号
-    paid_at INTEGER,
-    created_at INTEGER NOT NULL DEFAULT (unixepoch() * 1000),
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-  );
-
   -- 验证码表
   CREATE TABLE IF NOT EXISTS verification_codes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -148,14 +132,34 @@ db.exec(`
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
   );
 
+  -- 动作库（来自 hasaneyldrm/exercises-dataset，1324 条）
+  CREATE TABLE IF NOT EXISTS exercises (
+    id TEXT PRIMARY KEY,              -- "0001"
+    name TEXT NOT NULL,               -- 动作名称
+    category TEXT,                    -- 身体部位类别（upper arms/chest/back...）
+    body_part TEXT,                   -- 同 category，目标身体部位
+    equipment TEXT,                   -- 所需设备（dumbbell/body weight...）
+    target TEXT,                      -- 主要目标肌肉（biceps/pectoralis major...）
+    muscle_group TEXT,                -- 主要协同肌群
+    secondary_muscles TEXT,           -- JSON array，附加参与肌肉
+    instructions_zh TEXT,             -- 中文逐步说明
+    instructions_en TEXT,             -- 英文逐步说明（备份）
+    media_id TEXT,                    -- 原始 ExerciseDB 媒体参考 ID
+    created_at INTEGER                -- 数据集记录创建时间戳
+  );
+
   -- 创建复合索引（优化 WHERE user_id = ? ORDER BY created_at DESC 查询）
   CREATE INDEX IF NOT EXISTS idx_analysis_user_created ON analysis_records(user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_workout_user_created ON workout_records(user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_nutrition_user_created ON nutrition_records(user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_chat_user_created ON chat_history(user_id, created_at DESC);
   CREATE INDEX IF NOT EXISTS idx_plans_user_created ON training_plans(user_id, created_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_orders_user_created ON orders(user_id, created_at DESC);
-  CREATE INDEX IF NOT EXISTS idx_orders_trade_no ON orders(trade_no);
+
+  -- 动作库索引（支持按身体部位/设备/目标肌群筛选 + 名称搜索）
+  CREATE INDEX IF NOT EXISTS idx_ex_body_part ON exercises(body_part);
+  CREATE INDEX IF NOT EXISTS idx_ex_equipment ON exercises(equipment);
+  CREATE INDEX IF NOT EXISTS idx_ex_target ON exercises(target);
+  CREATE INDEX IF NOT EXISTS idx_ex_name ON exercises(name);
 `);
 
 // === 数据库迁移 ===
@@ -172,10 +176,6 @@ function safeAddColumn(table: string, column: string, type: string): void {
     }
   }
 }
-
-safeAddColumn('users', 'plan', "TEXT NOT NULL DEFAULT 'free'");
-safeAddColumn('users', 'plan_expires_at', 'INTEGER');
-safeAddColumn('users', 'open_id', 'TEXT');
 
 // 验证码防爆破：添加尝试次数字段
 safeAddColumn('verification_codes', 'attempts', 'INTEGER NOT NULL DEFAULT 0');

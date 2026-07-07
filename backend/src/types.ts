@@ -12,8 +12,6 @@ declare module 'express-serve-static-core' {
 // === 自定义错误 ===
 export interface AppError extends Error {
   statusCode?: number;
-  quotaExceeded?: boolean;
-  action?: string;
 }
 
 // === 数据库行类型 ===
@@ -22,23 +20,8 @@ export interface UserRow {
   email: string;
   password: string;
   nickname: string | null;
-  plan: 'free' | 'pro_monthly' | 'pro_yearly';
-  plan_expires_at: number | null;
-  open_id: string | null;
   created_at: number;
   updated_at: number;
-}
-
-export interface OrderRow {
-  id: string;
-  user_id: string;
-  plan: string;
-  amount: number;
-  status: 'pending' | 'paid' | 'failed' | 'refunded';
-  payment_method: string | null;
-  trade_no: string | null;
-  paid_at: number | null;
-  created_at: number;
 }
 
 export interface AnalysisRecordRow {
@@ -128,13 +111,6 @@ export interface ChatHistoryRow {
   created_at: number;
 }
 
-export interface UsageLogRow {
-  id: number;
-  user_id: string;
-  action: string;
-  created_at: number;
-}
-
 // === AI 结果类型 ===
 export interface AnalysisIssue {
   name: string;
@@ -210,22 +186,6 @@ export interface NutritionResult {
 export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
-}
-
-// === 套餐配置类型 ===
-export type PlanId = 'free' | 'pro_monthly' | 'pro_yearly';
-
-export interface PlanConfig {
-  id: PlanId;
-  name: string;
-  price: number;
-  limits: {
-    analyzePerDay: number;
-    planPerDay: number;
-    nutritionPerDay: number;
-    chatPerDay: number;
-  };
-  features: string[];
 }
 
 // === 训练方案参数 ===

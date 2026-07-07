@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -79,31 +80,21 @@ class SettingsScreen extends StatelessWidget {
             ],
           ),
 
-          // 账号
+          // 数据管理（个人版：无登录，提供清除本地数据）
           _buildSection(
             context,
-            title: '账号',
+            title: '数据管理',
             children: [
               Consumer<AuthProvider>(
                 builder: (context, auth, _) {
-                  if (auth.isAuthenticated) {
-                    return _buildListTile(
-                      context,
-                      icon: Icons.logout,
-                      title: '退出登录',
-                      subtitle: auth.email,
-                      onTap: () => _showLogoutDialog(context, auth),
-                      textColor: KbColors.danger,
-                    );
-                  } else {
-                    return _buildListTile(
-                      context,
-                      icon: Icons.login,
-                      title: '登录 / 注册',
-                      subtitle: '同步数据到云端',
-                      onTap: () => context.go('/login'),
-                    );
-                  }
+                  return _buildListTile(
+                    context,
+                    icon: Icons.cleaning_services,
+                    title: '清除本地数据',
+                    subtitle: '清空本地存储的分析/训练/饮食记录',
+                    onTap: () => _showClearDataDialog(context),
+                    textColor: KbColors.danger,
+                  );
                 },
               ),
             ],
@@ -178,7 +169,7 @@ class SettingsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      auth.nickname ?? '用户',
+                      auth.nickname,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -264,7 +255,7 @@ class SettingsScreen extends StatelessWidget {
   }
 
   Future<void> _showClearDataDialog(BuildContext context) async {
-    showDialog(
+    unawaited(showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('清空数据'),
@@ -277,18 +268,23 @@ class SettingsScreen extends StatelessWidget {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
+              // 在 await 前获取 provider 引用，避免 await 后 context 失效
+              final analysisP = context.read<AnalysisProvider>();
+              final planP = context.read<PlanProvider>();
+              final workoutP = context.read<WorkoutProvider>();
+              final nutritionP = context.read<NutritionProvider>();
+              final chatP = context.read<ChatProvider>();
+              final messenger = ScaffoldMessenger.of(context);
               await StorageService.clear();
               // 重置内存中的数据，避免页面继续展示旧数据
-              if (!context.mounted) return;
-              context.read<AnalysisProvider>().clearHistory();
-              context.read<PlanProvider>().clearPlans();
-              context.read<WorkoutProvider>().cancelWorkout();
-              context.read<NutritionProvider>().clearError();
-              context.read<ChatProvider>().clearChat();
+              await analysisP.clearHistory();
+              await planP.clearPlans();
+              workoutP.cancelWorkout();
+              nutritionP.clearError();
+              await chatP.clearChat();
               // 清除导出缓存
               await ExportService.clearExportCache();
-              if (!context.mounted) return;
-              ScaffoldMessenger.of(context).showSnackBar(
+              messenger.showSnackBar(
                 const SnackBar(content: Text('数据已清空')),
               );
             },
@@ -299,37 +295,8 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
-  void _showLogoutDialog(BuildContext context, AuthProvider auth) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('退出登录'),
-        content: const Text('确定要退出登录吗？'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              Navigator.pop(context);
-              await auth.logout();
-              // 清除导出缓存
-              await ExportService.clearExportCache();
-              if (context.mounted) {
-                context.go('/login');
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: KbColors.danger,
-            ),
-            child: const Text('退出'),
-          ),
-        ],
-      ),
-    );
-  }
 }

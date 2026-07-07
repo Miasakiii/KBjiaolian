@@ -8,7 +8,13 @@ import { generatePlan } from './plan.js';
 import { extractExercisePerformance, calculateProgression, buildProgressionPrompt, getProgressionSummary } from './progression.js';
 import { analyzeFood } from './nutrition.js';
 import { sendMessage, sendMessageStream } from './chat.js';
-import { register, login, wechatLogin, getProfile, forgotPassword, resetPassword, sendVerificationCode, authMiddleware } from './auth.js';
+import { register, login, getProfile, forgotPassword, resetPassword, sendVerificationCode, authMiddleware } from './auth.js';
+import {
+  listExercises,
+  getExerciseById,
+  getExercisesMeta,
+  searchExercises,
+} from './exercises.js';
 import {
   saveAnalysisRecord,
   getAnalysisRecords,
@@ -32,9 +38,6 @@ import {
   getAnalysisRecordById,
   getWorkoutRecordsRaw,
 } from './data.js';
-import { getQuotaStatus, checkQuota, logUsage, reserveQuota, releaseQuota, PLANS } from './subscription.js';
-import { createOrder, getOrder, getUserOrders, completeOrder, generatePaymentParams, closeExpiredOrders } from './orders.js';
-import { verifyCallbackSignature, decryptNotification } from './wechatpay.js';
 import {
   isValidBase64Image,
   isValidGoal,
@@ -46,7 +49,7 @@ import {
   isValidChatHistory,
   sanitizeString,
 } from './validation.js';
-import type { AppError, PlanConfig, PlanParams, AnalysisResult } from './types.js';
+import type { PlanParams, AnalysisResult } from './types.js';
 
 // 全局兜底未处理的 Promise rejection 与未捕获异常，避免进程崩溃
 process.on('unhandledRejection', (reason) => {
@@ -56,25 +59,18 @@ process.on('uncaughtException', (err) => {
   logger.error({ err }, 'Uncaught Exception');
 });
 
-// 定时清理过期订单（每 5 分钟）
-setInterval(() => {
-  try { closeExpiredOrders(); } catch (err) { logger.error({ err }, '清理过期订单失败'); }
-}, 5 * 60 * 1000).unref();
-
 export function createApp(): Express {
   const app = express();
 
-  // 信任反向代理（Nginx / Docker 网络），以便正确获取客户端 IP
+  // 信任反向代理（本机开发可不用，保留兼容）
   app.set('trust proxy', 1);
 
-  // CORS：从环境变量读取，支持逗号分隔多域名；生产环境未配置则禁用跨域
+  // CORS：从环境变量读取，支持逗号分隔多域名；默认允许本机调试
   let corsOrigin: string[] | boolean;
   if (process.env.CORS_ORIGIN) {
     corsOrigin = process.env.CORS_ORIGIN.split(',').map(s => s.trim());
-  } else if (process.env.NODE_ENV === 'production') {
-    corsOrigin = false; // 生产环境默认不允许跨域
   } else {
-    corsOrigin = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'];
+    corsOrigin = ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://10.0.2.2:3003'];
   }
   app.use(cors({
     origin: corsOrigin,
@@ -111,16 +107,6 @@ export function createApp(): Express {
     keyGenerator: (req) => req.userId || req.ip || '',
   });
 
-  // CSP 违规报告端点限流：浏览器可能短时间内提交大量报告，
-  // 单独限流以避免日志洪泛影响其他日志可读性。
-  const cspReportLimiter = rateLimit({
-    windowMs: 60 * 1000,
-    max: 30,
-    message: { error: 'CSP 报告过于频繁' },
-    standardHeaders: true,
-    legacyHeaders: false,
-  });
-
   app.use(generalLimiter);
 
   // === 公开端点 ===
@@ -129,240 +115,22 @@ export function createApp(): Express {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  // CSP 违规报告收集端点（由 nginx report-uri 转发过来）。
-  // 浏览器以 POST application/json 或 application/csp-report 提交，
-  // 服务端只做记录与采样，不返回任何业务数据。
-  app.post('/api/csp-report', cspReportLimiter, express.json({ type: ['application/json', 'application/csp-report'], limit: '64kb' }), (req, res) => {
-    try {
-      const body = req.body as { 'csp-report'?: Record<string, unknown> } | null;
-      const report = body?.['csp-report'];
-
-      // 仅记录关键字段，避免泄露 cookie/Authorization 等敏感信息
-      if (report && typeof report === 'object') {
-        const sanitized = {
-          'document-uri': report['document-uri'],
-          'referrer': report['referrer'],
-          'violated-directive': report['violated-directive'],
-          'effective-directive': report['effective-directive'],
-          'original-policy': report['original-policy'],
-          'blocked-uri': report['blocked-uri'],
-          'line-number': report['line-number'],
-          'column-number': report['column-number'],
-          'source-file': report['source-file'],
-          'status-code': report['status-code'],
-          'script-sample': report['script-sample'],
-        };
-        logger.warn({ csp: sanitized }, 'CSP 违规报告');
-      } else {
-        logger.warn({ body: String(req.body).slice(0, 256) }, 'CSP 报告格式异常');
-      }
-    } catch (err) {
-      logger.error({ err }, '处理 CSP 报告失败');
-    }
-    // 浏览器不关心返回内容，使用 204 No Content 减少带宽
-    res.status(204).end();
-  });
-
   app.post('/api/auth/register', authLimiter, register);
   app.post('/api/auth/login', authLimiter, login);
   app.post('/api/auth/send-code', authLimiter, sendVerificationCode);
-  app.post('/api/auth/wechat-login', authLimiter, wechatLogin);
+
+  // === 动作库（公开访问，静态数据）===
+
+  app.get('/api/exercises/meta', getExercisesMeta);
+  app.get('/api/exercises/search', searchExercises);
+  app.get('/api/exercises', listExercises);
+  app.get('/api/exercises/:id', getExerciseById);
 
   // === 需要认证的端点 ===
 
   app.get('/api/auth/profile', authMiddleware, getProfile);
   app.post('/api/auth/forgot-password', authLimiter, forgotPassword);
   app.post('/api/auth/reset-password', authLimiter, resetPassword);
-
-  // 配额查询
-  app.get('/api/quota', authMiddleware, (req, res) => {
-    try {
-      const quota = getQuotaStatus(req.userId!);
-      res.json(quota);
-    } catch (err) {
-      logger.error({ err }, '查询配额失败');
-      res.status(500).json({ error: '查询配额失败' });
-    }
-  });
-
-  // 套餐信息（公开）
-  app.get('/api/plans', (_req, res) => {
-    res.json(PLANS);
-  });
-
-  // 创建订单（仅创建，不生成支付参数）
-  app.post('/api/orders', authMiddleware, (req, res) => {
-    try {
-      const { plan } = req.body;
-      if (!plan || !(PLANS as Record<string, PlanConfig>)[plan] || plan === 'free') {
-        return res.status(400).json({ error: '请选择有效的套餐' });
-      }
-
-      const order = createOrder(req.userId!, plan);
-
-      res.json({
-        order: {
-          id: order.id,
-          plan: order.plan,
-          amount: order.amount,
-          amountYuan: (order.amount / 100).toFixed(2),
-          planName: (PLANS as Record<string, PlanConfig>)[order.plan]?.name,
-          status: order.status,
-        },
-      });
-    } catch (err) {
-      logger.error({ err }, '创建订单失败');
-      if ((err as AppError).statusCode) {
-        return res.status((err as AppError).statusCode ?? 500).json({ error: (err as AppError).message });
-      }
-      res.status(500).json({ error: '创建订单失败' });
-    }
-  });
-
-  // 获取支付参数（创建订单后调用，需指定平台）
-  app.post('/api/orders/:id/pay', authMiddleware, async (req, res) => {
-    try {
-      const { platform, openid } = req.body;
-      const order = getOrder(req.params.id as string);
-
-      if (!order || order.user_id !== req.userId!) {
-        return res.status(404).json({ error: '订单不存在' });
-      }
-      if (order.status !== 'pending') {
-        return res.status(400).json({ error: '订单已支付或已关闭' });
-      }
-      if (!platform || !['miniapp', 'app'].includes(platform)) {
-        return res.status(400).json({ error: '请指定支付平台: miniapp 或 app' });
-      }
-
-      const paymentParams = await generatePaymentParams(order, platform, openid);
-      res.json({ payment: paymentParams });
-    } catch (err) {
-      logger.error({ err }, '获取支付参数失败');
-      if ((err as AppError).statusCode) {
-        return res.status((err as AppError).statusCode ?? 500).json({ error: (err as AppError).message });
-      }
-      res.status(500).json({ error: '获取支付参数失败' });
-    }
-  });
-
-  // 查询订单状态
-  app.get('/api/orders/:id', authMiddleware, (req, res) => {
-    try {
-      const order = getOrder(req.params.id as string);
-      if (!order || order.user_id !== req.userId!) {
-        return res.status(404).json({ error: '订单不存在' });
-      }
-      res.json({
-        id: order.id,
-        plan: order.plan,
-        amount: order.amount,
-        amountYuan: (order.amount / 100).toFixed(2),
-        planName: (PLANS as Record<string, PlanConfig>)[order.plan]?.name,
-        status: order.status,
-        paid_at: order.paid_at,
-        created_at: order.created_at,
-      });
-    } catch (err) {
-      logger.error({ err }, '查询订单失败');
-      res.status(500).json({ error: '查询订单失败' });
-    }
-  });
-
-  // 用户订单列表
-  app.get('/api/orders', authMiddleware, (req, res) => {
-    try {
-      const orders = getUserOrders(req.userId!);
-      res.json(orders.map(o => ({
-        id: o.id,
-        plan: o.plan,
-        amount: o.amount,
-        amountYuan: (o.amount / 100).toFixed(2),
-        planName: (PLANS as Record<string, PlanConfig>)[o.plan]?.name,
-        status: o.status,
-        paid_at: o.paid_at,
-        created_at: o.created_at,
-      })));
-    } catch (err) {
-      logger.error({ err }, '查询订单列表失败');
-      res.status(500).json({ error: '查询订单列表失败' });
-    }
-  });
-
-  // 模拟支付（仅开发/测试环境，生产环境必须使用真实支付回调）
-  if (process.env.NODE_ENV !== 'production') {
-    app.post('/api/payment/mock-pay/:orderId', authMiddleware, (req, res) => {
-      try {
-        const order = getOrder(req.params.orderId as string);
-        if (!order || order.user_id !== req.userId!) {
-          return res.status(404).json({ error: '订单不存在' });
-        }
-        if (order.status !== 'pending') {
-          return res.status(400).json({ error: '订单状态异常' });
-        }
-
-        const result = completeOrder(order.id, `MOCK_${Date.now()}`);
-        res.json({
-          message: '支付成功',
-          order: {
-            id: result.id,
-            plan: result.plan,
-            status: result.status,
-            paid_at: result.paid_at,
-          },
-        });
-      } catch (err) {
-        logger.error({ err }, '模拟支付失败');
-        if ((err as AppError).statusCode) {
-          return res.status((err as AppError).statusCode ?? 500).json({ error: (err as AppError).message });
-        }
-        res.status(500).json({ error: '支付失败' });
-      }
-    });
-  }
-
-  // 微信支付回调（生产环境）
-  app.post('/api/payment/wechat/notify', express.raw({ type: 'application/json' }), async (req, res) => {
-    try {
-      const bodyStr = req.body.toString('utf8');
-
-      // 验证签名（平台证书异步拉取，fail-closed）
-      if (!(await verifyCallbackSignature(req.headers as Record<string, string | undefined>, bodyStr))) {
-        logger.error('微信支付回调签名验证失败');
-        return res.status(401).json({ code: 'FAIL', message: '签名验证失败' });
-      }
-
-      // 解析通知体
-      const notification = JSON.parse(bodyStr);
-
-      if (notification.event_type === 'TRANSACTION.SUCCESS') {
-        // 解密支付结果
-        const result = decryptNotification(notification.resource);
-        const { out_trade_no, transaction_id, trade_state, amount } = result as { out_trade_no: string; transaction_id: string; trade_state: string; amount?: { total?: number } };
-
-        logger.info({ out_trade_no, transaction_id, trade_state }, '微信支付通知');
-
-        if (trade_state === 'SUCCESS') {
-          // 校验金额（防止篡改）
-          const order = getOrder(out_trade_no);
-          if (order && amount && amount.total !== order.amount) {
-            logger.error({ order_amount: order.amount, callback_amount: amount.total }, '微信支付金额不匹配');
-            return res.status(400).json({ code: 'FAIL', message: '金额不匹配' });
-          }
-
-          // 完成订单（幂等）
-          completeOrder(out_trade_no, transaction_id);
-          logger.info({ out_trade_no }, '订单支付成功，套餐已升级');
-        }
-      }
-
-      // 必须返回 200 + SUCCESS，否则微信会重复通知
-      res.json({ code: 'SUCCESS', message: '成功' });
-    } catch (err) {
-      logger.error({ err }, '微信支付回调处理失败');
-      res.status(500).json({ code: 'FAIL', message: '处理失败' });
-    }
-  });
 
   // 体态分析
   app.post('/api/analyze', authMiddleware, aiLimiter, async (req, res) => {
@@ -376,24 +144,8 @@ export function createApp(): Express {
         return res.status(400).json({ error: '图片格式不正确，请上传 JPG 或 PNG 格式' });
       }
 
-      // 预占配额，避免并发请求绕过配额（TOCTOU）
-      let usageId: number | null = null;
-      try {
-        usageId = reserveQuota(req.userId!, 'analyze');
-      } catch (err) {
-        if ((err as AppError).quotaExceeded) {
-          return res.status(429).json({ error: (err as AppError).message, quotaExceeded: true });
-        }
-        throw err;
-      }
-
-      try {
-        const result = await analyzePhoto(image);
-        res.json(result);
-      } catch (err) {
-        releaseQuota(usageId); // AI 调用失败，补偿释放
-        throw err;
-      }
+      const result = await analyzePhoto(image);
+      res.json(result);
     } catch (err) {
       logger.error({ err }, '分析失败');
       res.status(500).json({ error: '分析失败，请稍后重试' });
@@ -460,23 +212,8 @@ export function createApp(): Express {
         sessionDuration: isValidSessionDuration(sessionDuration) ? Number(sessionDuration) : 60,
       };
 
-      let usageId;
-      try {
-        usageId = reserveQuota(req.userId!, 'plan');
-      } catch (err) {
-        if ((err as AppError).quotaExceeded) {
-          return res.status(429).json({ error: (err as AppError).message, quotaExceeded: true });
-        }
-        throw err;
-      }
-
-      try {
-        const plan = await generatePlan(params, analysisResult);
-        res.json(plan);
-      } catch (err) {
-        releaseQuota(usageId);
-        throw err;
-      }
+      const plan = await generatePlan(params, analysisResult);
+      res.json(plan);
     } catch (err) {
       logger.error({ err }, '生成训练方案失败');
       res.status(500).json({ error: '生成训练方案失败，请稍后重试' });
@@ -507,28 +244,13 @@ export function createApp(): Express {
         sessionDuration: isValidSessionDuration(sessionDuration) ? Number(sessionDuration) : 60,
       };
 
-      let usageId;
-      try {
-        usageId = reserveQuota(req.userId!, 'plan');
-      } catch (err) {
-        if ((err as AppError).quotaExceeded) {
-          return res.status(429).json({ error: (err as AppError).message, quotaExceeded: true });
-        }
-        throw err;
-      }
-
-      try {
-        const plan = await generatePlan(params, analysisResult, progressionPrompt);
-        res.json({
-          ...plan,
-          progression: progressionSummary,
-          hasHistory: workoutHistory.length > 0,
-          historyCount: workoutHistory.length,
-        });
-      } catch (err) {
-        releaseQuota(usageId);
-        throw err;
-      }
+      const plan = await generatePlan(params, analysisResult, progressionPrompt);
+      res.json({
+        ...plan,
+        progression: progressionSummary,
+        hasHistory: workoutHistory.length > 0,
+        historyCount: workoutHistory.length,
+      });
     } catch (err) {
       logger.error({ err }, '渐进式方案生成失败');
       res.status(500).json({ error: '生成训练方案失败，请稍后重试' });
@@ -568,23 +290,8 @@ export function createApp(): Express {
         return res.status(400).json({ error: '图片格式不正确，请上传 JPG 或 PNG 格式' });
       }
 
-      let usageId;
-      try {
-        usageId = reserveQuota(req.userId!, 'nutrition');
-      } catch (err) {
-        if ((err as AppError).quotaExceeded) {
-          return res.status(429).json({ error: (err as AppError).message, quotaExceeded: true });
-        }
-        throw err;
-      }
-
-      try {
-        const result = await analyzeFood(image);
-        res.json(result);
-      } catch (err) {
-        releaseQuota(usageId);
-        throw err;
-      }
+      const result = await analyzeFood(image);
+      res.json(result);
     } catch (err) {
       logger.error({ err }, '食物识别失败');
       res.status(500).json({ error: '食物识别失败，请稍后重试' });
@@ -607,26 +314,11 @@ export function createApp(): Express {
       }
 
       // 保存用户消息
-      let usageId;
-      try {
-        usageId = reserveQuota(req.userId!, 'chat');
-      } catch (err) {
-        if ((err as AppError).quotaExceeded) {
-          return res.status(429).json({ error: (err as AppError).message, quotaExceeded: true });
-        }
-        throw err;
-      }
-
       saveChatMessage(req.userId!, 'user', message);
 
-      try {
-        const reply = await sendMessage(message, history || []);
-        saveChatMessage(req.userId!, 'assistant', reply);
-        res.json({ reply });
-      } catch (err) {
-        releaseQuota(usageId);
-        throw err;
-      }
+      const reply = await sendMessage(message, history || []);
+      saveChatMessage(req.userId!, 'assistant', reply);
+      res.json({ reply });
     } catch (err) {
       logger.error({ err }, 'AI 对话失败');
       res.status(500).json({ error: 'AI 对话失败，请稍后重试' });
@@ -636,7 +328,6 @@ export function createApp(): Express {
   // 流式响应端点
   app.post('/api/chat/stream', authMiddleware, aiLimiter, async (req, res) => {
     let headersSent = false;
-    let usageId;
     const abortController = new AbortController();
 
     // 客户端断开时取消上游 AI 请求，避免连接泄漏
@@ -648,16 +339,6 @@ export function createApp(): Express {
 
       if (!message || !isValidChatMessage(message)) {
         return res.status(400).json({ error: '消息内容不合法或过长' });
-      }
-
-      // 预占配额
-      try {
-        usageId = reserveQuota(req.userId!, 'chat');
-      } catch (err) {
-        if ((err as AppError).quotaExceeded) {
-          return res.status(429).json({ error: (err as AppError).message, quotaExceeded: true });
-        }
-        throw err;
       }
 
       saveChatMessage(req.userId!, 'user', message);
@@ -714,8 +395,6 @@ export function createApp(): Express {
 
       res.end();
     } catch (err) {
-      // AI 流式失败：补偿释放配额
-      if (usageId) releaseQuota(usageId);
       logger.error({ err }, '流式对话失败');
       if (headersSent) {
         // 响应头已发送，无法改 status，仅能写入错误事件后结束

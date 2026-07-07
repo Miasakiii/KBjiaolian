@@ -1,4 +1,5 @@
-﻿import 'dart:io';
+﻿import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -34,7 +35,7 @@ class _AnalyzeScreenState extends State<AnalyzeScreen> {
         setState(() {
           _imageFile = File(image.path);
         });
-        _analyzeImage();
+        unawaited(_analyzeImage());
       }
     } catch (e) {
       debugPrint('选择图片失败: $e');

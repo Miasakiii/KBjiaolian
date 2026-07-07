@@ -1,10 +1,19 @@
 import 'dotenv/config';
 import { createApp } from './app.js';
 import { closeDatabase } from './database.js';
+import { seedExercises } from './exercises-seed.js';
 import logger from './logger.js';
 import './backup.js';
 
-const PORT: number = Number(process.env.PORT) || 3001;
+const PORT: number = Number(process.env.PORT) || 3003;
+
+// 启动时导入动作库数据集（若表为空且数据集文件存在）
+try {
+  seedExercises();
+} catch (err) {
+  logger.error({ err }, '动作库数据集导入失败（非致命，继续启动）');
+}
+
 const app = createApp();
 
 const server = app.listen(PORT, '0.0.0.0', () => {

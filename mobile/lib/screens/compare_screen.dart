@@ -60,7 +60,7 @@ class _CompareScreenState extends State<CompareScreen> {
                               ? Map<String, dynamic>.from(rawResult)
                               : <String, dynamic>{};
                           final date = DateTime.tryParse(
-                                  record['timestamp']?.toString() ?? '') ??
+                                  record['timestamp']?.toString() ?? '',) ??
                               DateTime.now();
                           final score = (result['score'] is num)
                               ? (result['score'] as num).toInt()
@@ -107,11 +107,11 @@ class _CompareScreenState extends State<CompareScreen> {
   Future<void> _doCompare() async {
     if (_beforeRecord == null || _afterRecord == null) return;
 
-    final beforeId = _beforeRecord!['id']?.toString();
-    final afterId = _afterRecord!['id']?.toString();
-    if (beforeId == null || afterId == null) {
+    final beforeResult = _beforeRecord!['result'] as Map<String, dynamic>?;
+    final afterResult = _afterRecord!['result'] as Map<String, dynamic>?;
+    if (beforeResult == null || afterResult == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('记录缺少ID，无法对比')),
+        const SnackBar(content: Text('记录缺少分析结果，无法对比')),
       );
       return;
     }
@@ -119,8 +119,8 @@ class _CompareScreenState extends State<CompareScreen> {
     setState(() => _loading = true);
     try {
       final result = await ApiService.compareAnalysis(
-        beforeId: beforeId,
-        afterId: afterId,
+        beforeResult: beforeResult,
+        afterResult: afterResult,
       );
       setState(() => _result = result);
     } catch (e) {

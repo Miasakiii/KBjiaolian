@@ -1,127 +1,59 @@
 import 'package:flutter/material.dart';
 
-import '../services/api_service.dart';
+import '../services/storage_service.dart';
 
+/// 个人版 AuthProvider —— 无登录态，永真。
+/// user 信息存本地（昵称/性别/年龄等），保留旧字段与方法签名兼容 UI 调用。
 class AuthProvider extends ChangeNotifier {
-  bool _isAuthenticated = false;
-  bool _isLoading = true;
+  bool _isAuthenticated = true; // 个人版恒真
+  bool _isLoading = false;
   Map<String, dynamic>? _user;
   String? _error;
 
   bool get isAuthenticated => _isAuthenticated;
   bool get isLoading => _isLoading;
   Map<String, dynamic>? get user => _user;
-  String get nickname => _user?['nickname'] as String? ?? _user?['email'] as String? ?? '用户';
+  String get nickname => _user?['nickname'] as String? ?? '个人用户';
   String? get email => _user?['email'] as String?;
   String? get error => _error;
 
   AuthProvider() {
-    _checkAuth();
+    _loadLocalUser();
   }
 
-  Future<void> _checkAuth() async {
+  // 从本地存储加载用户资料
+  Future<void> _loadLocalUser() async {
     _isLoading = true;
     notifyListeners();
-
     try {
-      _isAuthenticated = await ApiService.isAuthenticated();
-      if (_isAuthenticated) {
-        // 后端 /auth/profile 直接返回用户对象（不带 user 包装）
-        final result = await ApiService.getProfile();
-        final user = result['user'];
-        if (user is Map<String, dynamic>) {
-          _user = user;
-        } else if (result.isNotEmpty) {
-          _user = result;
-        } else {
-          // profile 为空时退化为最小信息
-          _user = <String, dynamic>{};
-        }
-      }
+      final saved = StorageService.getJson('user_profile');
+      if (saved != null) _user = saved;
     } catch (e) {
-      _isAuthenticated = false;
-      _user = null;
-      debugPrint('检查认证状态失败: $e');
+      debugPrint('加载本地用户资料失败: $e');
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<bool> register({
-    required String email,
-    required String password,
-    String? nickname,
-  }) async {
-    if (_isLoading) return false; // 防止重复请求
-    _error = null;
-    _isLoading = true;
+  // 更新本地用户资料（个人资料编辑页调用）
+  Future<void> updateProfile(Map<String, dynamic> profile) async {
+    _user = {...?_user, ...profile};
+    await StorageService.saveJson('user_profile', _user!);
     notifyListeners();
-
-    try {
-      final result = await ApiService.register(
-        email: email,
-        password: password,
-        nickname: nickname,
-      );
-      _isAuthenticated = true;
-      final user = result['user'];
-      _user = user is Map<String, dynamic>
-          ? Map<String, dynamic>.from(user)
-          : <String, dynamic>{'email': email};
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
   }
 
-  Future<bool> login({
+  // 兼容旧调用：个人版登录/注册/登出均为 no-op
+  Future<bool> login({required String email, required String password}) async => true;
+  Future<bool> register({required String email, required String password, String? nickname}) async => true;
+  Future<void> logout() async {}
+
+  Future<bool> forgotPassword({required String email}) async => false;
+  Future<bool> resetPassword({
     required String email,
-    required String password,
-  }) async {
-    if (_isLoading) return false; // 防止重复请求
-    _error = null;
-    _isLoading = true;
-    notifyListeners();
-
-    try {
-      final result = await ApiService.login(
-        email: email,
-        password: password,
-      );
-      _isAuthenticated = true;
-      final user = result['user'];
-      _user = user is Map<String, dynamic>
-          ? Map<String, dynamic>.from(user)
-          : <String, dynamic>{'email': email};
-      _isLoading = false;
-      notifyListeners();
-      return true;
-    } catch (e) {
-      _error = e.toString().replaceFirst('Exception: ', '');
-      _isLoading = false;
-      notifyListeners();
-      return false;
-    }
-  }
-
-  Future<void> logout() async {
-    try {
-      await ApiService.logout();
-    } catch (e) {
-      debugPrint('登出错误: $e');
-    } finally {
-      _isAuthenticated = false;
-      _user = null;
-      _error = null;
-      notifyListeners();
-    }
-  }
+    required String code,
+    required String newPassword,
+  }) async => false;
 
   void clearError() {
     _error = null;

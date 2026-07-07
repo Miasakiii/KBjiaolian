@@ -1,8 +1,0 @@
-{
-  "navigationBarTitleText": "KB教练",
-  "usingComponents": {
-    "kb-score": "/components/kb-score/index",
-    "kb-quota": "/components/kb-quota/index",
-    "kb-empty": "/components/kb-empty/index"
-  }
-}

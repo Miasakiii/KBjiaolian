@@ -126,10 +126,7 @@ function generateCode(): string {
 const stmts = {
   findUserByEmail: db.prepare<unknown[], UserRow>('SELECT * FROM users WHERE email = ?'),
   findUserById: db.prepare<unknown[], UserRow>('SELECT * FROM users WHERE id = ?'),
-  findUserByOpenId: db.prepare<unknown[], UserRow>('SELECT * FROM users WHERE open_id = ?'),
   createUser: db.prepare('INSERT INTO users (id, email, password, nickname) VALUES (?, ?, ?, ?)'),
-  createWechatUser: db.prepare('INSERT INTO users (id, open_id, nickname, plan, email, password) VALUES (?, ?, ?, ?, ?, ?)'),
-  updateUserOpenId: db.prepare('UPDATE users SET open_id = ?, updated_at = ? WHERE id = ?'),
   updatePassword: db.prepare('UPDATE users SET password = ?, updated_at = ? WHERE id = ?'),
   createResetToken: db.prepare('INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)'),
   findResetToken: db.prepare('SELECT * FROM password_resets WHERE token = ? AND used = 0 AND expires_at > ?'),
@@ -347,94 +344,6 @@ export async function login(req: Request, res: Response) {
   }
 }
 
-// === 微信小程序登录（wx.login → code2Session → 换 token）===
-const WECHAT_APPID: string = process.env.WECHAT_APPID ?? '';
-const WECHAT_APPSECRET: string = process.env.WECHAT_APPSECRET ?? '';
-// 生产环境强制禁用 Mock 微信登录，避免误配置导致绕过真实认证
-const isWechatLoginMockAllowed = process.env.NODE_ENV !== 'production';
-
-export async function wechatLogin(req: Request, res: Response) {
-  try {
-    const { code } = req.body;
-
-    if (!code) {
-      return res.status(400).json({ error: '缺少登录凭证 code' });
-    }
-
-    // ===== 本地开发 Mock 模式 =====
-    // 在 .env 中配置 MOCK_WECHAT_LOGIN=true 即可跳过真实微信 API 调用
-    // 生产环境强制关闭，即使误配置 MOCK_WECHAT_LOGIN=true 也不会生效
-    const isMock = isWechatLoginMockAllowed && process.env.MOCK_WECHAT_LOGIN === 'true';
-    let openid;
-
-    if (isMock) {
-      openid = `mock_${code}`;
-    } else {
-      if (!WECHAT_APPID || !WECHAT_APPSECRET) {
-        logger.error('WECHAT_APPID 或 WECHAT_APPSECRET 环境变量未配置');
-        return res.status(500).json({ error: '服务器配置错误，请联系管理员' });
-      }
-
-      // 调用微信 code2Session 接口
-      const wechatUrl = `https://api.weixin.qq.com/sns/jscode2session?appid=${WECHAT_APPID}&secret=${WECHAT_APPSECRET}&js_code=${code}&grant_type=authorization_code`;
-
-      let wechatRes;
-      try {
-        wechatRes = await fetch(wechatUrl);
-      } catch (err) {
-        logger.error({ err }, '调用微信 code2Session 失败');
-        return res.status(502).json({ error: '无法连接微信登录服务，请稍后重试' });
-      }
-
-      const wechatData = await wechatRes.json() as Record<string, any>;
-
-      if (wechatData.errcode) {
-        logger.error({ errcode: wechatData.errcode, errmsg: wechatData.errmsg }, '微信 code2Session 错误');
-        return res.status(400).json({ error: `微信登录失败: ${wechatData.errmsg}` });
-      }
-
-      openid = wechatData.openid;
-    }
-
-    if (!openid) {
-      return res.status(400).json({ error: '获取微信用户身份失败' });
-    }
-
-    // 查找是否已有关联用户
-    let user = stmts.findUserByOpenId.get(openid);
-
-    if (!user) {
-      // 新用户：创建账号
-      const userId = generateUserId();
-      const randomSuffix = crypto.randomInt(1000, 9999).toString();
-      const nickname = isMock ? `测试用户${randomSuffix}` : `KB用户${randomSuffix}`;
-
-      stmts.createWechatUser.run(userId, openid, nickname, 'free', `wechat_${userId}@local.dev`, '__WECHAT_NO_PW__');
-      user = stmts.findUserByOpenId.get(openid);
-    }
-
-    if (!user) {
-      return res.status(500).json({ error: '创建用户失败' });
-    }
-
-    // 生成 JWT
-    const token = generateToken(user.id);
-
-    // 返回格式需与小程序 utils/auth.js 的解析逻辑匹配
-    res.json({
-      access_token: token,
-      user: {
-        id: user.id,
-        nickname: user.nickname,
-        plan: user.plan || 'free',
-      },
-    });
-  } catch (err) {
-    logger.error({ err }, '微信登录失败');
-    res.status(500).json({ error: '登录失败，请稍后重试' });
-  }
-}
-
 // === 获取当前用户信息 ===
 export function getProfile(req: Request, res: Response) {
   try {
@@ -447,8 +356,6 @@ export function getProfile(req: Request, res: Response) {
       id: user.id,
       email: user.email,
       nickname: user.nickname,
-      plan: user.plan || 'free',
-      planExpiresAt: user.plan_expires_at,
       createdAt: user.created_at,
     });
   } catch (err) {

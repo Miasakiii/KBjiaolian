@@ -28,12 +28,12 @@ class QuotaWidget extends StatelessWidget {
                 children: [
                   Text(item.label,
                       style: const TextStyle(
-                          fontSize: 12, color: KbColors.text2)),
+                          fontSize: 12, color: KbColors.text2,),),
                   Text('${item.remaining} / ${item.total}',
                       style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: over ? KbColors.accentWarn : KbColors.brand)),
+                          color: over ? KbColors.accentWarn : KbColors.brand,),),
                 ],
               ),
               const SizedBox(height: 4),

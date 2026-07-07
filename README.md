@@ -1,215 +1,164 @@
-# KB教练 - AI 健身康复应用
+# KB教练 - AI 健身康复应用（个人版）
 
-> 🏋️ AI 驱动的体态评估与健身训练平台
+> 🏋️ AI 驱动的体态评估与健身训练应用 · 纯本地 · 直连大模型 · 无后端无登录
 
 ## 简介
 
-KB教练是一个全平台健身康复应用，通过 AI 技术为用户提供个性化的体态评估、训练计划、营养建议和运动指导。
+KB教练个人版是一个纯本地运行的健身康复应用，移动端直连小米 MiMo 大模型 API，无需后端服务器、无需登录注册。所有用户数据（个人资料/体态记录/训练方案/饮食记录/聊天历史）存储在本机 SharedPreferences，动作库（1,324 条）打包进 APK 离线可用，隐私可控。
 
 ## 功能特性
 
 - 🎯 **体态分析** — AI 驱动的 8 维度体态评估（头前伸/圆肩/骨盆前倾/膝超伸/脊柱侧弯/高低肩/XO型腿/核心稳定）
-- 📋 **训练计划** — 个性化训练方案生成 + 渐进式超负荷算法
+- 📋 **训练计划** — 个性化训练方案生成 + 渐进式超负荷
 - 🥗 **营养管理** — 食物拍照识别 + 营养成分估算
-- 💬 **AI 聊天** — 智能健身问答（流式响应）
-- 📊 **历史记录** — 体态/训练/饮食/聊天全维度历史追踪 + 前后对比 + 进度趋势图
+- 💬 **AI 聊天** — 智能健身问答（流式 SSE + markdown 渲染）
+- 📚 **动作库** — 内置 1,324 个训练动作（10 个身体部位 / 12 种设备 / 含中文逐步说明），离线浏览搜索
+- 📊 **历史记录** — 体态/训练/饮食全维度历史追踪 + 前后对比 + 进度趋势
 - 🔄 **恢复追踪** — 肌肉恢复进度 + 4 周训练热力图
-- 📤 **数据导出** — Flutter 端统一数据导出（JSON + 系统分享）
-- ⚙️ **商业化** — Free/Pro 套餐、配额管理、订单系统、微信支付 API v3（小程序+App）
-- 🎨 **视觉设计系统** — 深 teal `#0f766e` 临床专业色 + 极简留白，miniprogram/Flutter 跨端一致
-- 📱 **PWA + 移动端** — Web 端支持离线、Flutter 支持 Android/iOS/Windows
+- 📤 **数据导出** — JSON 统一导出 + 系统分享
+- 👤 **个人资料** — 年龄/性别/身高/体重作为 AI 个性化建议上下文，首页未填提醒
+- 🎨 **视觉设计系统** — 深 teal `#0f766e` 临床专业色 + 极简留白
 
 ## 技术栈
 
 | 层级 | 技术 |
 |------|------|
-| Web 前端 | Next.js 14 App Router + React 18 + TypeScript + Tailwind CSS |
 | 移动端/桌面端 | Flutter 3.44.2 + Provider 6 + go_router 12 + KbColors token |
-| 后端 | Express.js 4 + better-sqlite3 + JWT |
-| AI | MiMo / OpenAI 兼容 Chat Completions API |
-| 认证 | JWT + bcrypt + 邮箱验证码 |
-| 本地存储 | Web: localStorage；Mobile: SharedPreferences |
-| 部署 | Docker Compose + Nginx + SSL，支持 Railway，GitHub Actions CI |
+| AI | 小米 MiMo（OpenAI 兼容 Chat Completions API，key 通过 `--dart-define` 注入） |
+| 本地存储 | SharedPreferences（个人资料/历史记录） |
+| 动作库数据 | JSON 打包进 assets（1,324 条，离线可用） |
+| AI 回复渲染 | flutter_markdown |
+| 图标 | flutter_launcher_icons |
 
 ## 模块文档
 
-- [Web 前端](web/README.md) — Next.js 路由、组件、状态管理、PWA、安全
-- [后端 API](backend/README.md) — Express 路由、数据库、AI 模块、配额/订单系统
-- [移动端](mobile/README.md) — Flutter 路由、Provider、网络层、KbColors token
-- [设计系统 spec](docs/superpowers/specs/2026-06-24-visual-redesign-design.md) — 跨端设计 token、组件、雷达图、图标系统
-- [项目状态](docs/project-status.md) — Sprint 进度、API/页面/数据库清单、待办
+- [移动端](mobile/README.md) — Flutter 路由、Provider、直连 MiMo、本地存储、KbColors token
+- [项目状态](docs/project-status.md) — 功能清单、架构、待办
+- [后端（可选/历史）](backend/README.md) — Express 后端，个人版不再依赖，保留供参考
 
 ## 快速开始
 
 ### 前置要求
 
-- Node.js 18+
-- Flutter 3.44.2+（如需移动端）
-- Android Studio / Xcode（如需构建 APK/IPA）
+- Flutter 3.44.2+（Dart 3.2+）
+- 小米 MiMo API Key（[申请地址](https://www.xiaomimimo.com/)）
 
-### 启动后端
-
-```bash
-cd backend
-npm install
-cp .env.example .env  # 编辑 JWT_SECRET / MIMO_API_KEY 等
-npm run dev
-# API: http://localhost:3001
-```
-
-### 启动 Web 前端
-
-```bash
-cd web
-npm install
-npm run dev
-# Web: http://localhost:3000
-```
-
-### 启动 Flutter 移动端
+### 运行（开发模式）
 
 ```bash
 cd mobile
 flutter pub get
-flutter run                    # Android 模拟器（API: 10.0.2.2:3001）
-# 或生产配置：
-flutter run --dart-define=API_BASE_URL=https://api.your-host.com/api
+flutter run \
+  --dart-define=MIMO_API_KEY=sk-你的key \
+  --dart-define=MIMO_API_URL=https://api.xiaomimimo.com/v1/chat/completions \
+  --dart-define=MIMO_MODEL=mimo-v2.5
 ```
 
-### 启动 Flutter Windows 桌面端
+### 构建 Release APK
 
 ```bash
 cd mobile
-flutter pub get
-flutter run -d windows
+flutter build apk --release \
+  --dart-define=MIMO_API_KEY=sk-你的key \
+  --dart-define=MIMO_API_URL=https://api.xiaomimimo.com/v1/chat/completions \
+  --dart-define=MIMO_MODEL=mimo-v2.5
+# 产物：mobile/build/app/outputs/flutter-apk/app-release.apk
 ```
+
+### Windows 桌面端
+
+```bash
+cd mobile
+flutter run -d windows \
+  --dart-define=MIMO_API_KEY=sk-你的key \
+  --dart-define=MIMO_API_URL=https://api.xiaomimimo.com/v1/chat/completions \
+  --dart-define=MIMO_MODEL=mimo-v2.5
+```
+
+> ⚠️ 若不传 `MIMO_API_KEY`，App 可启动但 AI 功能（体态分析/训练方案/营养识别/对话）不可用；动作库浏览、本地训练记录等离线功能正常。
 
 ## 项目结构
 
 ```
 KBjiaolian/
-├── web/                    # Next.js Web 前端（详见 web/README.md）
-│   ├── src/
-│   │   ├── app/            # 25 个路由
-│   │   ├── components/     # 36 个组件
-│   │   ├── lib/            # auth/storage/cloudStorage 等
-│   │   ├── hooks/
-│   │   └── types/
-│   ├── public/sw.js        # Service Worker
-│   └── README.md
-├── backend/                # Express.js 后端（详见 backend/README.md）
-│   ├── src/
-│   │   ├── app.js          # 路由 + 限流
-│   │   ├── auth.js         # 注册/登录/验证码
-│   │   ├── analyze.js / plan.js / nutrition.js / chat.js  # AI 模块
-│   │   ├── subscription.js # 配额预占/释放 + 套餐升级
-│   │   ├── orders.js       # 订单 + 微信支付参数
-│   │   ├── data.js         # 数据持久化 CRUD
-│   │   └── database.js     # SQLite 表结构
-│   ├── __tests__/          # 9 个测试套件
-│   └── README.md
-├── mobile/                 # Flutter 移动端（详见 mobile/README.md）
+├── mobile/                 # Flutter 移动端（个人版主体，详见 mobile/README.md）
 │   ├── lib/
-│   │   ├── screens/        # 15 个页面（全部 token 化）
-│   │   ├── providers/      # 6 个 ChangeNotifier
-│   │   ├── services/       # api/storage/cloud
-│   │   ├── models/
-│   │   ├── widgets/        # common(score/quota/empty) + analyze(radar/score_card/suggestion)
-│   │   ├── theme/          # kb_colors.dart + kb_spacing.dart (设计 token)
-│   │   └── routes/
-│   ├── android/            # 已禁用 cleartextTraffic
-│   ├── windows/
-│   └── README.md
-├── miniprogram/            # 微信小程序（详见 miniprogram/app.json）
-│   ├── pages/              # 主包页面（首页/分析/训练/方案/对话/营养/动作库）
-│   ├── subpkg/             # 分包（history/ + user/）
-│   ├── components/         # kb-radar / kb-score / kb-quota / kb-empty
-│   └── utils/              # auth / request / markdown
+│   │   ├── main.dart              # 入口（runZonedGuarded 全局错误兜底）
+│   │   ├── app.dart               # MaterialApp.router 配置
+│   │   ├── routes/app_router.dart # go_router 路由（无登录守卫）
+│   │   ├── screens/               # 17 个页面（含动作库/恢复追踪/训练完成）
+│   │   ├── providers/             # 6 个 ChangeNotifier（AuthProvider 永真）
+│   │   ├── services/
+│   │   │   ├── api_service.dart          # 直连 MiMo API（无后端）
+│   │   │   ├── storage_service.dart      # SharedPreferences 本地存储
+│   │   │   ├── local_exercises_service.dart # 动作库本地查询（读 assets JSON）
+│   │   │   ├── cloud_storage_service.dart # no-op stub（兼容旧调用）
+│   │   │   ├── wechat_pay_service.dart   # no-op stub
+│   │   │   └── export_service.dart       # 数据导出
+│   │   ├── models/                # 数据模型
+│   │   ├── widgets/               # common + analyze 组件
+│   │   └── theme/                 # kb_colors.dart + kb_spacing.dart
+│   ├── assets/
+│   │   ├── exercises.json         # 动作库数据集（1,324 条，9.7MB，离线）
+│   │   └── logo/                  # App 图标素材
+│   ├── android/                   # Android 配置（com.kbcoach.personal）
+│   └── windows/                   # Windows 桌面配置
+├── backend/                # Express.js 后端（个人版不再依赖，保留供参考）
 ├── docs/                   # 项目文档
-├── deploy.sh / docker-compose.yml / nginx/  # 部署配置
 └── README.md               # 本文件
 ```
 
-## API 接口
+## 架构
 
-公开端点（无需认证）：
+```
+┌─────────────────────────────────────────────────────┐
+│              Flutter 移动端 / Windows 桌面端           │
+│  ┌──────────────────────────────────────────────┐  │
+│  │  Provider 6 + go_router 12 + KbColors token  │  │
+│  │  无登录 · 无后端 · 直连大模型                  │  │
+│  └──────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────┘
+            │                          │
+            ▼                          ▼
+┌───────────────────────┐   ┌─────────────────────┐
+│   小米 MiMo API        │   │  本地存储            │
+│   （直连，--dart-define │   │  SharedPreferences  │
+│    注入 key）           │   │  + assets JSON     │
+│   - 体态分析（多模态）  │   │  - 个人资料         │
+│   - 训练方案            │   │  - 体态/训练/饮食历史│
+│   - 营养识别            │   │  - 动作库（1324条）  │
+│   - AI 对话（SSE 流式） │   │                    │
+└───────────────────────┘   └─────────────────────┘
+```
 
-| 端点 | 方法 | 描述 |
-|------|------|------|
-| `/api/health` | GET | 健康检查 |
-| `/api/auth/register` | POST | 注册（需验证码） |
-| `/api/auth/login` | POST | 登录 |
-| `/api/auth/send-code` | POST | 发送邮箱验证码 |
-| `/api/auth/forgot-password` | POST | 发送重置验证码 |
-| `/api/auth/reset-password` | POST | 重置密码 |
-| `/api/plans` | GET | 套餐信息 |
+## 个人资料与 AI 个性化
 
-需认证端点（Bearer JWT）：
+个人资料（昵称/性别/年龄/身高/体重）存储在本地 SharedPreferences，并作为上下文注入所有 AI 调用：
 
-| 端点 | 方法 | 描述 |
-|------|------|------|
-| `/api/auth/profile` | GET | 用户信息 |
-| `/api/quota` | GET | 今日配额 |
-| `/api/analyze` | POST | 体态分析（限额） |
-| `/api/analyze/compare` | POST | 前后对比 |
-| `/api/plan/generate` | POST | 训练方案（限额） |
-| `/api/plan/progressive` | POST | 渐进式方案（限额） |
-| `/api/nutrition/analyze` | POST | 食物识别（限额） |
-| `/api/chat` `(/stream)` | POST | AI 对话（限额） |
-| `/api/orders` | POST/GET | 订单创建/查询 |
-| `/api/payment/mock-pay/:id` | POST | 模拟支付（仅非生产） |
-| `/api/data/*` | CRUD | 数据持久化（分析/方案/训练/饮食/聊天） |
+- **AI 对话** — system prompt 拼接个人资料
+- **训练方案生成** — "用户信息"段落包含个人资料
+- **体态分析** — system prompt 拼接个人资料
 
-完整 API 说明详见 [backend/README.md](backend/README.md)。
+首页检测到个人资料未填时显示提醒卡片，引导用户前往 `/profile` 完善。
+
+## 动作库数据集
+
+**来源**：[hasaneyldrm/exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset)（1,324 条，10 个身体部位，12 种设备，6 种语言含中文）
+
+- 打包进 `mobile/assets/exercises.json`（9.7MB），完全离线
+- `LocalExercisesService` 启动时加载到内存，提供列表/详情/搜索/元数据查询
+- 浏览页支持按身体部位/设备筛选 + 关键词搜索
+- 详情页显示中文逐步说明 + 目标肌群 + 协同肌群
+
+⚠️ 该数据集仓库未明确标注开源许可证，基础数据来自 ExerciseDB v1。个人版本地使用风险较低，不可商用。
 
 ## 国内镜像
 
 ```bash
-# Flutter 镜像
-export PUB_HOSTED_URL="https://pub.flutter-io.cn"
-export FLUTTER_STORAGE_BASE_URL="https://storage.flutter-io.cn"
-
-# npm 镜像（如需）
-npm config set registry https://registry.npmmirror.com
+# Flutter 镜像（国内访问慢时使用）
+$env:PUB_HOSTED_URL="https://pub.flutter-io.cn"
+$env:FLUTTER_STORAGE_BASE_URL="https://storage.flutter-io.cn"
 ```
-
-## 代码审查与修复记录
-
-### 2026-06-20 审查（Web 前端 + 后端）
-
-修复 **7 个问题**，含 2 个 CRITICAL 运行时崩溃：
-
-| 等级 | 问题 | 状态 |
-|------|------|------|
-| CRITICAL | `ChatMessage.tsx` / `chat/page.tsx` `Bot` 未导入致聊天页崩溃 | ✅ 已修复 |
-| HIGH | `handleSend` 闭包过期致 AI 缺少当前消息上下文 | ✅ 已修复 |
-| MEDIUM | `AuthContext` value 未 memo 导致级联重渲染 | ✅ 已修复 |
-| MEDIUM | `planStorage.clearAllPlans()` 不同步云端 | ✅ 已修复 |
-| MEDIUM | `compare/page.tsx` `Camera` 未导入 | ✅ 已修复 |
-| LOW | `iconMap.tsx` TypeScript 类型错误 | ✅ 已修复 |
-
-**安全发现**（待处理）：JWT Secret 弱值、Token 存 localStorage、微信支付回调未验证签名、验证码无尝试次数限制
-
-### 2026-06-13 全量审查
-
-对 Web / Backend / Mobile 三个模块全量审查并修复 **88 个问题**：
-
-| 等级 | Backend | Web | Mobile | 合计 |
-|------|---------|-----|--------|------|
-| Critical | 5 | 7 | 9 | **21** |
-| High | 9 | 6 | 12 | **27** |
-| Medium | 7 | 9 | 8 | **24** |
-| Low | 5 | 5 | 6 | **16** |
-| **合计** | 26 | 27 | 35 | **88** |
-
-## 文档
-
-- [项目状态总结](docs/project-status.md) — Sprint 完成情况、API/页面/数据库清单
-- [Web 前端](web/README.md)
-- [后端 API](backend/README.md)
-- [移动端](mobile/README.md)
-- [部署指南](docs/deployment-guide.md)
-- [云端部署](docs/CLOUD_DEPLOY.md)
 
 ## 许可
 
@@ -217,4 +166,4 @@ Private — 仅供个人使用
 
 ---
 
-*Built with ❤️ by KB Coach Team*
+*Built with ❤️ for personal fitness coaching*

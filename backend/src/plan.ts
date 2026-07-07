@@ -1,5 +1,6 @@
 import crypto from 'crypto';
 import { extractJsonObject } from './validation.js';
+import { queryExercisesByEquipment, formatExercisesForPrompt } from './exercises.js';
 import type { PlanParams, AnalysisResult } from './types.js';
 
 const API_URL = process.env.MIMO_API_URL ?? '';
@@ -33,6 +34,10 @@ function buildPlanPrompt(params: PlanParams, analysisResult: AnalysisResult): st
     bodyweight: '徒手训练',
   };
 
+  // 查询匹配设备的真实动作清单，注入 prompt 防止 AI 凭空捏造动作
+  const exercises = queryExercisesByEquipment(equipment, 6);
+  const exercisesBlock = formatExercisesForPrompt(exercises);
+
   return `你是一位拥有 15 年经验的健身教练和运动康复专家。请根据用户的体态分析结果和训练偏好，生成个性化训练方案。
 
 用户信息：
@@ -47,12 +52,15 @@ function buildPlanPrompt(params: PlanParams, analysisResult: AnalysisResult): st
 - 体态问题：${analysisResult.issues.map((i) => `${i.name}（${i.severity === 'severe' ? '严重' : i.severity === 'moderate' ? '中度' : '轻微'}）`).join('、')}
 - 雷达数据：头前伸 ${analysisResult.radar.headForward ?? 0}%、圆肩 ${analysisResult.radar.roundShoulder ?? 0}%、骨盆前倾 ${analysisResult.radar.pelvicTilt ?? 0}%、膝超伸 ${analysisResult.radar.kneeExtension ?? 0}%
 
+可用动作库（必须只从以下动作中选择，exerciseId 必须是下面列出的 ID 之一）：
+${exercisesBlock}
+
 要求：
 1. 训练方案必须针对用户的体态问题进行优化
 2. 如果有圆肩问题，减少推类动作，增加拉类动作
 3. 如果有骨盆前倾，加强臀部和核心训练
 4. 如果有头前伸，加入颈部深层肌群训练
-5. 动作选择要适合用户的设备条件
+5. 动作必须来自上面的动作库，不可编造
 6. 根据经验水平调整训练强度
 
 请严格按以下 JSON 格式输出，不要输出其他内容：
@@ -66,7 +74,8 @@ function buildPlanPrompt(params: PlanParams, analysisResult: AnalysisResult): st
       "name": "<训练日名称，如：上肢拉 + 核心>",
       "exercises": [
         {
-          "name": "<动作名称>",
+          "exerciseId": "<必须来自上面动作库的 ID>",
+          "name": "<动作名称，与动作库一致>",
           "sets": <组数>,
           "reps": "<次数或时间，如：8-12次 或 30秒>",
           "restSec": <组间休息秒数>,
@@ -91,7 +100,7 @@ function buildPlanPrompt(params: PlanParams, analysisResult: AnalysisResult): st
 - 每个训练日安排 4-8 个动作
 - 根据时长调整动作数量
 - 体态问题严重的用户，降低训练强度
-- 提供替代动作建议（在 notes 中说明）
+- exerciseId 必须是上面动作库中真实存在的 ID
 - 营养建议要符合训练目标
 `;
 }
