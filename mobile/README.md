@@ -1,6 +1,6 @@
 # KB教练 — Flutter 移动端（个人版）
 
-Flutter × Provider × go_router 实现的移动/桌面客户端。**纯本地 + 直连大模型**架构：无后端、无登录，App 直连小米 MiMo API，所有数据存本机。
+Flutter × Provider × go_router 实现的移动客户端。**纯本地 + 直连大模型**架构：无后端、无登录，App 直连小米 MiMo API，所有数据存本机。
 
 ## 架构
 
@@ -42,8 +42,6 @@ flutter build apk --release \
   --dart-define=MIMO_API_URL=https://api.xiaomimimo.com/v1/chat/completions \
   --dart-define=MIMO_MODEL=mimo-v2.5
 ```
-
-> Windows 桌面端：`flutter run -d windows --dart-define=...`（同上）
 
 > ⚠️ 不传 `MIMO_API_KEY` 时 App 可启动，但 AI 功能不可用；动作库浏览、本地训练记录等离线功能正常。
 
@@ -98,7 +96,6 @@ mobile/
 │   ├── exercises.json                    # 动作库数据集（1324 条，9.7MB，离线）
 │   └── logo/                             # App 图标素材
 ├── android/                              # Android 配置（com.kbcoach.personal，已生成图标）
-├── windows/                              # Windows 桌面配置
 ├── pubspec.yaml                          # 依赖 + flutter_launcher_icons 配置
 └── analysis_options.yaml
 ```

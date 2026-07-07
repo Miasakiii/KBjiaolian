@@ -10,7 +10,7 @@ KB教练个人版是纯本地运行的健身康复应用。移动端直连小米
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│              Flutter 移动端 / Windows 桌面端           │
+│              Flutter 移动端（Android）                  │
 │  ┌──────────────────────────────────────────────┐  │
 │  │  Provider 6 + go_router 12 + KbColors token  │  │
 │  │  无登录 · 无后端 · 直连大模型                  │  │
@@ -94,7 +94,6 @@ KB教练个人版是纯本地运行的健身康复应用。移动端直连小米
 | 层 | 技术 |
 |---|---|
 | 移动端 | Flutter 3.44.2 + Provider 6 + go_router 12 + KbColors |
-| 桌面端 | Flutter Windows |
 | AI | 小米 MiMo（OpenAI 兼容） |
 | 本地存储 | SharedPreferences |
 | 动作库 | assets JSON（1,324 条，离线） |

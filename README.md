@@ -23,7 +23,7 @@ KB教练个人版是一个纯本地运行的健身康复应用，移动端直连
 
 | 层级 | 技术 |
 |------|------|
-| 移动端/桌面端 | Flutter 3.44.2 + Provider 6 + go_router 12 + KbColors token |
+| 移动端 | Flutter 3.44.2 + Provider 6 + go_router 12 + KbColors token |
 | AI | 小米 MiMo（OpenAI 兼容 Chat Completions API，key 通过 `--dart-define` 注入） |
 | 本地存储 | SharedPreferences（个人资料/历史记录） |
 | 动作库数据 | JSON 打包进 assets（1,324 条，离线可用） |
@@ -64,16 +64,6 @@ flutter build apk --release \
 # 产物：mobile/build/app/outputs/flutter-apk/app-release.apk
 ```
 
-### Windows 桌面端
-
-```bash
-cd mobile
-flutter run -d windows \
-  --dart-define=MIMO_API_KEY=sk-你的key \
-  --dart-define=MIMO_API_URL=https://api.xiaomimimo.com/v1/chat/completions \
-  --dart-define=MIMO_MODEL=mimo-v2.5
-```
-
 > ⚠️ 若不传 `MIMO_API_KEY`，App 可启动但 AI 功能（体态分析/训练方案/营养识别/对话）不可用；动作库浏览、本地训练记录等离线功能正常。
 
 ## 项目结构
@@ -100,8 +90,7 @@ KBjiaolian/
 │   ├── assets/
 │   │   ├── exercises.json         # 动作库数据集（1,324 条，9.7MB，离线）
 │   │   └── logo/                  # App 图标素材
-│   ├── android/                   # Android 配置（com.kbcoach.personal）
-│   └── windows/                   # Windows 桌面配置
+│   └── android/                   # Android 配置（com.kbcoach.personal）
 ├── docs/                   # 项目文档
 └── README.md               # 本文件
 ```
@@ -110,7 +99,7 @@ KBjiaolian/
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│              Flutter 移动端 / Windows 桌面端           │
+│              Flutter 移动端（Android）                  │
 │  ┌──────────────────────────────────────────────┐  │
 │  │  Provider 6 + go_router 12 + KbColors token  │  │
 │  │  无登录 · 无后端 · 直连大模型                  │  │
