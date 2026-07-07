@@ -34,7 +34,6 @@ KB教练个人版是一个纯本地运行的健身康复应用，移动端直连
 
 - [移动端](mobile/README.md) — Flutter 路由、Provider、直连 MiMo、本地存储、KbColors token
 - [项目状态](docs/project-status.md) — 功能清单、架构、待办
-- [后端（可选/历史）](backend/README.md) — Express 后端，个人版不再依赖，保留供参考
 
 ## 快速开始
 
@@ -103,7 +102,6 @@ KBjiaolian/
 │   │   └── logo/                  # App 图标素材
 │   ├── android/                   # Android 配置（com.kbcoach.personal）
 │   └── windows/                   # Windows 桌面配置
-├── backend/                # Express.js 后端（个人版不再依赖，保留供参考）
 ├── docs/                   # 项目文档
 └── README.md               # 本文件
 ```

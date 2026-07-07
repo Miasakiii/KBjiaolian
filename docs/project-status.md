@@ -143,7 +143,6 @@ flutter build apk --release \
 |------|------|------|
 | 主 README | [README.md](../README.md) | 项目概览、快速开始 |
 | 移动端 | [mobile/README.md](../mobile/README.md) | Flutter 纯本地架构、路由、Provider、ApiService |
-| 后端（可选/历史） | [backend/README.md](../backend/README.md) | Express 后端，个人版不再依赖 |
 | 项目状态 | 本文件 | 功能清单、架构、待办 |
 
 ---
